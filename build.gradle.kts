@@ -29,6 +29,7 @@ extra["springBootAdminVersion"] = "2.3.1"
 dependencies {
     // springDoc
     implementation("org.springdoc:springdoc-openapi-ui:1.5.4")
+    implementation("org.junit.jupiter:junit-jupiter:5.4.2")
 
     // mockito
     testImplementation("org.mockito:mockito-core:3.7.7")
