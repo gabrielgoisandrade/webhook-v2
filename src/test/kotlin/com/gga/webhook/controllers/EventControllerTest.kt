@@ -1,7 +1,7 @@
 package com.gga.webhook.controllers
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.gga.webhook.utils.PayloadUtils.Companion.PAYLOAD_BODY
+import com.gga.webhook.models.dto.*
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -30,14 +30,23 @@ internal class EventControllerTest {
     @Test
     @DisplayName("POST -> Deve salvar a issue e retornar um status code 201")
     fun saveIssue() {
-        val body: String = this.jsonParser(PAYLOAD_BODY)
+        val body: String =
+            this.jsonParser(
+                PayloadDto(
+                    "closed",
+                    IssueDto(user = UserDto()),
+                    RepositoryDto(owner = OwnerDto()),
+                    SenderDto()
+                )
+            )
 
         val request: MockHttpServletRequestBuilder = httpPost(body)
 
         this.mockMvc.perform(request).andExpect(status().isCreated)
     }
 
-    private fun jsonParser(value: String): String = ObjectMapper().writeValueAsString(value)
+    private fun <T> jsonParser(value: T): String =
+        ObjectMapper().writeValueAsString(value)
 
     private fun httpGet(): MockHttpServletRequestBuilder = get(ISSUE)
         .accept(MediaType.APPLICATION_JSON)

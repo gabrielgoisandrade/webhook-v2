@@ -290,7 +290,7 @@ class PayloadUtils private constructor(){
                 "      \"state\": \"closed\",\n" +
                 "      \"locked\": false,\n" +
                 "      \"assignee\": null,\n" +
-                "      \"assignees\": [ ],\n" +
+                "      \"assignees\": [],\n" +
                 "      \"milestone\": null,\n" +
                 "      \"comments\": 0,\n" +
                 "      \"created_at\": \"2021-02-17T05:33:48Z\",\n" +

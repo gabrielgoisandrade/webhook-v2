@@ -164,6 +164,7 @@
   }
 
 //issue com assignee/asignees
+/*
 {
     "action": "closed",
     "issue": {
@@ -993,4 +994,4 @@
       "type": "User",
       "site_admin": false
     }
-  }
+  } */

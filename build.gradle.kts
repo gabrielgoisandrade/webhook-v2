@@ -27,6 +27,9 @@ repositories {
 extra["springBootAdminVersion"] = "2.3.1"
 
 dependencies {
+    /* Model mapper */
+    implementation("com.github.dozermapper:dozer-core:6.5.0")
+
     // springDoc
     implementation("org.springdoc:springdoc-openapi-ui:1.5.4")
     implementation("org.junit.jupiter:junit-jupiter:5.4.2")
@@ -55,12 +58,9 @@ dependencies {
     // migration
     implementation("org.flywaydb:flyway-core")
 
-    // lombok
-    compileOnly("org.projectlombok:lombok")
-    annotationProcessor("org.projectlombok:lombok")
-
     // H2
     runtimeOnly("com.h2database:h2")
+    runtimeOnly("org.postgresql:postgresql")
 
     // devtools
     developmentOnly("org.springframework.boot:spring-boot-devtools")

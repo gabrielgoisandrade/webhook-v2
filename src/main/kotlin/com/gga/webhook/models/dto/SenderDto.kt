@@ -1,13 +1,14 @@
 package com.gga.webhook.models.dto
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 import java.io.Serializable
 
-data class UserDto @JvmOverloads constructor(
+data class SenderDto @JvmOverloads constructor(
     @JsonProperty("login")
     var login: String = "",
 
-    @JsonProperty("user_id")
+    @JsonProperty("id")
     var id: Long = 0L,
 
     @JsonProperty("node_id")
@@ -31,7 +32,7 @@ data class UserDto @JvmOverloads constructor(
     @JsonProperty("following_url")
     var followingUrl: String = "",
 
-    @JsonProperty("gist_url")
+    @JsonProperty("gists_url")
     var gistsUrl: String = "",
 
     @JsonProperty("starred_url")
