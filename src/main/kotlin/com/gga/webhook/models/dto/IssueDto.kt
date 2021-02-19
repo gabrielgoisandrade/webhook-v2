@@ -1,9 +1,9 @@
 package com.gga.webhook.models.dto
 
-import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
+import com.github.dozermapper.core.Mapping
 import java.io.Serializable
-import java.util.*
+import java.time.Instant
 
 data class IssueDto @JvmOverloads constructor(
     @JsonProperty("url")
@@ -24,8 +24,9 @@ data class IssueDto @JvmOverloads constructor(
     @JsonProperty("html_url")
     var htmlUrl: String = "",
 
+    @Mapping("id")
     @JsonProperty("id")
-    var id: Long = 0,
+    var issueId: Long = 0,
 
     @JsonProperty("node_id")
     var nodeId: String = "",
@@ -40,7 +41,7 @@ data class IssueDto @JvmOverloads constructor(
     var user: UserDto,
 
     @JsonProperty("labels")
-    var labels: Set<LabelDto> = hashSetOf(),
+    var labels: Set<LabelDto> = setOf(),
 
     @JsonProperty("state")
     var state: String = "",
@@ -52,7 +53,7 @@ data class IssueDto @JvmOverloads constructor(
     var assignee: AssigneeDto? = null,
 
     @JsonProperty("assignees")
-    var assignees: Set<AssigneesDto>? = hashSetOf(),
+    var assignees: Set<AssigneesDto>? = setOf(),
 
     @JsonProperty("milestone")
     var milestone: MilestoneDto? = null,
@@ -61,13 +62,13 @@ data class IssueDto @JvmOverloads constructor(
     var comments: Int = 0,
 
     @JsonProperty("created_at")
-    var createdAt: Date? = null,
+    var createdAt: Instant,
 
     @JsonProperty("updated_at")
-    var updatedAt: Date? = null,
+    var updatedAt: Instant? = null,
 
     @JsonProperty("closed_at")
-    var closedAt: Date? = null,
+    var closedAt: Instant? = null,
 
     @JsonProperty("autor_association")
     var authorAssociation: String = "",

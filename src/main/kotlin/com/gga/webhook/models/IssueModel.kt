@@ -45,7 +45,7 @@ data class IssueModel @JvmOverloads constructor(
     val user: UserModel,
 
     @OneToMany(mappedBy = "issue")
-    val labels: Set<LabelModel> = hashSetOf(),
+    val labels: Set<LabelModel> = setOf(),
 
     @Column(name = "STATE")
     val state: String,
@@ -57,7 +57,7 @@ data class IssueModel @JvmOverloads constructor(
     val assignee: AssigneeModel? = null,
 
     @OneToMany(mappedBy = "issue")
-    val assignees: Set<AssigneesModel>? = hashSetOf(),
+    val assignees: Set<AssigneesModel>? = setOf(),
 
     @OneToOne(mappedBy = "issue")
     val milestone: MilestoneModel? = null,

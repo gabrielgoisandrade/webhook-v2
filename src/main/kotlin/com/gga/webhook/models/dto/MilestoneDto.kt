@@ -1,9 +1,9 @@
 package com.gga.webhook.models.dto
 
-import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
+import com.github.dozermapper.core.Mapping
 import java.io.Serializable
-import java.util.*
+import java.time.Instant
 
 data class MilestoneDto @JvmOverloads constructor(
     @JsonProperty("url")
@@ -15,8 +15,9 @@ data class MilestoneDto @JvmOverloads constructor(
     @JsonProperty("labels_url")
     var labelsUrl: String = "",
 
+    @Mapping("id")
     @JsonProperty("id")
-    var id: Long = 0,
+    var milestoneId: Long = 0,
 
     @JsonProperty("node_id")
     var nodeId: String = "",
@@ -34,23 +35,23 @@ data class MilestoneDto @JvmOverloads constructor(
     var creator: CreatorDto? = null,
 
     @JsonProperty("open_issues")
-    var openIssues: Int,
+    var openIssues: Int = 0,
 
     @JsonProperty("closed_issues")
-    var closedIssues: Int,
+    var closedIssues: Int = 0,
 
     @JsonProperty("state")
     var state: String = "",
 
     @JsonProperty("created_at")
-    var createdAt: Date,
+    var createdAt: Instant,
 
     @JsonProperty("updated_at")
-    var updatedAt: Date? = null,
+    var updatedAt: Instant? = null,
 
     @JsonProperty("due_on")
-    var dueOn: Date? = null,
+    var dueOn: Instant? = null,
 
     @JsonProperty("closed_at")
-    var closedAt: Date? = null
+    var closedAt: Instant? = null
 ) : Serializable

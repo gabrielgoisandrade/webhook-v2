@@ -1,14 +1,16 @@
 package com.gga.webhook.models.dto
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder
+import com.github.dozermapper.core.Mapping
 import java.io.Serializable
 
 data class OwnerDto @JvmOverloads constructor(
     @JsonPropertyOrder("login")
     var login: String = "",
 
+    @Mapping("id")
     @JsonPropertyOrder("id")
-    var id: Long = 0L,
+    var ownerId: Long = 0L,
 
     @JsonPropertyOrder("node_id")
     var nodeId: String = "",
