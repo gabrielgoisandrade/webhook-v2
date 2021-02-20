@@ -49,6 +49,10 @@ class EventService @Autowired constructor(
         TODO("Not yet implemented")
     }
 
+    override fun getIssueByNumber(issueId: Int): IssueDto {
+        TODO("Not yet implemented")
+    }
+
     override fun saveCreator(creatorDto: CreatorDto): CreatorDto {
         TODO("Not yet implemented")
     }

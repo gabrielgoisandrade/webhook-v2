@@ -53,7 +53,7 @@ data class IssueDto @JvmOverloads constructor(
     var assignee: AssigneeDto? = null,
 
     @JsonProperty("assignees")
-    var assignees: Set<AssigneesDto>? = setOf(),
+    var assignees: Set<AssigneesDto> = setOf(),
 
     @JsonProperty("milestone")
     var milestone: MilestoneDto? = null,

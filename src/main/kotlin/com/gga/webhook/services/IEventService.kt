@@ -28,4 +28,6 @@ interface IEventService {
 
     fun saveSender(senderDto: SenderDto): SenderDto
 
+    fun getIssueByNumber(issueId: Int): IssueDto
+
 }

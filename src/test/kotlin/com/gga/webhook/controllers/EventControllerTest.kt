@@ -1,166 +1,302 @@
 package com.gga.webhook.controllers
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.gga.webhook.builder.PayloadBuilder
-import com.gga.webhook.models.dto.AssigneesDto
-import com.gga.webhook.models.dto.LabelDto
-import org.hamcrest.Matchers.*
+import com.gga.webhook.errors.exceptions.IssueNotFound
+import com.gga.webhook.models.dto.IssueDto
+import com.gga.webhook.models.dto.PayloadDto
+import com.gga.webhook.services.EventService
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import org.mockito.BDDMockito.given
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.http.MediaType
-import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import java.util.*
+import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.http.HttpStatus
 
 @SpringBootTest
 @AutoConfigureMockMvc
 internal class EventControllerTest {
 
-    companion object {
-        private const val ISSUE: String = "/issue"
-    }
+    @MockBean
+    private lateinit var service: EventService
 
     @Autowired
-    private lateinit var mockMvc: MockMvc
+    private lateinit var controller: EventController
 
     private val builder: PayloadBuilder = PayloadBuilder()
 
     @Test
     @DisplayName("POST -> Deve salvar o Payload, sem nenhum objeto como null e retornar o status code 201.")
     fun saveFullPayload() {
-        val body: String = this.jsonParser(this.builder.payloadBuilder())
+        val body: PayloadDto = this.builder.payloadBuilder()
 
-        val request: MockHttpServletRequestBuilder = httpPost(body)
+        given(this.service.savePayload(body)).willReturn(body)
 
-        this.mockMvc.perform(request).andExpect(status().isCreated)
-            .andExpect(jsonPath("issue", notNullValue()))
-            .andExpect(jsonPath("issue['labels']", hasSize<Int>(1)))
-            .andExpect(jsonPath("issue['milestone']", notNullValue()))
-            .andExpect(jsonPath("issue['milestone']['creator']", notNullValue()))
-            .andExpect(jsonPath("issue['assignee']", notNullValue()))
-            .andExpect(jsonPath("issue['assignees']", hasSize<Int>(1)))
-            .andExpect(jsonPath("repository", notNullValue()))
-            .andExpect(jsonPath("repository['license']", notNullValue()))
-            .andExpect(jsonPath("repository['owner']", notNullValue()))
-            .andExpect(jsonPath("sender", notNullValue()))
+        this.controller.saveIssue(body).also {
+            assertEquals(it.statusCode, HttpStatus.CREATED)
+
+            with(it.body!!) {
+                assertAll(
+                    {
+                        assertFalse(this.repository.license == null, "License must not be null")
+                        assertFalse(this.issue.milestone == null, "Milestone must not be null")
+                        assertFalse(this.issue.assignee == null, "Assignee must not be null")
+                        assertFalse(this.issue.assignees.isEmpty(), "Assignees must not be an empty list")
+                        assertFalse(this.issue.labels.isEmpty(), "Labels must not be an empty list")
+                    },
+                    {
+                        assertEquals(body, this, "The response body must be equal to mock")
+                    }
+                )
+            }
+        }
     }
 
     @Test
     @DisplayName("POST -> Deve salvar o Payload, sem nenhuma label e retornar o status code 201.")
     fun savePayloadWithEmptyLabelAtIssue() {
-        val body: String = this.jsonParser(this.builder.issueWithoutLabels())
+        val body: PayloadDto = this.builder.issueWithoutLabels()
 
-        val request: MockHttpServletRequestBuilder = httpPost(body)
+        given(this.service.savePayload(body)).willReturn(body)
 
-        this.mockMvc.perform(request).andExpect(status().isCreated)
-            .andExpect(jsonPath("issue", notNullValue()))
-            .andExpect(jsonPath("issue['labels']", empty<HashSet<LabelDto>>()))
-            .andExpect(jsonPath("issue['milestone']", notNullValue()))
-            .andExpect(jsonPath("issue['milestone']['creator']", notNullValue()))
-            .andExpect(jsonPath("issue['assignee']", notNullValue()))
-            .andExpect(jsonPath("issue['assignees']", hasSize<Int>(1)))
-            .andExpect(jsonPath("repository", notNullValue()))
-            .andExpect(jsonPath("repository['license']", notNullValue()))
-            .andExpect(jsonPath("repository['owner']", notNullValue()))
-            .andExpect(jsonPath("sender", notNullValue()))
+        this.controller.saveIssue(body).also {
+            assertEquals(it.statusCode, HttpStatus.CREATED)
+
+            with(it.body!!) {
+                assertAll(
+                    {
+                        assertFalse(this.repository.license == null, "License must not be null")
+                        assertFalse(this.issue.milestone == null, "Milestone must not be null")
+                        assertFalse(this.issue.assignee == null, "Assignee must not be null")
+                        assertFalse(this.issue.assignees.isEmpty(), "Assignees must not be an empty list")
+                    },
+                    {
+                        assertTrue(this.issue.labels.isEmpty(), "Labels must be an empty list")
+                        assertEquals(body, this, "The response body must be equal to mock")
+                    }
+                )
+            }
+        }
     }
 
     @Test
     @DisplayName("POST -> Deve salvar o Payload, sem nenhum milestone e retornar o status code 201.")
     fun savePayloadWitNullMilestoneAtIssue() {
-        val body: String = this.jsonParser(this.builder.issueWithoutMilestone())
+        val body: PayloadDto = this.builder.issueWithoutMilestone()
 
-        val request: MockHttpServletRequestBuilder = httpPost(body)
+        given(this.service.savePayload(body)).willReturn(body)
 
-        this.mockMvc.perform(request).andExpect(status().isCreated)
-            .andExpect(jsonPath("issue", notNullValue()))
-            .andExpect(jsonPath("issue['labels']", hasSize<Int>(1)))
-            .andExpect(jsonPath("issue['milestone']", nullValue()))
-            .andExpect(jsonPath("issue['assignee']", notNullValue()))
-            .andExpect(jsonPath("issue['assignees']", hasSize<Int>(1)))
-            .andExpect(jsonPath("repository", notNullValue()))
-            .andExpect(jsonPath("repository['license']", notNullValue()))
-            .andExpect(jsonPath("repository['owner']", notNullValue()))
-            .andExpect(jsonPath("sender", notNullValue()))
+        this.controller.saveIssue(body).also {
+            assertEquals(it.statusCode, HttpStatus.CREATED)
+
+            with(it.body!!) {
+                assertAll(
+                    {
+                        assertFalse(this.repository.license == null, "License must not be null")
+                        assertFalse(this.issue.assignee == null, "Assignee must not be null")
+                        assertFalse(this.issue.assignees.isEmpty(), "Assignees must be not an empty list")
+                        assertFalse(this.issue.labels.isEmpty(), "Labels must be not an empty list")
+                    },
+                    {
+                        assertTrue(this.issue.milestone == null, "Milestone must be null")
+                        assertEquals(body, this, "The response body must be equal to mock")
+                    }
+                )
+            }
+        }
     }
 
     @Test
-    @DisplayName("POST -> Deve salvar o Payload, sem nenhum assignee e retornar o status code 201.")
+    @DisplayName("POST -> Deve salvar o Payload, sem nenhum assignee/assignees e retornar o status code 201.")
     fun savePayloadWithoutAssigneeAtIssue() {
-        val body: String = this.jsonParser(this.builder.issueWithoutAssignee())
+        val body: PayloadDto = this.builder.issueWithoutAssignee()
 
-        val request: MockHttpServletRequestBuilder = httpPost(body)
+        given(this.service.savePayload(body)).willReturn(body)
 
-        this.mockMvc.perform(request).andExpect(status().isCreated)
-            .andExpect(jsonPath("issue", notNullValue()))
-            .andExpect(jsonPath("issue['labels']", hasSize<Int>(1)))
-            .andExpect(jsonPath("issue['milestone']", notNullValue()))
-            .andExpect(jsonPath("issue['milestone']['creator']", notNullValue()))
-            .andExpect(jsonPath("issue['assignee']", nullValue()))
-            .andExpect(jsonPath("issue['assignees']", hasSize<Int>(1)))
-            .andExpect(jsonPath("repository", notNullValue()))
-            .andExpect(jsonPath("repository['license']", notNullValue()))
-            .andExpect(jsonPath("repository['owner']", notNullValue()))
-            .andExpect(jsonPath("sender", notNullValue()))
-    }
+        this.controller.saveIssue(body).also {
+            assertEquals(it.statusCode, HttpStatus.CREATED)
 
-    @Test
-    @DisplayName("POST -> Deve salvar o Payload, sem nenhum assignees e retornar o status code 201.")
-    fun savePayloadWithoutAssigneesAtIssue() {
-        val body: String = this.jsonParser(this.builder.issueWithoutAssignees())
-
-        val request: MockHttpServletRequestBuilder = httpPost(body)
-
-        this.mockMvc.perform(request).andExpect(status().isCreated)
-            .andExpect(jsonPath("issue", notNullValue()))
-            .andExpect(jsonPath("issue['labels']", hasSize<Int>(1)))
-            .andExpect(jsonPath("issue['milestone']", notNullValue()))
-            .andExpect(jsonPath("issue['milestone']['creator']", notNullValue()))
-            .andExpect(jsonPath("issue['assignee']", notNullValue()))
-            .andExpect(jsonPath("issue['assignees']", empty<HashSet<AssigneesDto>>()))
-            .andExpect(jsonPath("repository", notNullValue()))
-            .andExpect(jsonPath("repository['license']", notNullValue()))
-            .andExpect(jsonPath("repository['owner']", notNullValue()))
-            .andExpect(jsonPath("sender", notNullValue()))
+            with(it.body!!) {
+                assertAll(
+                    {
+                        assertFalse(this.repository.license == null, "License must not be null")
+                        assertFalse(this.issue.milestone == null, "Milestone must not be null")
+                        assertFalse(this.issue.labels.isEmpty(), "Labels must not be an empty list")
+                    },
+                    {
+                        assertTrue(this.issue.assignees.isEmpty(), "Assignees must be an empty list")
+                        assertTrue(this.issue.assignee == null, "Assignee must be null")
+                        assertEquals(body, this, "The response body must be equal to mock")
+                    }
+                )
+            }
+        }
     }
 
     @Test
     @DisplayName("POST -> Deve salvar o Payload, sem nenhuma licença e retornar o status code 201.")
     fun savePayloadWithoutLicenseAtRepository() {
-        val body: String = this.jsonParser(this.builder.repositoryWithoutLicense())
+        val body: PayloadDto = this.builder.repositoryWithoutLicense()
 
-        val request: MockHttpServletRequestBuilder = httpPost(body)
+        given(this.service.savePayload(body)).willReturn(body)
 
-        this.mockMvc.perform(request).andExpect(status().isCreated)
-            .andExpect(jsonPath("issue", notNullValue()))
-            .andExpect(jsonPath("issue['labels']", hasSize<Int>(1)))
-            .andExpect(jsonPath("issue['milestone']", notNullValue()))
-            .andExpect(jsonPath("issue['milestone']['creator']", notNullValue()))
-            .andExpect(jsonPath("issue['assignee']", notNullValue()))
-            .andExpect(jsonPath("issue['assignees']", hasSize<Int>(1)))
-            .andExpect(jsonPath("repository", notNullValue()))
-            .andExpect(jsonPath("repository['license']", nullValue()))
-            .andExpect(jsonPath("repository['owner']", notNullValue()))
-            .andExpect(jsonPath("sender", notNullValue()))
+        this.controller.saveIssue(body).also {
+            assertEquals(it.statusCode, HttpStatus.CREATED)
+
+            with(it.body!!) {
+                assertAll(
+                    {
+                        assertFalse(this.issue.milestone == null, "Milestone must not be null")
+                        assertFalse(this.issue.assignee == null, "Assignee must not be null")
+                        assertFalse(this.issue.assignees.isEmpty(), "Assignees must not an empty list")
+                        assertFalse(this.issue.labels.isEmpty(), "Labels must not an empty list")
+                    },
+                    {
+                        assertTrue(this.repository.license == null, "License must be null")
+                        assertEquals(body, this, "The response body must be equal to mock")
+                    }
+                )
+            }
+        }
     }
 
-    private fun <T> jsonParser(value: T): String = ObjectMapper()
-        .registerModules(KotlinModule(nullIsSameAsDefault = true), JavaTimeModule())
-        .writeValueAsString(value)
+    @Test
+    @DisplayName(
+        "GET -> Deve retornar a issue com o número passado via path, sem nenhum objeto interno como null e o " +
+                "status code 200"
+    )
+    fun getIssueByNumberWithoutNullObjects() {
+        val body: IssueDto = this.builder.payloadBuilder().issue
 
-    private fun httpGet(): MockHttpServletRequestBuilder = get(ISSUE)
-        .accept(MediaType.APPLICATION_JSON)
+        given(this.service.getIssueByNumber(body.number)).willReturn(body)
 
-    private fun httpPost(json: String): MockHttpServletRequestBuilder = post(ISSUE)
-        .accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON).content(json)
+        this.controller.getIssueByNumber(body.number).also {
+            assertEquals(it.statusCode, HttpStatus.OK)
 
+            with(it.body!!) {
+                assertAll(
+                    {
+                        assertFalse(this.milestone == null, "Milestone must not be null")
+                        assertFalse(this.assignee == null, "Assignee must not be null")
+                        assertFalse(this.assignees.isEmpty(), "Assignees must not be an empty list")
+                        assertFalse(this.labels.isEmpty(), "Labels must not be an empty list")
+                    },
+                    {
+                        assertEquals(body, this, "The response body must be equal to mock")
+                    }
+                )
+            }
+        }
+    }
+
+    @Test
+    @DisplayName(
+        "GET -> Deve retornar a issue com o número passado via path, com uma lista vazia de labels " +
+                "e o status code 200"
+    )
+    fun getIssueByNumberWithEmptyLabels() {
+        val body: IssueDto = this.builder.issueWithoutLabels().issue
+
+        given(this.service.getIssueByNumber(body.number)).willReturn(body)
+
+        this.controller.getIssueByNumber(body.number).also {
+            assertEquals(it.statusCode, HttpStatus.OK)
+
+            with(it.body!!) {
+                assertAll(
+                    {
+                        assertFalse(this.milestone == null, "Milestone must not be null")
+                        assertFalse(this.assignees.isEmpty(), "Assignees must not be an empty list")
+                        assertFalse(this.assignee == null, "Assignee must not be null")
+                    },
+                    {
+                        assertTrue(this.labels.isEmpty(), "Labels must be an empty list")
+                        assertEquals(body, this, "The response body must be equal to mock")
+                    }
+                )
+            }
+        }
+    }
+
+    @Test
+    @DisplayName(
+        "GET -> Deve retornar a issue com o número passado via path, sem nenhum milestone e o status code 200"
+    )
+    fun getIssueByNumberWithNullMilestone() {
+        val body: IssueDto = this.builder.issueWithoutMilestone().issue
+
+        given(this.service.getIssueByNumber(body.number)).willReturn(body)
+
+        this.controller.getIssueByNumber(body.number).also {
+            assertEquals(it.statusCode, HttpStatus.OK)
+
+            with(it.body!!) {
+                assertAll(
+                    {
+                        assertFalse(this.assignee == null, "Assignee must not be null")
+                        assertFalse(this.assignees.isEmpty(), "Assignees must not be an empty list")
+                        assertFalse(this.labels.isEmpty(), "Labels must not be an empty list")
+                    },
+                    {
+                        assertTrue(this.milestone == null, "Milestone must be null")
+                        assertEquals(body, this, "The response body must be equal to mock")
+                    }
+                )
+            }
+        }
+    }
+
+    @Test
+    @DisplayName(
+        "GET -> Deve retornar a issue com o número passado via path, sem nenhum assignee, uma lista vazia de " +
+                "assignees e o status code 200"
+    )
+    fun getIssueByNumberWithNullAssignee() {
+        val body: IssueDto = this.builder.issueWithoutAssignee().issue
+
+        given(this.service.getIssueByNumber(body.number)).willReturn(body)
+
+        this.controller.getIssueByNumber(body.number).also {
+            assertEquals(it.statusCode, HttpStatus.OK)
+
+            with(it.body!!) {
+                assertAll(
+                    {
+                        assertFalse(this.milestone == null, "Milestone must not be null")
+                        assertFalse(this.labels.isEmpty(), "Labels must not be an empty list")
+                    },
+                    {
+                        assertTrue(this.assignee == null, "Assignee must be null")
+                        assertTrue(this.assignees.isEmpty(), "Assignees must be an empty list")
+                        assertEquals(body, this, "The response body must be equal to mock")
+                    }
+                )
+            }
+        }
+    }
+
+    @Test
+    @DisplayName("GET -> Deve retornar uma mensagem de erro ao buscar uma issue que não existe")
+    fun throwErrorIssueNotFound() {
+        val body: IssueDto = this.builder.payloadBuilder().issue
+
+        given(this.service.getIssueByNumber(body.number)).willThrow(IssueNotFound("Issue ${body.number} not found"))
+
+        assertAll({
+            assertThrows<IssueNotFound>("Must throw an exception") {
+                this.controller.getIssueByNumber(body.number)
+            }.also {
+                assertThat(it).isInstanceOf(IssueNotFound::class.java).hasMessage("Issue ${body.number} not found")
+            }
+        },
+            {
+                assertEquals(HttpStatus.BAD_REQUEST, this.controller.getIssueByNumber(body.number).statusCode)
+            }
+        )
+
+    }
 }
