@@ -1,7 +1,14 @@
 package com.gga.webhook.services
 
-import com.gga.webhook.models.dto.*
+import com.gga.webhook.errors.exceptions.IssueNotFound
+import com.gga.webhook.helper.ConverterHelper
+import com.gga.webhook.models.*
+import com.gga.webhook.models.dto.AssigneesDto
+import com.gga.webhook.models.dto.IssueDto
+import com.gga.webhook.models.dto.LabelDto
+import com.gga.webhook.models.dto.PayloadDto
 import com.gga.webhook.repositories.*
+import com.gga.webhook.utils.MapperUtil.Companion.convertTo
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
@@ -21,56 +28,63 @@ class EventService @Autowired constructor(
     private val senderRepository: SenderRepository,
 ) : IEventService {
 
-    override fun savePayload(payloadDto: PayloadDto): PayloadDto {
+    private val helper: ConverterHelper = ConverterHelper()
+
+    override fun savePayload(payload: PayloadDto): PayloadDto {
         TODO("Not yet implemented")
     }
 
-    override fun saveIssue(issueDto: IssueDto): IssueDto {
+    override fun saveIssue(issue: IssueModel): IssueModel {
         TODO("Not yet implemented")
     }
 
-    override fun saveUser(userDto: UserDto): UserDto {
+    override fun saveUser(user: UserModel): UserModel {
         TODO("Not yet implemented")
     }
 
-    override fun saveAssignee(assigneeDto: AssigneeDto): AssigneeDto {
+    override fun saveAssignee(assignee: AssigneesModel): AssigneesModel {
         TODO("Not yet implemented")
     }
 
-    override fun saveAssignees(assigneesDto: AssigneesDto): AssigneesDto {
+    override fun saveAssignees(assignees: AssigneesModel): AssigneesModel {
         TODO("Not yet implemented")
     }
 
-    override fun saveLabel(labelDto: LabelDto): LabelDto {
+    override fun saveLabel(label: LabelModel): LabelModel {
         TODO("Not yet implemented")
     }
 
-    override fun saveMilestone(milestoneDto: MilestoneDto): MilestoneDto {
+    override fun saveMilestone(milestone: MilestoneModel): MilestoneModel {
         TODO("Not yet implemented")
     }
 
-    override fun getIssueByNumber(issueId: Int): IssueDto {
+    override fun saveCreator(creator: CreatorModel): CreatorModel {
         TODO("Not yet implemented")
     }
 
-    override fun saveCreator(creatorDto: CreatorDto): CreatorDto {
+    override fun saveRepository(repository: RepositoryModel): RepositoryModel {
         TODO("Not yet implemented")
     }
 
-    override fun saveRepository(repositoryDto: RepositoryDto): RepositoryDto {
+    override fun saveLicense(license: LicenseModel): LicenseModel {
         TODO("Not yet implemented")
     }
 
-    override fun saveLicense(licenseDto: LicenseDto): LicenseDto {
+    override fun saveOwner(owner: OwnerModel): OwnerModel {
         TODO("Not yet implemented")
     }
 
-    override fun saveOwner(ownerDto: OwnerDto): OwnerDto {
+    override fun saveSender(sender: SenderModel): SenderModel {
         TODO("Not yet implemented")
     }
 
-    override fun saveSender(senderDto: SenderDto): SenderDto {
-        TODO("Not yet implemented")
-    }
+    override fun getIssueByNumber(number: Int): IssueDto {
+        val issueFound: IssueModel = this.issueRepository.findIssueModelByNumber(number) ?: throw
+            IssueNotFound("Issue #$number not found")
 
+        return (issueFound convertTo IssueDto::class.java).apply {
+            this.labels = this.labels convertTo LabelDto::class.java
+            this.assignees = this.assignees convertTo AssigneesDto::class.java
+        }
+    }
 }

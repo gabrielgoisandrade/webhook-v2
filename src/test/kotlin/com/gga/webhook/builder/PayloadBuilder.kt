@@ -1,14 +1,13 @@
 package com.gga.webhook.builder
 
 import com.gga.webhook.models.dto.*
-import java.time.Instant
 import java.util.*
 
 class PayloadBuilder {
 
     companion object {
         @JvmStatic
-        private val INSTANT_MOCK: Instant = Instant.ofEpochMilli(Date().time)
+        private val INSTANT_MOCK: Date = Date()
     }
 
     private val userDto = UserDto(
@@ -41,7 +40,7 @@ class PayloadBuilder {
         description = "mock"
     )
 
-    private val labels: HashSet<LabelDto> = hashSetOf(label)
+    private val labels: HashSet<LabelDto> = hashSetOf(label, label)
 
     private val creatorDto = CreatorDto(
         login = "mock@mock.com",
@@ -77,7 +76,7 @@ class PayloadBuilder {
         closedIssues = 5,
         state = "open",
         createdAt = INSTANT_MOCK,
-        updatedAt = INSTANT_MOCK.plusSeconds(60L),
+        updatedAt = INSTANT_MOCK,
         dueOn = null,
         closedAt = null
     )
@@ -200,9 +199,9 @@ class PayloadBuilder {
         labelsUrl = "https://mock.com",
         releasesUrl = "https://mock.com",
         deploymentsUrl = "https://mock.com",
-        createdAt = INSTANT_MOCK.minusSeconds(1800L),
-        updatedAt = INSTANT_MOCK.plusSeconds(60L),
-        pushedAt = INSTANT_MOCK.plusSeconds(1600L),
+        createdAt = INSTANT_MOCK,
+        updatedAt = INSTANT_MOCK,
+        pushedAt = INSTANT_MOCK,
         gitUrl = "https://mock.com",
         sshUrl = "https://mock.com",
         cloneUrl = "https://mock.com",
@@ -242,7 +241,7 @@ class PayloadBuilder {
         type = "mock"
     )
 
-    fun payloadBuilder(): PayloadDto = PayloadDto(
+    fun payload(): PayloadDto = PayloadDto(
         action = "some action",
         issue = this.issue(),
         repository = this.repositoryDto,
@@ -273,17 +272,17 @@ class PayloadBuilder {
         closedAt = null
     )
 
-    fun issueWithoutLabels(): PayloadDto = this.payloadBuilder().run {
+    fun issueWithoutLabels(): PayloadDto = this.payload().run {
         this.issue.apply { this.labels = hashSetOf() }
         this
     }
 
-    fun issueWithoutMilestone(): PayloadDto = this.payloadBuilder().run {
+    fun issueWithoutMilestone(): PayloadDto = this.payload().run {
         this.issue.apply { this.milestone = null }
         this
     }
 
-    fun issueWithoutAssignee(): PayloadDto = this.payloadBuilder().run {
+    fun issueWithoutAssignee(): PayloadDto = this.payload().run {
         this.issue.apply {
             this.assignee = null
             this.assignees = setOf()
@@ -291,7 +290,7 @@ class PayloadBuilder {
         this
     }
 
-    fun repositoryWithoutLicense(): PayloadDto = this.payloadBuilder().run {
+    fun repositoryWithoutLicense(): PayloadDto = this.payload().run {
         this.repository.apply { this.license = null }
         this
     }

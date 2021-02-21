@@ -13,11 +13,11 @@ data class PayloadModel @JvmOverloads constructor(
     val id: Long = 0L,
 
     @Column(name = "ACTION")
-    val action: String,
+    var action: String,
 
     @OneToOne(cascade = [ALL])
     @JoinColumn(name = "ISSUE_ID", referencedColumnName = "ISSUE_ID", foreignKey = ForeignKey(name = "C_ISSUE_PAYLOAD"))
-    val issue: IssueModel,
+    var issue: IssueModel,
 
     @OneToOne(cascade = [ALL])
     @JoinColumn(
@@ -25,7 +25,7 @@ data class PayloadModel @JvmOverloads constructor(
         referencedColumnName = "REPOSITORY_ID",
         foreignKey = ForeignKey(name = "C_REPOSITORY_PAYLOAD")
     )
-    val repository: RepositoryModel,
+    var repository: RepositoryModel,
 
     @OneToOne(cascade = [ALL])
     @JoinColumn(
@@ -33,5 +33,5 @@ data class PayloadModel @JvmOverloads constructor(
         referencedColumnName = "SENDER_ID",
         foreignKey = ForeignKey(name = "C_SENDER_PAYLOAD")
     )
-    val sender: SenderModel
+    var sender: SenderModel
 ) : Serializable

@@ -13,24 +13,24 @@ data class LabelModel @JvmOverloads constructor(
 
     @NaturalId
     @Column(name = "NODE_ID", unique = true)
-    val nodeId: String,
+    var nodeId: String,
 
     @Column(name = "URL")
-    val url: String,
+    var url: String,
 
     @Column(name = "NAME")
-    val name: String,
+    var name: String,
 
     @Column(name = "COLOR")
-    val color: String,
+    var color: String,
 
     @Column(name = "DEFAULT")
-    val default: Boolean = false,
+    var default: Boolean = false,
 
     @Column(name = "DESCRIPTION")
-    val description: String? = null,
+    var description: String? = null,
 
     @ManyToOne
     @JoinColumn(name = "ISSUE_ID", referencedColumnName = "ISSUE_ID", foreignKey = ForeignKey(name = "C_LABEL_ISSUE"))
-    val issue: IssueModel? = null
+    var issue: IssueModel? = null
 ): Serializable

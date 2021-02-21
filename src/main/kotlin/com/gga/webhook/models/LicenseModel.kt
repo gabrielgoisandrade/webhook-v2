@@ -12,19 +12,19 @@ data class LicenseModel @JvmOverloads constructor(
     val id: Long = 0L,
 
     @Column(name = "KEY")
-    val key: String,
+    var key: String,
 
     @Column(name = "NAME")
-    val name: String,
+    var name: String,
 
     @Column(name = "SPDX_ID")
-    val spdxId: String,
+    var spdxId: String,
 
     @Column(name = "URL")
-    val url: String,
+    var url: String,
 
     @Column(name = "NODE_ID")
-    val nodeId: String,
+    var nodeId: String,
 
     @OneToOne(cascade = [CascadeType.ALL])
     @JoinColumn(
@@ -32,5 +32,5 @@ data class LicenseModel @JvmOverloads constructor(
         referencedColumnName = "REPOSITORY_ID",
         foreignKey = ForeignKey(name = "C_LICENSE_REPOSITORY")
     )
-    val repository: RepositoryModel? = null
+    var repository: RepositoryModel? = null
 ) : Serializable

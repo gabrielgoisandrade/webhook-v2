@@ -9,10 +9,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.http.ResponseEntity.ok
 import org.springframework.http.ResponseEntity.status
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @Tag(name = "Issue controller", description = "Methods available for '/issue'.")
 @RestController
@@ -26,7 +23,8 @@ class EventController {
     fun saveIssue(@RequestBody payloadDto: PayloadDto): ResponseEntity<PayloadDto> =
         this.eventService.savePayload(payloadDto).run { status(HttpStatus.CREATED).body(this) }
 
-    fun getIssueByNumber(issueId: Int): ResponseEntity<IssueDto> =
-        this.eventService.getIssueByNumber(issueId).run { ok(this) }
+    @GetMapping("/{number}")
+    fun getIssueByNumber(@PathVariable("number") number: Int): ResponseEntity<IssueDto> =
+        this.eventService.getIssueByNumber(number).run { ok(this) }
 
 }

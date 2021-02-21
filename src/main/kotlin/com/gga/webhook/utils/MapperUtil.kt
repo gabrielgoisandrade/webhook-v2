@@ -11,11 +11,11 @@ class MapperUtil private constructor() {
         private val mapper: Mapper = DozerBeanMapperBuilder.buildDefault()
 
         @JvmStatic
-        fun <O, D> parseObjet(from: O, to: Class<D>): D = mapper.map(from, to)
+        infix fun <O, D> O.convertTo(to: Class<D>): D = mapper.map(this, to)
 
         @JvmStatic
-        fun <O, D> parseListObjets(from: Set<O>, to: Class<D>): Set<D> =
-            from.stream().map { this.mapper.map(it, to) }.collect(Collectors.toSet())
+        infix fun <O, D> Collection<O>.convertTo(to: Class<D>): Set<D> =
+            this.stream().map { mapper.map(it, to) }.collect(Collectors.toSet())
 
     }
 }

@@ -7,60 +7,60 @@ import javax.persistence.*
 @Table(name = "SENDER")
 data class SenderModel @JvmOverloads constructor(
     @Column(name = "LOGIN")
-    val login: String,
+    var login: String,
 
     @Id
     @Column(name = "SENDER_ID")
     val id: Long = 0L,
 
     @Column(name = "NODE_ID", unique = true)
-    val nodeId: String,
+    var nodeId: String,
 
     @Column(name = "AVATAR_URL")
-    val avatarUrl: String,
+    var avatarUrl: String,
 
     @Column(name = "GRAVATAR_ID", unique = true)
-    val gravatarId: String,
+    var gravatarId: String,
 
     @Column(name = "URL")
-    val url: String,
+    var url: String,
 
     @Column(name = "HTML_URL")
-    val htmlUrl: String,
+    var htmlUrl: String,
 
     @Column(name = "FOLLOWERS_URL")
-    val followersUrl: String,
+    var followersUrl: String,
 
     @Column(name = "FOLLOWING_URL")
-    val followingUrl: String,
+    var followingUrl: String,
 
     @Column(name = "GISTS_URL")
-    val gistsUrl: String,
+    var gistsUrl: String,
 
     @Column(name = "STARRED_URL")
-    val starredUrl: String,
+    var starredUrl: String,
 
     @Column(name = "SUBSCRIPTIONS_URL")
-    val subscriptionsUrl: String,
+    var subscriptionsUrl: String,
 
     @Column(name = "ORGANIZATIONS_URL")
-    val organizationsUrl: String,
+    var organizationsUrl: String,
 
     @Column(name = "REPOS_URL")
-    val reposUrl: String,
+    var reposUrl: String,
 
     @Column(name = "EVENTS_URL")
-    val eventsUrl: String,
+    var eventsUrl: String,
 
     @Column(name = "RECEIVED_EVENTS_URL")
-    val receivedEventsUrl: String,
+    var receivedEventsUrl: String,
 
     @Column(name = "TYPE")
-    val type: String,
+    var type: String,
 
     @Column(name = "SITE_ADMIN")
-    val siteAdmin: Boolean = false,
+    var siteAdmin: Boolean = false,
 
     @OneToOne(mappedBy = "sender")
-    val payload: PayloadModel? = null
+    var payload: PayloadModel? = null
 ) : Serializable

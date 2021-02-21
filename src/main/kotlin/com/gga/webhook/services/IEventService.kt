@@ -1,33 +1,35 @@
 package com.gga.webhook.services
 
-import com.gga.webhook.models.dto.*
+import com.gga.webhook.models.*
+import com.gga.webhook.models.dto.IssueDto
+import com.gga.webhook.models.dto.PayloadDto
 
 interface IEventService {
 
-    fun savePayload(payloadDto: PayloadDto): PayloadDto
+    fun savePayload(payload: PayloadDto): PayloadDto
 
-    fun saveIssue(issueDto: IssueDto): IssueDto
+    fun saveIssue(issue: IssueModel): IssueModel
 
-    fun saveUser(userDto: UserDto): UserDto
+    fun saveUser(user: UserModel): UserModel
 
-    fun saveAssignee(assigneeDto: AssigneeDto): AssigneeDto
+    fun saveAssignee(assignee: AssigneesModel): AssigneesModel
 
-    fun saveAssignees(assigneesDto: AssigneesDto): AssigneesDto
+    fun saveAssignees(assignees: AssigneesModel): AssigneesModel
 
-    fun saveLabel(labelDto: LabelDto): LabelDto
+    fun saveLabel(label: LabelModel): LabelModel
 
-    fun saveMilestone(milestoneDto: MilestoneDto): MilestoneDto
+    fun saveMilestone(milestone: MilestoneModel): MilestoneModel
 
-    fun saveCreator(creatorDto: CreatorDto): CreatorDto
+    fun saveCreator(creator: CreatorModel): CreatorModel
 
-    fun saveRepository(repositoryDto: RepositoryDto): RepositoryDto
+    fun saveRepository(repository: RepositoryModel): RepositoryModel
 
-    fun saveLicense(licenseDto: LicenseDto): LicenseDto
+    fun saveLicense(license: LicenseModel): LicenseModel
 
-    fun saveOwner(ownerDto: OwnerDto): OwnerDto
+    fun saveOwner(owner: OwnerModel): OwnerModel
 
-    fun saveSender(senderDto: SenderDto): SenderDto
+    fun saveSender(sender: SenderModel): SenderModel
 
-    fun getIssueByNumber(issueId: Int): IssueDto
+    fun getIssueByNumber(number: Int): IssueDto
 
 }

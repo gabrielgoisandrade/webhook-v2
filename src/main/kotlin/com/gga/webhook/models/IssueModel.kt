@@ -10,22 +10,22 @@ import javax.persistence.*
 @Table(name = "ISSUE")
 data class IssueModel @JvmOverloads constructor(
     @Column(name = "URL")
-    val url: String,
+    var url: String,
 
     @Column(name = "REPOSITORY_URL")
-    val repositoryUrl: String,
+    var repositoryUrl: String,
 
     @Column(name = "LABELS_URL")
-    val labelsUrl: String,
+    var labelsUrl: String,
 
     @Column(name = "COMMENTS_URL")
-    val commentsUrl: String,
+    var commentsUrl: String,
 
     @Column(name = "EVENTS_URL")
-    val eventsUrl: String,
+    var eventsUrl: String,
 
     @Column(name = "HTML_URL")
-    val htmlUrl: String,
+    var htmlUrl: String,
 
     @Id
     @Column(name = "ISSUE_ID")
@@ -33,62 +33,62 @@ data class IssueModel @JvmOverloads constructor(
 
     @NaturalId
     @Column(name = "NODE_ID", unique = true)
-    val nodeId: String,
+    var nodeId: String,
 
     @Column(name = "NUMBER")
-    val number: Int = 0,
+    var number: Int = 0,
 
     @Column(name = "TITLE")
-    val title: String,
+    var title: String,
 
     @OneToOne(mappedBy = "issue")
-    val user: UserModel,
+    var user: UserModel,
 
     @OneToMany(mappedBy = "issue")
-    val labels: Set<LabelModel> = setOf(),
+    var labels: Set<LabelModel> = setOf(),
 
     @Column(name = "STATE")
-    val state: String,
+    var state: String,
 
     @Column(name = "LOCKED")
-    val locked: Boolean = false,
+    var locked: Boolean = false,
 
     @OneToOne(mappedBy = "issue")
-    val assignee: AssigneeModel? = null,
+    var assignee: AssigneeModel? = null,
 
     @OneToMany(mappedBy = "issue")
-    val assignees: Set<AssigneesModel>? = setOf(),
+    var assignees: Set<AssigneesModel>? = setOf(),
 
     @OneToOne(mappedBy = "issue")
-    val milestone: MilestoneModel? = null,
+    var milestone: MilestoneModel? = null,
 
     @Column(name = "COMMENTS")
-    val comments: Int = 0,
+    var comments: Int = 0,
 
     @Column(name = "CREATED_AT")
     @Temporal(TemporalType.DATE)
-    val createdAt: Date,
+    var createdAt: Date,
 
     @Column(name = "UPDATED_AT")
     @Temporal(TemporalType.DATE)
-    val updatedAt: Date? = null,
+    var updatedAt: Date? = null,
 
     @Column(name = "CLOSED_AT")
     @Temporal(TemporalType.DATE)
-    val closedAt: Date? = null,
+    var closedAt: Date? = null,
 
     @Column(name = "AUTOR_ASSOCIATION")
-    val authorAssociation: String,
+    var authorAssociation: String,
 
     @Column(name = "ACTIVE_LOCK_REASON")
-    val activeLockReason: String? = null,
+    var activeLockReason: String? = null,
 
     @Column(name = "BODY")
-    val body: String = "",
+    var body: String = "",
 
     @Column(name = "PERFORMED_VIA_GITHUB_APP")
-    val performedViaGithubApp: String? = null,
+    var performedViaGithubApp: String? = null,
 
     @OneToOne(mappedBy = "issue")
-    val payload: PayloadModel? = null
+    var payload: PayloadModel? = null
 ) : Serializable

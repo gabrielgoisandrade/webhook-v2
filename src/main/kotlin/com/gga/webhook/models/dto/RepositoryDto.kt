@@ -3,7 +3,7 @@ package com.gga.webhook.models.dto
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.github.dozermapper.core.Mapping
 import java.io.Serializable
-import java.time.Instant
+import java.util.*
 
 data class RepositoryDto @JvmOverloads constructor(
     @Mapping("id")
@@ -146,13 +146,13 @@ data class RepositoryDto @JvmOverloads constructor(
     var deploymentsUrl: String = "",
 
     @JsonProperty("created_at")
-    var createdAt: Instant,
+    var createdAt: Date,
 
     @JsonProperty("updated_at")
-    var updatedAt: Instant? = null,
+    var updatedAt: Date? = null,
 
     @JsonProperty("pushed_at")
-    var pushedAt: Instant? = null,
+    var pushedAt: Date? = null,
 
     @JsonProperty("git_url")
     var gitUrl: String? = null,

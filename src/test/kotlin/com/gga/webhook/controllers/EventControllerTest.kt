@@ -5,17 +5,21 @@ import com.gga.webhook.errors.exceptions.IssueNotFound
 import com.gga.webhook.models.dto.IssueDto
 import com.gga.webhook.models.dto.PayloadDto
 import com.gga.webhook.services.EventService
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.mockito.BDDMockito.given
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType.APPLICATION_JSON
+import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -27,12 +31,15 @@ internal class EventControllerTest {
     @Autowired
     private lateinit var controller: EventController
 
+    @Autowired
+    private lateinit var mockMvc: MockMvc
+
     private val builder: PayloadBuilder = PayloadBuilder()
 
     @Test
     @DisplayName("POST -> Deve salvar o Payload, sem nenhum objeto como null e retornar o status code 201.")
     fun saveFullPayload() {
-        val body: PayloadDto = this.builder.payloadBuilder()
+        val body: PayloadDto = this.builder.payload()
 
         given(this.service.savePayload(body)).willReturn(body)
 
@@ -170,7 +177,7 @@ internal class EventControllerTest {
                 "status code 200"
     )
     fun getIssueByNumberWithoutNullObjects() {
-        val body: IssueDto = this.builder.payloadBuilder().issue
+        val body: IssueDto = this.builder.payload().issue
 
         given(this.service.getIssueByNumber(body.number)).willReturn(body)
 
@@ -282,21 +289,16 @@ internal class EventControllerTest {
     @Test
     @DisplayName("GET -> Deve retornar uma mensagem de erro ao buscar uma issue que não existe")
     fun throwErrorIssueNotFound() {
-        val body: IssueDto = this.builder.payloadBuilder().issue
+        val body: IssueDto = this.builder.payload().issue
 
-        given(this.service.getIssueByNumber(body.number)).willThrow(IssueNotFound("Issue ${body.number} not found"))
+        given(this.service.getIssueByNumber(body.number)).willThrow(IssueNotFound("Issue #${body.number} not found."))
 
-        assertAll({
-            assertThrows<IssueNotFound>("Must throw an exception") {
-                this.controller.getIssueByNumber(body.number)
-            }.also {
-                assertThat(it).isInstanceOf(IssueNotFound::class.java).hasMessage("Issue ${body.number} not found")
-            }
-        },
-            {
-                assertEquals(HttpStatus.BAD_REQUEST, this.controller.getIssueByNumber(body.number).statusCode)
-            }
-        )
+        val request: MockHttpServletRequestBuilder = get("/issue/${body.number}")
+            .accept(APPLICATION_JSON)
 
+        this.mockMvc.perform(request)
+            .andExpect(status().isBadRequest)
+            .andExpect(jsonPath("message").value("Issue #${body.number} not found."))
     }
+
 }

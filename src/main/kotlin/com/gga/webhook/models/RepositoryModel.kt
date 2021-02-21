@@ -13,224 +13,224 @@ data class RepositoryModel @JvmOverloads constructor(
     val id: Long = 0,
 
     @Column(name = "NODE_ID", unique = true)
-    val nodeId: String,
+    var nodeId: String,
 
     @Column(name = "NAME")
-    val name: String,
+    var name: String,
 
     @Column(name = "FULL_NAME")
-    val fullName: String,
+    var fullName: String,
 
     @Column(name = "PRIVATE")
-    val private: Boolean = false,
+    var private: Boolean = false,
 
     @OneToOne(mappedBy = "repository")
-    val owner: OwnerModel? = null,
+    var owner: OwnerModel? = null,
 
     @Column(name = "HTML_URL")
-    val htmlUrl: String,
+    var htmlUrl: String,
 
     @Column(name = "DESCRIPTION")
-    val description: String,
+    var description: String,
 
     @Column(name = "FORK")
-    val fork: Boolean = false,
+    var fork: Boolean = false,
 
     @Column(name = "URL")
-    val url: String,
+    var url: String,
 
     @Column(name = "FORKS_URL")
-    val forksUrl: String,
+    var forksUrl: String,
 
     @Column(name = "KEYS_URL")
-    val keysUrl: String,
+    var keysUrl: String,
 
     @Column(name = "COLLABORATORS_URL")
-    val collaboratorsUrl: String,
+    var collaboratorsUrl: String,
 
     @Column(name = "TEAMS_URL")
-    val teamsUrl: String,
+    var teamsUrl: String,
 
     @Column(name = "HOOKS_URL")
-    val hooksUrl: String,
+    var hooksUrl: String,
 
     @Column(name = "ISSUE_EVENTS_URL")
-    val issueEventsUrl: String,
+    var issueEventsUrl: String,
 
     @Column(name = "EVENTS_URL")
-    val eventsUrl: String,
+    var eventsUrl: String,
 
     @Column(name = "ASSIGNEES_URL")
-    val assigneesUrl: String,
+    var assigneesUrl: String,
 
     @Column(name = "BRANCHES_URL")
-    val branchesUrl: String,
+    var branchesUrl: String,
 
     @Column(name = "TAGS_URL")
-    val tagsUrl: String,
+    var tagsUrl: String,
 
     @Column(name = "BLOBS_URL")
-    val blobsUrl: String,
+    var blobsUrl: String,
 
     @Column(name = "GIT_TAGS_URL")
-    val gitTagsUrl: String,
+    var gitTagsUrl: String,
 
     @Column(name = "GIT_REFS_URL")
-    val gitRefsUrl: String,
+    var gitRefsUrl: String,
 
     @Column(name = "TREES_URL")
-    val treesUrl: String,
+    var treesUrl: String,
 
     @Column(name = "STATUSES_URL")
-    val statusesUrl: String,
+    var statusesUrl: String,
 
     @Column(name = "LANGUAGES_URL")
-    val languagesUrl: String,
+    var languagesUrl: String,
 
     @Column(name = "STARGAZERS_URL")
-    val stargazersUrl: String,
+    var stargazersUrl: String,
 
     @Column(name = "CONTRIBUTORS_URL")
-    val contributorsUrl: String,
+    var contributorsUrl: String,
 
     @Column(name = "SUBSCRIBERS_URL")
-    val subscribersUrl: String,
+    var subscribersUrl: String,
 
     @Column(name = "SUBSCRIPTION_URL")
-    val subscriptionUrl: String,
+    var subscriptionUrl: String,
 
     @Column(name = "COMMITS_URL")
-    val commitsUrl: String,
+    var commitsUrl: String,
 
     @Column(name = "GIT_COMMITS_URL")
-    val gitCommitsUrl: String,
+    var gitCommitsUrl: String,
 
     @Column(name = "COMMENTS_URL")
-    val commentsUrl: String,
+    var commentsUrl: String,
 
     @Column(name = "ISSUE_COMMENT_URL")
-    val issueCommentUrl: String,
+    var issueCommentUrl: String,
 
     @Column(name = "CONTENTS_URL")
-    val contentsUrl: String,
+    var contentsUrl: String,
 
     @Column(name = "COMPARE_URL")
-    val compareUrl: String,
+    var compareUrl: String,
 
     @Column(name = "MERGES_URL")
-    val mergesUrl: String,
+    var mergesUrl: String,
 
     @Column(name = "ARCHIVE_URL")
-    val archiveUrl: String,
+    var archiveUrl: String,
 
     @Column(name = "DOWNLOADS_URL")
-    val downloadsUrl: String,
+    var downloadsUrl: String,
 
     @Column(name = "ISSUES_URL")
-    val issuesUrl: String,
+    var issuesUrl: String,
 
     @Column(name = "PULLS_URL")
-    val pullsUrl: String,
+    var pullsUrl: String,
 
     @Column(name = "MILESTONES_URL")
-    val milestonesUrl: String,
+    var milestonesUrl: String,
 
     @Column(name = "NOTIFICATIONS_URL")
-    val notificationsUrl: String,
+    var notificationsUrl: String,
 
     @Column(name = "LABELS_URL")
-    val labelsUrl: String,
+    var labelsUrl: String,
 
     @Column(name = "RELEASES_URL")
-    val releasesUrl: String,
+    var releasesUrl: String,
 
     @Column(name = "DEPLOYMENTS_URL")
-    val deploymentsUrl: String,
+    var deploymentsUrl: String,
 
     @Column(name = "CREATED_AT")
     @Temporal(TemporalType.DATE)
-    val createdAt: Date,
+    var createdAt: Date,
 
     @Column(name = "UPDATED_AT")
     @Temporal(TemporalType.DATE)
-    val updatedAt: Date? = null,
+    var updatedAt: Date? = null,
 
     @Column(name = "PUSHED_AT")
     @Temporal(TemporalType.DATE)
-    val pushedAt: Date? = null,
+    var pushedAt: Date? = null,
 
     @Column(name = "GIT_URL")
-    val gitUrl: String? = null,
+    var gitUrl: String? = null,
 
     @Column(name = "SSH_URL")
-    val sshUrl: String? = null,
+    var sshUrl: String? = null,
 
     @Column(name = "CLONE_URL")
-    val cloneUrl: String? = null,
+    var cloneUrl: String? = null,
 
     @Column(name = "SVN_URL")
-    val svnUrl: String? = null,
+    var svnUrl: String? = null,
 
     @Column(name = "HOMEPAGE")
-    val homepage: String? = null,
+    var homepage: String? = null,
 
     @Column(name = "SIZE")
-    val size: Int = 0,
+    var size: Int = 0,
 
     @Column(name = "STARGAZERS_COUNT")
-    val stargazersCount: Int = 0,
+    var stargazersCount: Int = 0,
 
     @Column(name = "WATCHERS_COUNT")
-    val watchersCount: Int = 0,
+    var watchersCount: Int = 0,
 
     @Column(name = "LANGUAGE")
-    val language: String,
+    var language: String,
 
     @Column(name = "HAS_ISSUES")
-    val hasIssues: Boolean = false,
+    var hasIssues: Boolean = false,
 
     @Column(name = "HAS_PROJECTS")
-    val hasProjects: Boolean = false,
+    var hasProjects: Boolean = false,
 
     @Column(name = "HAS_DOWNLOADS")
-    val hasDownloads: Boolean = false,
+    var hasDownloads: Boolean = false,
 
     @Column(name = "HAS_WIKI")
-    val hasWiki: Boolean = false,
+    var hasWiki: Boolean = false,
 
     @Column(name = "HAS_PAGES")
-    val hasPages: Boolean = false,
+    var hasPages: Boolean = false,
 
     @Column(name = "FORKS_COUNT")
-    val forksCount: Int = 0,
+    var forksCount: Int = 0,
 
     @Column(name = "MIRROR_URL")
-    val mirrorUrl: String? = null,
+    var mirrorUrl: String? = null,
 
     @Column(name = "ARCHIVED")
-    val archived: Boolean = false,
+    var archived: Boolean = false,
 
     @Column(name = "DISABLED")
-    val disabled: Boolean = false,
+    var disabled: Boolean = false,
 
     @Column(name = "OPEN_ISSUES_COUNT")
-    val openIssuesCount: Int = 0,
+    var openIssuesCount: Int = 0,
 
     @OneToOne(mappedBy = "repository")
-    val license: LicenseModel? = null,
+    var license: LicenseModel? = null,
 
     @Column(name = "FORKS")
-    val forks: Int = 0,
+    var forks: Int = 0,
 
     @Column(name = "OPEN_ISSUES")
-    val openIssues: Int = 0,
+    var openIssues: Int = 0,
 
     @Column(name = "WATCHERS")
-    val watchers: Int = 0,
+    var watchers: Int = 0,
 
     @Column(name = "DEFAULT_BRANCH")
-    val defaultBranch: String,
+    var defaultBranch: String,
 
     @OneToOne(mappedBy = "repository")
-    val payload: PayloadModel? = null
+    var payload: PayloadModel? = null
 ) : Serializable

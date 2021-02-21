@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import com.github.dozermapper.core.Mapping
 import java.io.Serializable
 import java.time.Instant
+import java.util.*
 
 data class MilestoneDto @JvmOverloads constructor(
     @JsonProperty("url")
@@ -44,13 +45,13 @@ data class MilestoneDto @JvmOverloads constructor(
     var state: String = "",
 
     @JsonProperty("created_at")
-    var createdAt: Instant,
+    var createdAt: Date,
 
     @JsonProperty("updated_at")
-    var updatedAt: Instant? = null,
+    var updatedAt: Date? = null,
 
     @JsonProperty("due_on")
-    var dueOn: Instant? = null,
+    var dueOn: Date? = null,
 
     @JsonProperty("closed_at")
     var closedAt: Instant? = null

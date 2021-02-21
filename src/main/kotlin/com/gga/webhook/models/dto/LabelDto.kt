@@ -1,6 +1,5 @@
 package com.gga.webhook.models.dto
 
-import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.github.dozermapper.core.Mapping
 import java.io.Serializable
