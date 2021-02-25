@@ -1,14 +1,18 @@
+@file:Suppress("unused")
+
 package com.gga.webhook.utils
 
-import com.github.dozermapper.core.DozerBeanMapperBuilder
-import com.github.dozermapper.core.Mapper
+import org.modelmapper.ModelMapper
+import org.modelmapper.convention.MatchingStrategies
 import java.util.stream.Collectors
 
 class MapperUtil private constructor() {
     companion object {
 
         @JvmStatic
-        private val mapper: Mapper = DozerBeanMapperBuilder.buildDefault()
+        private val mapper: ModelMapper = ModelMapper().also {
+            it.configuration.setAmbiguityIgnored(true).matchingStrategy = MatchingStrategies.STRICT
+        }
 
         @JvmStatic
         infix fun <O, D> O.convertTo(to: Class<D>): D = mapper.map(this, to)

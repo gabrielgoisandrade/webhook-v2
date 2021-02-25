@@ -9,7 +9,7 @@ data class LicenseModel @JvmOverloads constructor(
     @Id
     @Column(name = "LICENSE_ID")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long = 0L,
+    var id: Long = 0L,
 
     @Column(name = "KEY")
     var key: String,

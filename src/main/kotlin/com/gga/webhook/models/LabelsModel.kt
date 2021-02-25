@@ -5,11 +5,11 @@ import java.io.Serializable
 import javax.persistence.*
 
 @Entity
-@Table(name = "LABEL")
-data class LabelModel @JvmOverloads constructor(
+@Table(name = "LABELS")
+data class LabelsModel @JvmOverloads constructor(
     @Id
-    @Column(name = "LABEL_ID")
-    val id: Long = 0L,
+    @Column(name = "LABELS_ID")
+    var id: Long = 0L,
 
     @NaturalId
     @Column(name = "NODE_ID", unique = true)
@@ -33,4 +33,4 @@ data class LabelModel @JvmOverloads constructor(
     @ManyToOne
     @JoinColumn(name = "ISSUE_ID", referencedColumnName = "ISSUE_ID", foreignKey = ForeignKey(name = "C_LABEL_ISSUE"))
     var issue: IssueModel? = null
-): Serializable
+) : Serializable

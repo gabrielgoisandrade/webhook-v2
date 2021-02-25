@@ -28,7 +28,7 @@ extra["springBootAdminVersion"] = "2.3.1"
 
 dependencies {
     /* Model mapper */
-    implementation("com.github.dozermapper:dozer-core:6.5.0")
+    implementation("org.modelmapper:modelmapper:2.3.0")
 
     // springDoc
     implementation("org.springdoc:springdoc-openapi-ui:1.5.4")
@@ -60,6 +60,8 @@ dependencies {
 
     // H2
     runtimeOnly("com.h2database:h2")
+
+    // POSTGRES
     runtimeOnly("org.postgresql:postgresql")
 
     // devtools

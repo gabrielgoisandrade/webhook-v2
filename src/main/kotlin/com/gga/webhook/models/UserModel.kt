@@ -12,7 +12,7 @@ data class UserModel @JvmOverloads constructor(
 
     @Id
     @Column(name = "USER_ID")
-    val id: Long = 0L,
+    var id: Long = 0L,
 
     @NaturalId
     @Column(name = "NODE_ID", unique = true)

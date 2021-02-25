@@ -1,16 +1,14 @@
 package com.gga.webhook.models.dto
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import com.github.dozermapper.core.Mapping
 import java.io.Serializable
 
 data class AssigneeDto @JvmOverloads constructor(
     @JsonProperty("login")
     var login: String = "",
 
-    @Mapping("id")
     @JsonProperty("id")
-    var assigneeId: Long = 0L,
+    var id: Long = 0L,
 
     @JsonProperty("node_id")
     var nodeId: String = "",
@@ -59,5 +57,4 @@ data class AssigneeDto @JvmOverloads constructor(
 
     @JsonProperty("site_admin")
     var siteAdmin: Boolean = false
-
 ) : Serializable

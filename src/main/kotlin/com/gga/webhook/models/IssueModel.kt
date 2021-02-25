@@ -1,9 +1,8 @@
 package com.gga.webhook.models
 
 import org.hibernate.annotations.NaturalId
-import org.springframework.data.jpa.repository.Temporal
 import java.io.Serializable
-import java.util.*
+import java.time.Instant
 import javax.persistence.*
 
 @Entity
@@ -29,7 +28,7 @@ data class IssueModel @JvmOverloads constructor(
 
     @Id
     @Column(name = "ISSUE_ID")
-    val id: Long = 0,
+    var id: Long = 0,
 
     @NaturalId
     @Column(name = "NODE_ID", unique = true)
@@ -42,10 +41,10 @@ data class IssueModel @JvmOverloads constructor(
     var title: String,
 
     @OneToOne(mappedBy = "issue")
-    var user: UserModel,
+    var user: UserModel? = null,
 
     @OneToMany(mappedBy = "issue")
-    var labels: Set<LabelModel> = setOf(),
+    var labels: Set<LabelsModel> = hashSetOf(),
 
     @Column(name = "STATE")
     var state: String,
@@ -57,7 +56,7 @@ data class IssueModel @JvmOverloads constructor(
     var assignee: AssigneeModel? = null,
 
     @OneToMany(mappedBy = "issue")
-    var assignees: Set<AssigneesModel>? = setOf(),
+    var assignees: Set<AssigneesModel> = hashSetOf(),
 
     @OneToOne(mappedBy = "issue")
     var milestone: MilestoneModel? = null,
@@ -66,18 +65,15 @@ data class IssueModel @JvmOverloads constructor(
     var comments: Int = 0,
 
     @Column(name = "CREATED_AT")
-    @Temporal(TemporalType.DATE)
-    var createdAt: Date,
+    var createdAt: Instant,
 
     @Column(name = "UPDATED_AT")
-    @Temporal(TemporalType.DATE)
-    var updatedAt: Date? = null,
+    var updatedAt: Instant? = null,
 
     @Column(name = "CLOSED_AT")
-    @Temporal(TemporalType.DATE)
-    var closedAt: Date? = null,
+    var closedAt: Instant? = null,
 
-    @Column(name = "AUTOR_ASSOCIATION")
+    @Column(name = "AUTHOR_ASSOCIATION")
     var authorAssociation: String,
 
     @Column(name = "ACTIVE_LOCK_REASON")

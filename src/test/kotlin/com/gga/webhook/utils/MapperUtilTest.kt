@@ -1,9 +1,9 @@
 package com.gga.webhook.utils
 
 import com.gga.webhook.builder.PayloadBuilder
-import com.gga.webhook.models.LabelModel
+import com.gga.webhook.models.LabelsModel
 import com.gga.webhook.models.SenderModel
-import com.gga.webhook.models.dto.LabelDto
+import com.gga.webhook.models.dto.LabelsDto
 import com.gga.webhook.models.dto.SenderDto
 import com.gga.webhook.utils.MapperUtil.Companion.convertTo
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -15,7 +15,7 @@ internal class MapperUtilTest {
 
     @Test
     fun fromModelToDto() {
-        val senderDto: SenderDto = this.builder.payload().sender
+        val senderDto: SenderDto = this.builder.payload().sender!!
 
         val senderModel = SenderModel(
             login = "mock@mock.com",
@@ -44,10 +44,10 @@ internal class MapperUtilTest {
 
     @Test
     fun fromListDtoToListModel() {
-        val labelsDto: Set<LabelDto> = this.builder.payload().issue.labels
+        val labelsDto: Set<LabelsDto> = this.builder.payload().issue!!.labels
 
-        val labelsModel: Set<LabelModel> = setOf(
-            LabelModel(
+        val labelsModel: Set<LabelsModel> = setOf(
+            LabelsModel(
                 id = 2L,
                 nodeId = "mock431mock",
                 url = "https://mock.com",
@@ -56,8 +56,8 @@ internal class MapperUtilTest {
                 default = false,
                 description = "mock"
             ),
-            LabelModel(
-                id = 2L,
+            LabelsModel(
+                id = 3L,
                 nodeId = "mock431mock",
                 url = "https://mock.com",
                 name = "bug",
@@ -67,14 +67,14 @@ internal class MapperUtilTest {
             )
         )
 
-        val parseObjects: Set<LabelDto> = labelsModel convertTo LabelDto::class.java
+        val parseObjects: Set<LabelsDto> = labelsModel convertTo LabelsDto::class.java
 
         assertEquals(labelsDto, parseObjects)
     }
 
     @Test
     fun fromDtoToModel() {
-        val senderDto: SenderDto = this.builder.payload().sender
+        val senderDto: SenderDto = this.builder.payload().sender!!
 
         val senderModel = SenderModel(
             login = "mock@mock.com",
@@ -103,10 +103,10 @@ internal class MapperUtilTest {
 
     @Test
     fun fromListModelToListDto() {
-        val labelsDto: Set<LabelDto> = this.builder.payload().issue.labels
+        val labelsDto: Set<LabelsDto> = this.builder.payload().issue!!.labels
 
-        val labelsModel: Set<LabelModel> = setOf(
-            LabelModel(
+        val labelsModel: Set<LabelsModel> = setOf(
+            LabelsModel(
                 id = 2L,
                 nodeId = "mock431mock",
                 url = "https://mock.com",
@@ -115,8 +115,8 @@ internal class MapperUtilTest {
                 default = false,
                 description = "mock"
             ),
-            LabelModel(
-                id = 2L,
+            LabelsModel(
+                id = 3L,
                 nodeId = "mock431mock",
                 url = "https://mock.com",
                 name = "bug",
@@ -126,7 +126,7 @@ internal class MapperUtilTest {
             )
         )
 
-        val parseObjects: Set<LabelModel> = labelsDto convertTo LabelModel::class.java
+        val parseObjects: Set<LabelsModel> = labelsDto convertTo LabelsModel::class.java
 
         assertEquals(labelsModel, parseObjects)
     }

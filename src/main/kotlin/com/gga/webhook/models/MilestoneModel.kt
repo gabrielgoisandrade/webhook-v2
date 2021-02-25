@@ -1,8 +1,7 @@
 package com.gga.webhook.models
 
-import org.springframework.data.jpa.repository.Temporal
 import java.io.Serializable
-import java.util.*
+import java.time.Instant
 import javax.persistence.*
 
 
@@ -20,7 +19,7 @@ data class MilestoneModel @JvmOverloads constructor(
 
     @Id
     @Column(name = "MILESTONE_ID")
-    val id: Long = 0,
+    var id: Long = 0,
 
     @Column(name = "NODE_ID", unique = true)
     var nodeId: String,
@@ -47,20 +46,16 @@ data class MilestoneModel @JvmOverloads constructor(
     var state: String,
 
     @Column(name = "CREATED_AT")
-    @Temporal(TemporalType.DATE)
-    var createdAt: Date,
+    var createdAt: Instant,
 
     @Column(name = "UPDATED_AT")
-    @Temporal(TemporalType.DATE)
-    var updatedAt: Date? = null,
+    var updatedAt: Instant? = null,
 
     @Column(name = "DUE_ON")
-    @Temporal(TemporalType.DATE)
-    var dueOn: Date? = null,
+    var dueOn: Instant? = null,
 
     @Column(name = "CLOSED_AT")
-    @Temporal(TemporalType.DATE)
-    var closedAt: Date? = null,
+    var closedAt: Instant? = null,
 
     @OneToOne(cascade = [CascadeType.ALL])
     @JoinColumn(

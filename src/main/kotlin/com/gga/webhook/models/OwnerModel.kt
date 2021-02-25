@@ -11,7 +11,7 @@ data class OwnerModel @JvmOverloads constructor(
 
     @Id
     @Column(name = "OWNER_ID")
-    val id: Long = 0L,
+    var id: Long = 0L,
 
     @Column(name = "NODE_ID", unique = true)
     var nodeId: String,

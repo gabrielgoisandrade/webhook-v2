@@ -49,11 +49,11 @@ internal class EventControllerTest {
             with(it.body!!) {
                 assertAll(
                     {
-                        assertFalse(this.repository.license == null, "License must not be null")
-                        assertFalse(this.issue.milestone == null, "Milestone must not be null")
-                        assertFalse(this.issue.assignee == null, "Assignee must not be null")
-                        assertFalse(this.issue.assignees.isEmpty(), "Assignees must not be an empty list")
-                        assertFalse(this.issue.labels.isEmpty(), "Labels must not be an empty list")
+                        assertFalse(this.repository!!.license == null, "License must not be null")
+                        assertFalse(this.issue!!.milestone == null, "Milestone must not be null")
+                        assertFalse(this.issue!!.assignee == null, "Assignee must not be null")
+                        assertFalse(this.issue!!.assignees.isEmpty(), "Assignees must not be an empty list")
+                        assertFalse(this.issue!!.labels.isEmpty(), "Labels must not be an empty list")
                     },
                     {
                         assertEquals(body, this, "The response body must be equal to mock")
@@ -76,13 +76,13 @@ internal class EventControllerTest {
             with(it.body!!) {
                 assertAll(
                     {
-                        assertFalse(this.repository.license == null, "License must not be null")
-                        assertFalse(this.issue.milestone == null, "Milestone must not be null")
-                        assertFalse(this.issue.assignee == null, "Assignee must not be null")
-                        assertFalse(this.issue.assignees.isEmpty(), "Assignees must not be an empty list")
+                        assertFalse(this.repository!!.license == null, "License must not be null")
+                        assertFalse(this.issue!!.milestone == null, "Milestone must not be null")
+                        assertFalse(this.issue!!.assignee == null, "Assignee must not be null")
+                        assertFalse(this.issue!!.assignees.isEmpty(), "Assignees must not be an empty list")
                     },
                     {
-                        assertTrue(this.issue.labels.isEmpty(), "Labels must be an empty list")
+                        assertTrue(this.issue!!.labels.isEmpty(), "Labels must be an empty list")
                         assertEquals(body, this, "The response body must be equal to mock")
                     }
                 )
@@ -103,13 +103,13 @@ internal class EventControllerTest {
             with(it.body!!) {
                 assertAll(
                     {
-                        assertFalse(this.repository.license == null, "License must not be null")
-                        assertFalse(this.issue.assignee == null, "Assignee must not be null")
-                        assertFalse(this.issue.assignees.isEmpty(), "Assignees must be not an empty list")
-                        assertFalse(this.issue.labels.isEmpty(), "Labels must be not an empty list")
+                        assertFalse(this.repository!!.license == null, "License must not be null")
+                        assertFalse(this.issue!!.assignee == null, "Assignee must not be null")
+                        assertFalse(this.issue!!.assignees.isEmpty(), "Assignees must be not an empty list")
+                        assertFalse(this.issue!!.labels.isEmpty(), "Labels must be not an empty list")
                     },
                     {
-                        assertTrue(this.issue.milestone == null, "Milestone must be null")
+                        assertTrue(this.issue!!.milestone == null, "Milestone must be null")
                         assertEquals(body, this, "The response body must be equal to mock")
                     }
                 )
@@ -130,13 +130,13 @@ internal class EventControllerTest {
             with(it.body!!) {
                 assertAll(
                     {
-                        assertFalse(this.repository.license == null, "License must not be null")
-                        assertFalse(this.issue.milestone == null, "Milestone must not be null")
-                        assertFalse(this.issue.labels.isEmpty(), "Labels must not be an empty list")
+                        assertFalse(this.repository!!.license == null, "License must not be null")
+                        assertFalse(this.issue!!.milestone == null, "Milestone must not be null")
+                        assertFalse(this.issue!!.labels.isEmpty(), "Labels must not be an empty list")
                     },
                     {
-                        assertTrue(this.issue.assignees.isEmpty(), "Assignees must be an empty list")
-                        assertTrue(this.issue.assignee == null, "Assignee must be null")
+                        assertTrue(this.issue!!.assignees.isEmpty(), "Assignees must be an empty list")
+                        assertTrue(this.issue!!.assignee == null, "Assignee must be null")
                         assertEquals(body, this, "The response body must be equal to mock")
                     }
                 )
@@ -157,13 +157,13 @@ internal class EventControllerTest {
             with(it.body!!) {
                 assertAll(
                     {
-                        assertFalse(this.issue.milestone == null, "Milestone must not be null")
-                        assertFalse(this.issue.assignee == null, "Assignee must not be null")
-                        assertFalse(this.issue.assignees.isEmpty(), "Assignees must not an empty list")
-                        assertFalse(this.issue.labels.isEmpty(), "Labels must not an empty list")
+                        assertFalse(this.issue!!.milestone == null, "Milestone must not be null")
+                        assertFalse(this.issue!!.assignee == null, "Assignee must not be null")
+                        assertFalse(this.issue!!.assignees.isEmpty(), "Assignees must not an empty list")
+                        assertFalse(this.issue!!.labels.isEmpty(), "Labels must not an empty list")
                     },
                     {
-                        assertTrue(this.repository.license == null, "License must be null")
+                        assertTrue(this.repository!!.license == null, "License must be null")
                         assertEquals(body, this, "The response body must be equal to mock")
                     }
                 )
@@ -177,7 +177,7 @@ internal class EventControllerTest {
                 "status code 200"
     )
     fun getIssueByNumberWithoutNullObjects() {
-        val body: IssueDto = this.builder.payload().issue
+        val body: IssueDto = this.builder.payload().issue!!
 
         given(this.service.getIssueByNumber(body.number)).willReturn(body)
 
@@ -206,7 +206,7 @@ internal class EventControllerTest {
                 "e o status code 200"
     )
     fun getIssueByNumberWithEmptyLabels() {
-        val body: IssueDto = this.builder.issueWithoutLabels().issue
+        val body: IssueDto = this.builder.issueWithoutLabels().issue!!
 
         given(this.service.getIssueByNumber(body.number)).willReturn(body)
 
@@ -234,7 +234,7 @@ internal class EventControllerTest {
         "GET -> Deve retornar a issue com o número passado via path, sem nenhum milestone e o status code 200"
     )
     fun getIssueByNumberWithNullMilestone() {
-        val body: IssueDto = this.builder.issueWithoutMilestone().issue
+        val body: IssueDto = this.builder.issueWithoutMilestone().issue!!
 
         given(this.service.getIssueByNumber(body.number)).willReturn(body)
 
@@ -263,7 +263,7 @@ internal class EventControllerTest {
                 "assignees e o status code 200"
     )
     fun getIssueByNumberWithNullAssignee() {
-        val body: IssueDto = this.builder.issueWithoutAssignee().issue
+        val body: IssueDto = this.builder.issueWithoutAssignee().issue!!
 
         given(this.service.getIssueByNumber(body.number)).willReturn(body)
 
@@ -289,7 +289,7 @@ internal class EventControllerTest {
     @Test
     @DisplayName("GET -> Deve retornar uma mensagem de erro ao buscar uma issue que não existe")
     fun throwErrorIssueNotFound() {
-        val body: IssueDto = this.builder.payload().issue
+        val body: IssueDto = this.builder.payload().issue!!
 
         given(this.service.getIssueByNumber(body.number)).willThrow(IssueNotFound("Issue #${body.number} not found."))
 

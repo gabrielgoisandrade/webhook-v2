@@ -1,16 +1,15 @@
 package com.gga.webhook.models.dto
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
-import com.github.dozermapper.core.Mapping
 import java.io.Serializable
 
 data class SenderDto @JvmOverloads constructor(
     @JsonProperty("login")
     var login: String = "",
 
-    @Mapping("id")
     @JsonProperty("id")
-    var senderId: Long = 0L,
+    var id: Long = 0L,
 
     @JsonProperty("node_id")
     var nodeId: String = "",
@@ -58,5 +57,8 @@ data class SenderDto @JvmOverloads constructor(
     var type: String = "",
 
     @JsonProperty("site_admin")
-    var siteAdmin: Boolean = false
+    var siteAdmin: Boolean = false,
+
+    @JsonIgnore
+    var payload: PayloadDto? = null
 ) : Serializable

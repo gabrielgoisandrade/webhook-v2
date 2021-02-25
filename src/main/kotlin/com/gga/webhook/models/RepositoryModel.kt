@@ -1,8 +1,7 @@
 package com.gga.webhook.models
 
-import org.springframework.data.jpa.repository.Temporal
 import java.io.Serializable
-import java.util.*
+import java.time.Instant
 import javax.persistence.*
 
 @Entity
@@ -10,7 +9,7 @@ import javax.persistence.*
 data class RepositoryModel @JvmOverloads constructor(
     @Id
     @Column(name = "REPOSITORY_ID")
-    val id: Long = 0,
+    var id: Long = 0,
 
     @Column(name = "NODE_ID", unique = true)
     var nodeId: String,
@@ -148,16 +147,13 @@ data class RepositoryModel @JvmOverloads constructor(
     var deploymentsUrl: String,
 
     @Column(name = "CREATED_AT")
-    @Temporal(TemporalType.DATE)
-    var createdAt: Date,
+    var createdAt: Instant,
 
     @Column(name = "UPDATED_AT")
-    @Temporal(TemporalType.DATE)
-    var updatedAt: Date? = null,
+    var updatedAt: Instant? = null,
 
     @Column(name = "PUSHED_AT")
-    @Temporal(TemporalType.DATE)
-    var pushedAt: Date? = null,
+    var pushedAt: Instant? = null,
 
     @Column(name = "GIT_URL")
     var gitUrl: String? = null,

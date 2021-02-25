@@ -1,16 +1,17 @@
 package com.gga.webhook.builder
 
 import com.gga.webhook.models.dto.*
+import java.time.Instant
 import java.util.*
 
 class PayloadBuilder {
 
     companion object {
         @JvmStatic
-        private val INSTANT_MOCK: Date = Date()
+        private val INSTANT_MOCK: Instant = Instant.now()
     }
 
-    private val userDto = UserDto(
+    fun userDto(): UserDto = UserDto(
         "mock@mock.com",
         10L,
         "mockmock4123mock",
@@ -30,8 +31,8 @@ class PayloadBuilder {
         "https://mock.com/events"
     )
 
-    private val label = LabelDto(
-        labelId = 2L,
+    private fun label(): LabelsDto = LabelsDto(
+        id = 2L,
         nodeId = "mock431mock",
         url = "https://mock.com",
         name = "bug",
@@ -40,11 +41,11 @@ class PayloadBuilder {
         description = "mock"
     )
 
-    private val labels: HashSet<LabelDto> = hashSetOf(label, label)
+    fun labels(): HashSet<LabelsDto> = hashSetOf(this.label(), this.label().apply { this.id = 3L })
 
-    private val creatorDto = CreatorDto(
+    fun creatorDto(): CreatorDto = CreatorDto(
         login = "mock@mock.com",
-        creatorId = 10L,
+        id = 10L,
         nodeId = "mockmock4123mock",
         avatarUrl = "mock",
         gravatarId = "mock4321mock",
@@ -62,16 +63,16 @@ class PayloadBuilder {
         type = "https://mock.com/events"
     )
 
-    private val milestoneDto = MilestoneDto(
+    fun milestoneDto(): MilestoneDto = MilestoneDto(
         url = "https://mock.com",
         htmlUrl = "https://mock.com",
         labelsUrl = "https://mock.com",
-        milestoneId = 10L,
+        id = 10L,
         nodeId = "mock241mock",
         number = 1,
         title = "mock",
         description = "mock",
-        creator = this.creatorDto,
+        creator = this.creatorDto(),
         openIssues = 10,
         closedIssues = 5,
         state = "open",
@@ -81,9 +82,9 @@ class PayloadBuilder {
         closedAt = null
     )
 
-    private val assigneeDto = AssigneeDto(
+    fun assigneeDto(): AssigneeDto = AssigneeDto(
         login = "mock@mock.com",
-        assigneeId = 10L,
+        id = 10L,
         nodeId = "mockmock4123mock",
         avatarUrl = "mock",
         gravatarId = "mock4321mock",
@@ -101,9 +102,9 @@ class PayloadBuilder {
         type = "https://mock.com/events"
     )
 
-    private val assigneesDto = AssigneesDto(
+    private fun assigneesDto(): AssigneesDto = AssigneesDto(
         login = "mock@mock.com",
-        assigneesId = 10L,
+        id = 10L,
         nodeId = "mockmock4123mock",
         avatarUrl = "mock",
         gravatarId = "mock4321mock",
@@ -121,11 +122,11 @@ class PayloadBuilder {
         type = "https://mock.com/events"
     )
 
-    private val assignees: Set<AssigneesDto> = setOf(assigneesDto)
+    fun assignees(): HashSet<AssigneesDto> = hashSetOf(this.assigneesDto())
 
-    private val ownerDto = OwnerDto(
+    fun ownerDto(): OwnerDto = OwnerDto(
         login = "mock@mock.com",
-        ownerId = 10L,
+        id = 10L,
         nodeId = "mockmock4123mock",
         avatarUrl = "mock",
         gravatarId = "mock4321mock",
@@ -143,8 +144,8 @@ class PayloadBuilder {
         type = "mock"
     )
 
-    private val licenseDto = LicenseDto(
-        licenseId = 10L,
+    fun licenseDto(): LicenseDto = LicenseDto(
+        id = 10L,
         key = "mock",
         name = "Mock 2.0",
         spdxId = "mockmock",
@@ -152,13 +153,13 @@ class PayloadBuilder {
         nodeId = "mock423mock"
     )
 
-    private val repositoryDto = RepositoryDto(
-        repositoryId = 10L,
+    private fun repositoryDto(): RepositoryDto = RepositoryDto(
+        id = 10L,
         nodeId = "mock464mock",
         name = "mock",
         fullName = "mock",
         private = true,
-        owner = this.ownerDto,
+        owner = this.ownerDto(),
         htmlUrl = "https://mock.com",
         description = "mock",
         fork = false,
@@ -214,16 +215,16 @@ class PayloadBuilder {
         forksCount = 1,
         mirrorUrl = "https://mock.com",
         openIssuesCount = 10,
-        license = this.licenseDto,
+        license = this.licenseDto(),
         forks = 0,
         openIssues = 10,
         watchers = 0,
         defaultBranch = "mock",
     )
 
-    private val senderDto = SenderDto(
+    fun senderDto(): SenderDto = SenderDto(
         login = "mock@mock.com",
-        senderId = 10L,
+        id = 10L,
         nodeId = "mockmock4123mock",
         avatarUrl = "mock",
         gravatarId = "mock4321mock",
@@ -244,8 +245,8 @@ class PayloadBuilder {
     fun payload(): PayloadDto = PayloadDto(
         action = "some action",
         issue = this.issue(),
-        repository = this.repositoryDto,
-        sender = this.senderDto
+        repository = this.repositoryDto(),
+        sender = this.senderDto()
     )
 
     private fun issue(): IssueDto = IssueDto(
@@ -255,17 +256,17 @@ class PayloadBuilder {
         commentsUrl = "https://mock.com",
         eventsUrl = "https://mock.com",
         htmlUrl = "https://mock.com",
-        issueId = 10L,
+        id = 10L,
         nodeId = "mock756mock",
         number = 5,
         title = "mock",
-        user = this.userDto,
-        labels = this.labels,
+        user = this.userDto(),
+        labels = this.labels(),
         state = "open",
         locked = true,
-        assignee = this.assigneeDto,
-        assignees = this.assignees,
-        milestone = this.milestoneDto,
+        assignee = this.assigneeDto(),
+        assignees = this.assignees(),
+        milestone = this.milestoneDto(),
         comments = 9,
         createdAt = INSTANT_MOCK,
         updatedAt = null,
@@ -273,25 +274,25 @@ class PayloadBuilder {
     )
 
     fun issueWithoutLabels(): PayloadDto = this.payload().run {
-        this.issue.apply { this.labels = hashSetOf() }
+        this.issue.apply { this?.labels = hashSetOf() }
         this
     }
 
     fun issueWithoutMilestone(): PayloadDto = this.payload().run {
-        this.issue.apply { this.milestone = null }
+        this.issue.apply { this?.milestone = null }
         this
     }
 
     fun issueWithoutAssignee(): PayloadDto = this.payload().run {
         this.issue.apply {
-            this.assignee = null
-            this.assignees = setOf()
+            this?.assignee = null
+            this?.assignees = hashSetOf()
         }
         this
     }
 
     fun repositoryWithoutLicense(): PayloadDto = this.payload().run {
-        this.repository.apply { this.license = null }
+        this.repository.apply { this?.license = null }
         this
     }
 
