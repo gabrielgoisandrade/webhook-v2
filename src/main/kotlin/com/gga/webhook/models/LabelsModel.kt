@@ -13,16 +13,16 @@ data class LabelsModel @JvmOverloads constructor(
 
     @NaturalId
     @Column(name = "NODE_ID", unique = true)
-    var nodeId: String,
+    var nodeId: String="",
 
     @Column(name = "URL")
-    var url: String,
+    var url: String="",
 
     @Column(name = "NAME")
-    var name: String,
+    var name: String="",
 
     @Column(name = "COLOR")
-    var color: String,
+    var color: String="",
 
     @Column(name = "DEFAULT")
     var default: Boolean = false,
@@ -30,7 +30,7 @@ data class LabelsModel @JvmOverloads constructor(
     @Column(name = "DESCRIPTION")
     var description: String? = null,
 
-    @ManyToOne
+    @ManyToOne(cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
     @JoinColumn(name = "ISSUE_ID", referencedColumnName = "ISSUE_ID", foreignKey = ForeignKey(name = "C_LABEL_ISSUE"))
     var issue: IssueModel? = null
 ) : Serializable

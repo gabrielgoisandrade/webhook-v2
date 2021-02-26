@@ -28,7 +28,7 @@ extra["springBootAdminVersion"] = "2.3.1"
 
 dependencies {
     /* Model mapper */
-    implementation("org.modelmapper:modelmapper:2.3.0")
+    implementation("org.modelmapper:modelmapper:2.3.9")
 
     // springDoc
     implementation("org.springdoc:springdoc-openapi-ui:1.5.4")
@@ -85,6 +85,7 @@ tasks.withType<KotlinCompile> {
     kotlinOptions {
         freeCompilerArgs = listOf("-Xjsr305=strict")
         jvmTarget = "15"
+        this.useIR = true //Kotlin JVM
     }
 }
 

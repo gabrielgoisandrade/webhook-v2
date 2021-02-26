@@ -6,61 +6,61 @@ import javax.persistence.*
 @Entity
 @Table(name = "SENDER")
 data class SenderModel @JvmOverloads constructor(
-    @Column(name = "LOGIN")
-    var login: String,
+        @Column(name = "LOGIN")
+        var login: String = "",
 
-    @Id
-    @Column(name = "SENDER_ID")
-    var id: Long = 0L,
+        @Id
+        @Column(name = "SENDER_ID")
+        var id: Long = 0L,
 
-    @Column(name = "NODE_ID", unique = true)
-    var nodeId: String,
+        @Column(name = "NODE_ID", unique = true)
+        var nodeId: String = "",
 
-    @Column(name = "AVATAR_URL")
-    var avatarUrl: String,
+        @Column(name = "AVATAR_URL")
+        var avatarUrl: String = "",
 
-    @Column(name = "GRAVATAR_ID", unique = true)
-    var gravatarId: String,
+        @Column(name = "GRAVATAR_ID", unique = true)
+        var gravatarId: String = "",
 
-    @Column(name = "URL")
-    var url: String,
+        @Column(name = "URL")
+        var url: String = "",
 
-    @Column(name = "HTML_URL")
-    var htmlUrl: String,
+        @Column(name = "HTML_URL")
+        var htmlUrl: String = "",
 
-    @Column(name = "FOLLOWERS_URL")
-    var followersUrl: String,
+        @Column(name = "FOLLOWERS_URL")
+        var followersUrl: String = "",
 
-    @Column(name = "FOLLOWING_URL")
-    var followingUrl: String,
+        @Column(name = "FOLLOWING_URL")
+        var followingUrl: String = "",
 
-    @Column(name = "GISTS_URL")
-    var gistsUrl: String,
+        @Column(name = "GISTS_URL")
+        var gistsUrl: String = "",
 
-    @Column(name = "STARRED_URL")
-    var starredUrl: String,
+        @Column(name = "STARRED_URL")
+        var starredUrl: String = "",
 
-    @Column(name = "SUBSCRIPTIONS_URL")
-    var subscriptionsUrl: String,
+        @Column(name = "SUBSCRIPTIONS_URL")
+        var subscriptionsUrl: String = "",
 
-    @Column(name = "ORGANIZATIONS_URL")
-    var organizationsUrl: String,
+        @Column(name = "ORGANIZATIONS_URL")
+        var organizationsUrl: String = "",
 
-    @Column(name = "REPOS_URL")
-    var reposUrl: String,
+        @Column(name = "REPOS_URL")
+        var reposUrl: String = "",
 
-    @Column(name = "EVENTS_URL")
-    var eventsUrl: String,
+        @Column(name = "EVENTS_URL")
+        var eventsUrl: String = "",
 
-    @Column(name = "RECEIVED_EVENTS_URL")
-    var receivedEventsUrl: String,
+        @Column(name = "RECEIVED_EVENTS_URL")
+        var receivedEventsUrl: String = "",
 
-    @Column(name = "TYPE")
-    var type: String,
+        @Column(name = "TYPE")
+        var type: String = "",
 
-    @Column(name = "SITE_ADMIN")
-    var siteAdmin: Boolean = false,
+        @Column(name = "SITE_ADMIN")
+        var siteAdmin: Boolean = false,
 
-    @OneToOne(mappedBy = "sender")
-    var payload: PayloadModel? = null
+        @OneToOne(mappedBy = "sender", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
+        var payload: PayloadModel? = null
 ) : Serializable

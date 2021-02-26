@@ -1,6 +1,5 @@
 package com.gga.webhook.models.dto
 
-import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 import java.io.Serializable
 
@@ -57,8 +56,5 @@ data class SenderDto @JvmOverloads constructor(
     var type: String = "",
 
     @JsonProperty("site_admin")
-    var siteAdmin: Boolean = false,
-
-    @JsonIgnore
-    var payload: PayloadDto? = null
+    var siteAdmin: Boolean = false
 ) : Serializable

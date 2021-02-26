@@ -56,5 +56,5 @@ data class OwnerDto @JvmOverloads constructor(
     var type: String = "",
 
     @JsonPropertyOrder("site_admin")
-    var siteAdmin: Boolean = false,
+    var siteAdmin: Boolean = false
 ) : Serializable

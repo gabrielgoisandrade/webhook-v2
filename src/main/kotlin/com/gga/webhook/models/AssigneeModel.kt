@@ -8,7 +8,7 @@ import javax.persistence.*
 @Table(name = "ASSIGNEE")
 data class AssigneeModel @JvmOverloads constructor(
     @Column(name = "LOGIN")
-    var login: String,
+    var login: String="",
 
     @Id
     @Column(name = "ASSIGNEE_ID")
@@ -16,55 +16,55 @@ data class AssigneeModel @JvmOverloads constructor(
 
     @NaturalId
     @Column(name = "NODE_ID", unique = true)
-    var nodeId: String,
+    var nodeId: String="",
 
     @Column(name = "AVATAR_URL")
-    var avatarUrl: String,
+    var avatarUrl: String="",
 
     @NaturalId
     @Column(name = "GRAVATAR_ID", unique = true)
     var gravatarId: String = "",
 
     @Column(name = "URL")
-    var url: String,
+    var url: String="",
 
     @Column(name = "HTML_URL")
-    var htmlUrl: String,
+    var htmlUrl: String="",
 
     @Column(name = "FOLLOWERS_URL")
-    var followersUrl: String,
+    var followersUrl: String="",
 
     @Column(name = "FOLLOWING_URL")
-    var followingUrl: String,
+    var followingUrl: String="",
 
     @Column(name = "GIST_URL")
-    var gistsUrl: String,
+    var gistsUrl: String="",
 
     @Column(name = "STARRED_URL")
-    var starredUrl: String,
+    var starredUrl: String="",
 
     @Column(name = "SUBSCRIPTIONS_URL")
-    var subscriptionsUrl: String,
+    var subscriptionsUrl: String="",
 
     @Column(name = "ORGANIZATIONS_URL")
-    var organizationsUrl: String,
+    var organizationsUrl: String="",
 
     @Column(name = "REPOS_URL")
-    var reposUrl: String,
+    var reposUrl: String="",
 
     @Column(name = "EVENTS_URL")
-    var eventsUrl: String,
+    var eventsUrl: String="",
 
     @Column(name = "RECEIVED_EVENTS_URL")
-    var receivedEventsUrl: String,
+    var receivedEventsUrl: String="",
 
     @Column(name = "TYPE")
-    var type: String,
+    var type: String="",
 
     @Column(name = "SITE_ADMIN")
     var siteAdmin: Boolean = false,
 
-    @OneToOne(cascade = [CascadeType.ALL])
+    @OneToOne(cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
     @JoinColumn(
         name = "ISSUE_ID",
         referencedColumnName = "ISSUE_ID",

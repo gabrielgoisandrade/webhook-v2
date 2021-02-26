@@ -249,7 +249,7 @@ class PayloadBuilder {
         sender = this.senderDto()
     )
 
-    private fun issue(): IssueDto = IssueDto(
+    fun issue(): IssueDto = IssueDto(
         url = "https://mock.com",
         repositoryUrl = "https://mock.com",
         labelsUrl = "https://mock.com",

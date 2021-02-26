@@ -3,7 +3,7 @@ package com.gga.webhook.repositories
 import com.gga.webhook.builder.PayloadBuilder
 import com.gga.webhook.models.PayloadModel
 import com.gga.webhook.models.SenderModel
-import com.gga.webhook.utils.ConverterUtil.Companion.toModel
+import com.gga.webhook.utils.MapperUtil.Companion.toModel
 import com.gga.webhook.utils.MapperUtil.Companion.convertTo
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith

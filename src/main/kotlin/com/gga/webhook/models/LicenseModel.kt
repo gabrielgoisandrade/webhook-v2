@@ -12,21 +12,21 @@ data class LicenseModel @JvmOverloads constructor(
     var id: Long = 0L,
 
     @Column(name = "KEY")
-    var key: String,
+    var key: String="",
 
     @Column(name = "NAME")
-    var name: String,
+    var name: String="",
 
     @Column(name = "SPDX_ID")
-    var spdxId: String,
+    var spdxId: String="",
 
     @Column(name = "URL")
-    var url: String,
+    var url: String="",
 
     @Column(name = "NODE_ID")
-    var nodeId: String,
+    var nodeId: String="",
 
-    @OneToOne(cascade = [CascadeType.ALL])
+    @OneToOne(cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
     @JoinColumn(
         name = "REPOSITORY_ID",
         referencedColumnName = "REPOSITORY_ID",

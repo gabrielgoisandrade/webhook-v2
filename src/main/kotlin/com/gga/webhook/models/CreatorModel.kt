@@ -6,66 +6,66 @@ import javax.persistence.*
 @Entity
 @Table(name = "CREATOR")
 data class CreatorModel @JvmOverloads constructor(
-    @Column(name = "LOGIN")
-    var login: String,
+        @Column(name = "LOGIN")
+        var login: String = "",
 
-    @Id
-    @Column(name = "CREATOR_ID")
-    var id: Long = 0L,
+        @Id
+        @Column(name = "CREATOR_ID")
+        var id: Long = 0L,
 
-    @Column(name = "NODE_ID", unique = true)
-    var nodeId: String,
+        @Column(name = "NODE_ID", unique = true)
+        var nodeId: String = "",
 
-    @Column(name = "AVATAR_URL")
-    var avatarUrl: String,
+        @Column(name = "AVATAR_URL")
+        var avatarUrl: String = "",
 
-    @Column(name = "GRAVATAR_ID", unique = true)
-    var gravatarId: String,
+        @Column(name = "GRAVATAR_ID", unique = true)
+        var gravatarId: String = "",
 
-    @Column(name = "URL")
-    var url: String,
+        @Column(name = "URL")
+        var url: String = "",
 
-    @Column(name = "HTML_URL")
-    var htmlUrl: String,
+        @Column(name = "HTML_URL")
+        var htmlUrl: String = "",
 
-    @Column(name = "FOLLOWERS_URL")
-    var followersUrl: String,
+        @Column(name = "FOLLOWERS_URL")
+        var followersUrl: String = "",
 
-    @Column(name = "FOLLOWING_URL")
-    var followingUrl: String,
+        @Column(name = "FOLLOWING_URL")
+        var followingUrl: String = "",
 
-    @Column(name = "GISTS_URL")
-    var gistsUrl: String,
+        @Column(name = "GISTS_URL")
+        var gistsUrl: String = "",
 
-    @Column(name = "STARRED_URL")
-    var starredUrl: String,
+        @Column(name = "STARRED_URL")
+        var starredUrl: String = "",
 
-    @Column(name = "SUBSCRIPTIONS_URL")
-    var subscriptionsUrl: String,
+        @Column(name = "SUBSCRIPTIONS_URL")
+        var subscriptionsUrl: String = "",
 
-    @Column(name = "ORGANIZATIONS_URL")
-    var organizationsUrl: String,
+        @Column(name = "ORGANIZATIONS_URL")
+        var organizationsUrl: String = "",
 
-    @Column(name = "REPOS_URL")
-    var reposUrl: String,
+        @Column(name = "REPOS_URL")
+        var reposUrl: String = "",
 
-    @Column(name = "EVENTS_URL")
-    var eventsUrl: String,
+        @Column(name = "EVENTS_URL")
+        var eventsUrl: String = "",
 
-    @Column(name = "RECEIVED_EVENTS_URL")
-    var receivedEventsUrl: String,
+        @Column(name = "RECEIVED_EVENTS_URL")
+        var receivedEventsUrl: String = "",
 
-    @Column(name = "TYPE")
-    var type: String,
+        @Column(name = "TYPE")
+        var type: String = "",
 
-    @Column(name = "SITE_ADMIN")
-    var siteAdmin: Boolean = false,
+        @Column(name = "SITE_ADMIN")
+        var siteAdmin: Boolean = false,
 
-    @OneToOne(cascade = [CascadeType.ALL])
-    @JoinColumn(
-        name = "MILESTONE_ID",
-        referencedColumnName = "MILESTONE_ID",
-        foreignKey = ForeignKey(name = "C_CREATOR_MILESTONE")
-    )
-    var milestone: MilestoneModel? = null
+        @OneToOne(cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
+        @JoinColumn(
+                name = "MILESTONE_ID",
+                referencedColumnName = "MILESTONE_ID",
+                foreignKey = ForeignKey(name = "C_CREATOR_MILESTONE")
+        )
+        var milestone: MilestoneModel? = null
 ) : Serializable
