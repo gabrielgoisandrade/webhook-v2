@@ -27,7 +27,7 @@ class MapperUtil private constructor() {
 
         @JvmStatic
         infix fun <O, D> Collection<O>.convertTo(to: Class<D>): Set<D> =
-                this.stream().map { mapper.map(it, to) }.collect(Collectors.toSet())
+            this.stream().map { mapper.map(it, to) }.collect(Collectors.toSet())
 
         @JvmStatic
         infix fun <O, D> O.convertTo(to: Class<D>): D = mapper.map(this, to)
@@ -58,6 +58,30 @@ class MapperUtil private constructor() {
             }
 
             return (this convertTo PayloadDto::class.java).apply { this.issue = issueModel }
+        }
+
+        @JvmStatic
+        fun IssueDto.toModel(): IssueModel {
+            val labelsModel: Set<LabelsModel> = this.labels convertTo LabelsModel::class.java
+
+            val assigneesModel: Set<AssigneesModel> = this.assignees convertTo AssigneesModel::class.java
+
+            return (this convertTo IssueModel::class.java).apply {
+                this.labels = labelsModel
+                this.assignees = assigneesModel
+            }
+        }
+
+        @JvmStatic
+        fun IssueModel.toDto(): IssueDto {
+            val labelsModel: Set<LabelsDto> = this.labels convertTo LabelsDto::class.java
+
+            val assigneesModel: Set<AssigneesDto> = this.assignees convertTo AssigneesDto::class.java
+
+            return (this convertTo IssueDto::class.java).apply {
+                this.labels = labelsModel
+                this.assignees = assigneesModel
+            }
         }
 
     }

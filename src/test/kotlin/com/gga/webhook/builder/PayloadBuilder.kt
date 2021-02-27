@@ -4,7 +4,7 @@ import com.gga.webhook.models.dto.*
 import java.time.Instant
 import java.util.*
 
-class PayloadBuilder {
+internal class PayloadBuilder {
 
     companion object {
         @JvmStatic

@@ -1,7 +1,7 @@
 package com.gga.webhook.controllers
 
 import com.gga.webhook.builder.PayloadBuilder
-import com.gga.webhook.errors.exceptions.IssueNotFound
+import com.gga.webhook.errors.exceptions.IssueNotFoundException
 import com.gga.webhook.models.dto.IssueDto
 import com.gga.webhook.models.dto.PayloadDto
 import com.gga.webhook.services.EventService
@@ -15,6 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType.APPLICATION_JSON
+import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
@@ -22,6 +23,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPat
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
 @SpringBootTest
+@ActiveProfiles("test")
 @AutoConfigureMockMvc
 internal class EventControllerTest {
 
@@ -267,6 +269,8 @@ internal class EventControllerTest {
 
         given(this.service.getIssueByNumber(body.number)).willReturn(body)
 
+        assertDoesNotThrow { this.controller.getIssueByNumber(body.number) }
+
         this.controller.getIssueByNumber(body.number).also {
             assertEquals(it.statusCode, HttpStatus.OK)
 
@@ -291,7 +295,7 @@ internal class EventControllerTest {
     fun throwErrorIssueNotFound() {
         val body: IssueDto = this.builder.payload().issue!!
 
-        given(this.service.getIssueByNumber(body.number)).willThrow(IssueNotFound("Issue #${body.number} not found."))
+        given(this.service.getIssueByNumber(body.number)).willThrow(IssueNotFoundException("Issue #${body.number} not found."))
 
         val request: MockHttpServletRequestBuilder = get("/issue/${body.number}")
             .accept(APPLICATION_JSON)

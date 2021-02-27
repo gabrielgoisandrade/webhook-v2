@@ -1,5 +1,6 @@
 package com.gga.webhook.services
 
+import com.gga.webhook.errors.exceptions.IssueNotFoundException
 import com.gga.webhook.models.*
 import com.gga.webhook.models.dto.IssueDto
 import com.gga.webhook.models.dto.PayloadDto
@@ -10,18 +11,18 @@ import org.springframework.stereotype.Service
 
 @Service
 class EventService @Autowired constructor(
-        private val payloadRepository: PayloadRepository,
-        private val issueRepository: IssueRepository,
-        private val userRepository: UserRepository,
-        private val assigneeRepository: AssigneeRepository,
-        private val assigneesRepository: AssigneesRepository,
-        private val labelRepository: LabelRepository,
-        private val milestoneRepository: MilestoneRepository,
-        private val creatorRepository: CreatorRepository,
-        private val repositoryRepository: RepositoryRepository,
-        private val licenseRepository: LicenseRepository,
-        private val ownerRepository: OwnerRepository,
-        private val senderRepository: SenderRepository
+    private val payloadRepository: PayloadRepository,
+    private val issueRepository: IssueRepository,
+    private val userRepository: UserRepository,
+    private val assigneeRepository: AssigneeRepository,
+    private val assigneesRepository: AssigneesRepository,
+    private val labelRepository: LabelRepository,
+    private val milestoneRepository: MilestoneRepository,
+    private val creatorRepository: CreatorRepository,
+    private val repositoryRepository: RepositoryRepository,
+    private val licenseRepository: LicenseRepository,
+    private val ownerRepository: OwnerRepository,
+    private val senderRepository: SenderRepository
 ) : IEventService {
 
     override fun savePayload(payload: PayloadDto): PayloadDto {
@@ -68,16 +69,16 @@ class EventService @Autowired constructor(
     }
 
     override fun saveUser(user: UserModel, fk: IssueModel): UserModel =
-            user.apply { this.issue = fk }.run { userRepository.save(this) }
+        user.apply { this.issue = fk }.run { userRepository.save(this) }
 
     override fun saveAssignee(assignee: AssigneeModel, fk: IssueModel): AssigneeModel =
-            assignee.apply { this.issue = fk }.run { assigneeRepository.save(this) }
+        assignee.apply { this.issue = fk }.run { assigneeRepository.save(this) }
 
     override fun saveAssignees(assignees: Set<AssigneesModel>, fk: IssueModel): HashSet<AssigneesModel> =
-            assignees.run {
-                this.map { it.issue = fk }
-                assigneesRepository.saveAll(this)
-            }.toHashSet()
+        assignees.run {
+            this.map { it.issue = fk }
+            assigneesRepository.saveAll(this)
+        }.toHashSet()
 
     override fun saveLabels(labels: Set<LabelsModel>, fk: IssueModel): HashSet<LabelsModel> = labels.run {
         this.map { it.issue = fk }
@@ -99,7 +100,7 @@ class EventService @Autowired constructor(
     }
 
     override fun saveCreator(creator: CreatorModel, fk: MilestoneModel): CreatorModel =
-            creator.apply { this.milestone = fk }.run { creatorRepository.save(this) }
+        creator.apply { this.milestone = fk }.run { creatorRepository.save(this) }
 
     override fun saveRepository(repository: RepositoryModel, fk: PayloadModel): RepositoryModel {
         val owner: OwnerModel = repository.owner!!
@@ -121,16 +122,15 @@ class EventService @Autowired constructor(
     }
 
     override fun saveLicense(license: LicenseModel, fk: RepositoryModel): LicenseModel =
-            license.apply { this.repository = fk }.run { licenseRepository.save(this) }
+        license.apply { this.repository = fk }.run { licenseRepository.save(this) }
 
     override fun saveOwner(owner: OwnerModel, fk: RepositoryModel): OwnerModel =
-            owner.apply { this.repository = fk }.run { ownerRepository.save(this) }
+        owner.apply { this.repository = fk }.run { ownerRepository.save(this) }
 
     override fun saveSender(sender: SenderModel, fk: PayloadModel): SenderModel =
-            sender.apply { this.payload = fk }.run { senderRepository.save(this) }
+        sender.apply { this.payload = fk }.run { senderRepository.save(this) }
 
-    override fun getIssueByNumber(number: Int): IssueDto {
-        TODO("Not yet implemented")
-    }
+    override fun getIssueByNumber(number: Int): IssueDto = issueRepository.findIssueModelByNumber(number)?.toDto()
+        ?: throw IssueNotFoundException("Issue #$number not found.")
 
 }

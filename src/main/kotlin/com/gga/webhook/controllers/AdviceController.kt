@@ -1,7 +1,7 @@
 package com.gga.webhook.controllers
 
 import com.gga.webhook.errors.ApiError
-import com.gga.webhook.errors.exceptions.IssueNotFound
+import com.gga.webhook.errors.exceptions.IssueNotFoundException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.http.ResponseEntity.status
@@ -18,8 +18,8 @@ class AdviceController {
         private val TIMESTAMP: Date = Date()
     }
 
-    @ExceptionHandler(IssueNotFound::class)
-    fun handler(ex: IssueNotFound, request: WebRequest): ResponseEntity<ApiError> =
+    @ExceptionHandler(IssueNotFoundException::class)
+    fun handler(ex: IssueNotFoundException, request: WebRequest): ResponseEntity<ApiError> =
         ApiError(ex.message!!, request.getDescription(false), TIMESTAMP).run {
             status(HttpStatus.BAD_REQUEST).body(this)
         }

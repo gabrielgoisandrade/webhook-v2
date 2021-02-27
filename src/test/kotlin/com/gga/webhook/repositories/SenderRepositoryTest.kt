@@ -1,10 +1,6 @@
 package com.gga.webhook.repositories
 
 import com.gga.webhook.builder.PayloadBuilder
-import com.gga.webhook.models.PayloadModel
-import com.gga.webhook.models.SenderModel
-import com.gga.webhook.utils.MapperUtil.Companion.toModel
-import com.gga.webhook.utils.MapperUtil.Companion.convertTo
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -31,7 +27,7 @@ internal class SenderRepositoryTest {
 
     @Test
     fun saveSender() {
-        val senderModel: SenderModel = this.builder.senderDto() convertTo SenderModel::class.java
+        /*val senderModel: SenderModel = this.builder.senderDto() convertTo SenderModel::class.java
 
         val payloadModel: PayloadModel = this.builder.payload().toModel().apply {
             this.issue = null
@@ -47,7 +43,7 @@ internal class SenderRepositoryTest {
         this.entityManager.persist(payloadModel)
 
         println(payloadRepository.findAll().first())
-        println(senderRepository.findAll().first())
+        println(senderRepository.findAll().first())*/
     }
 
 }
