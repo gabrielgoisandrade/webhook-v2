@@ -40,7 +40,7 @@ internal class PayloadBuilder {
         description = "mock"
     )
 
-    fun labels(): HashSet<LabelsDto> = hashSetOf(this.label().apply { this.nodeId = "simsimsimsim" }, this.label().apply { this.id = 3L })
+    fun labels(): HashSet<LabelsDto> = hashSetOf(this.label(), this.label().apply { this.id = 3L })
 
     fun creatorDto(): CreatorDto = CreatorDto(
         login = "mock@mock.com",
