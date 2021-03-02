@@ -38,7 +38,7 @@ data class IssueModel @JvmOverloads constructor(
     @Column(name = "TITLE")
     var title: String = "",
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
     @JoinColumn(name = "USER_ID", foreignKey = ForeignKey(name = "C_ISSUE_USER"))
     var user: UserModel? = null,
 
@@ -48,11 +48,11 @@ data class IssueModel @JvmOverloads constructor(
     @Column(name = "LOCKED")
     var locked: Boolean = false,
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
     @JoinColumn(name = "ASSIGNEE_ID", foreignKey = ForeignKey(name = "C_ISSUE_ASSIGNEE"))
     var assignee: AssigneeModel? = null,
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
     @JoinColumn(name = "MILESTONE_ID", foreignKey = ForeignKey(name = "C_ISSUE_MILESTONE"))
     var milestone: MilestoneModel? = null,
 

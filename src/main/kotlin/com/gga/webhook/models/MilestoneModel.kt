@@ -33,7 +33,7 @@ data class MilestoneModel @JvmOverloads constructor(
     @Column(name = "DESCRIPTION")
     var description: String? = null,
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(cascade= [CascadeType.ALL], fetch = FetchType.LAZY)
     @JoinColumn(name = "CREATOR_ID", foreignKey = ForeignKey(name = "C_MILESTONE_CREATOR"))
     var creator: CreatorModel? = null,
 

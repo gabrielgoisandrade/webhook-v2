@@ -23,7 +23,7 @@ data class RepositoryModel @JvmOverloads constructor(
     @Column(name = "PRIVATE")
     var private: Boolean = false,
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(cascade= [CascadeType.ALL], fetch = FetchType.LAZY)
     @JoinColumn(name = "OWNER_ID", foreignKey = ForeignKey(name = "C_REPOSITORY_OWNER"))
     var owner: OwnerModel? = null,
 
@@ -213,7 +213,7 @@ data class RepositoryModel @JvmOverloads constructor(
     @Column(name = "OPEN_ISSUES_COUNT")
     var openIssuesCount: Int = 0,
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(cascade= [CascadeType.ALL], fetch = FetchType.LAZY)
     @JoinColumn(name = "LICENSE_ID", foreignKey = ForeignKey(name = "C_REPOSITORY_LICENSE"))
     var license: LicenseModel? = null,
 
