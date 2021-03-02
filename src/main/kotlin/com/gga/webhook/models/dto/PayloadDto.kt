@@ -1,10 +1,12 @@
 package com.gga.webhook.models.dto
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 import java.io.Serializable
 
 data class PayloadDto(
     @JsonProperty("id")
+    @get:JsonIgnore
     var id: Long = 0L,
 
     @JsonProperty("action")

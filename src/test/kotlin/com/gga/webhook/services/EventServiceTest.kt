@@ -3,18 +3,17 @@ package com.gga.webhook.services
 import com.gga.webhook.builder.PayloadBuilder
 import com.gga.webhook.errors.exceptions.IssueNotFoundException
 import com.gga.webhook.models.*
-import com.gga.webhook.models.dto.IssueDto
-import com.gga.webhook.models.dto.PayloadDto
+import com.gga.webhook.models.dto.*
 import com.gga.webhook.repositories.*
 import com.gga.webhook.utils.MapperUtil.Companion.convertTo
-import com.gga.webhook.utils.MapperUtil.Companion.toDto
-import com.gga.webhook.utils.MapperUtil.Companion.toModel
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertAll
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.*
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.test.context.ActiveProfiles
@@ -41,7 +40,7 @@ internal class EventServiceTest {
     private lateinit var assigneesRepository: AssigneesRepository
 
     @MockBean
-    private lateinit var labelRepository: LabelRepository
+    private lateinit var labelsRepository: LabelsRepository
 
     @MockBean
     private lateinit var milestoneRepository: MilestoneRepository
@@ -68,7 +67,7 @@ internal class EventServiceTest {
             userRepository,
             assigneeRepository,
             assigneesRepository,
-            labelRepository,
+            labelsRepository,
             milestoneRepository,
             creatorRepository,
             repositoryRepository,
@@ -80,86 +79,35 @@ internal class EventServiceTest {
 
     private val builder: PayloadBuilder = PayloadBuilder()
 
-    private val issueModel: IssueModel = (this.builder.payload().issue convertTo IssueModel::class.java).apply {
-        this.assignee = null
-        this.milestone = null
-        this.user = null
-        this.assignees = hashSetOf()
-        this.labels = hashSetOf()
-    }
+    private val payloadDto: PayloadDto = this.builder.payload()
 
-    private val repositoryModel: RepositoryModel =
-        (this.builder.payload().repository convertTo RepositoryModel::class.java).apply {
-            this.owner = null
-            this.license = null
-        }
+    private val issueDto: IssueDto = this.builder.payload().issue!!
 
-    private val payloadModel: PayloadModel =
-        this.builder.payload().toModel().apply {
-            this.sender = null
-            this.repository = null
-            this.issue = null
-        }
+    private val userDto: UserDto = this.builder.userDto()
 
-    private val milestoneModel: MilestoneModel =
-        (this.builder.milestoneDto() convertTo MilestoneModel::class.java).apply {
-            this.creator = null
-            this.issue = null
-        }
+    private val labelsDto: HashSet<LabelsDto> = this.builder.labels()
+
+    private val assigneesDto: HashSet<AssigneesDto> = this.builder.assignees()
+
+    private val assigneeDto: AssigneeDto = this.builder.assigneeDto()
+
+    private val milestoneDto: MilestoneDto = this.builder.milestoneDto()
+
+    private val creatorDto: CreatorDto = this.builder.creatorDto()
+
+    private val repositoryDto: RepositoryDto = this.builder.repositoryDto()
+
+    private val licenseDto: LicenseDto = this.builder.licenseDto()
+
+    private val ownerDto: OwnerDto = this.builder.ownerDto()
+
+    private val senderDto: SenderDto = this.builder.senderDto()
 
     @Test
     @DisplayName("Payload -> Deve salvar o payload e retornar os objeto com as FKs configuradas")
     fun savePayload() {
-        val payload: PayloadModel = this.builder.payload().toModel()
+        val issueModel: IssueModel = issueDto convertTo IssueModel::class.java
 
-        val issue: IssueModel = payload.issue!!
-
-        val assignee: AssigneeModel = issue.assignee!!
-
-        val user: UserModel = issue.user!!
-
-        val milestone: MilestoneModel = issue.milestone!!
-
-        val creator: CreatorModel = milestone.creator!!
-
-        val repository: RepositoryModel = payload.repository!!
-
-        val license: LicenseModel = repository.license!!
-
-        val owner: OwnerModel = repository.owner!!
-
-        val sender: SenderModel = payload.sender!!
-
-        `when`(this.payloadRepository.save(any(PayloadModel::class.java))).thenReturn(this.payloadModel)
-
-        `when`(this.assigneeRepository.save(any(AssigneeModel::class.java))).thenReturn(assignee)
-
-        `when`(this.userRepository.save(any(UserModel::class.java))).thenReturn(user)
-
-        `when`(this.milestoneRepository.save(any(MilestoneModel::class.java))).thenReturn(milestone)
-
-        `when`(this.creatorRepository.save(any(CreatorModel::class.java))).thenReturn(creator)
-
-        `when`(this.issueRepository.save(any(IssueModel::class.java))).thenReturn(issue)
-
-        `when`(this.licenseRepository.save(any(LicenseModel::class.java))).thenReturn(license)
-
-        `when`(this.ownerRepository.save(any(OwnerModel::class.java))).thenReturn(owner)
-
-        `when`(this.repositoryRepository.save(any(RepositoryModel::class.java))).thenReturn(repository)
-
-        `when`(this.senderRepository.save(any(SenderModel::class.java))).thenReturn(sender)
-
-        `when`(this.payloadRepository.save(any(PayloadModel::class.java))).thenReturn(payload)
-
-        val payloadDto: PayloadDto = this.eventService.savePayload(payload.toDto())
-
-        assertEquals(payload.toDto(), payloadDto)
-    }
-
-    @Test
-    @DisplayName("Issue -> Deve salvar a issue e retornar os objeto com as FKs configuradas")
-    fun saveIssue() {
         val expectedAssignees: HashSet<AssigneesModel> =
             (this.builder.assignees() convertTo AssigneesModel::class.java).map {
                 it.apply { this.issue = issueModel }
@@ -169,229 +117,56 @@ internal class EventServiceTest {
             it.apply { this.issue = issueModel }
         }.toHashSet()
 
-        val expectedUser: UserModel =
-            (this.builder.userDto() convertTo UserModel::class.java).apply { this.issue = issueModel }
+        `when`(this.assigneesRepository.saveAll(anySet())).thenReturn(expectedAssignees.toMutableList())
 
-        val expectedAssignee: AssigneeModel =
-            (this.builder.assigneeDto() convertTo AssigneeModel::class.java).apply { this.issue = issueModel }
+        `when`(this.labelsRepository.saveAll(anySet())).thenReturn(expectedLabels.toMutableList())
 
-        val expectedMilestone: MilestoneModel =
-            (this.builder.milestoneDto() convertTo MilestoneModel::class.java).apply { this.issue = issueModel }
+        `when`(this.assigneeRepository.save(any(AssigneeModel::class.java)))
+            .thenReturn(this.assigneeDto convertTo AssigneeModel::class.java)
 
-        val expectedCreator: CreatorModel =
-            (this.builder.creatorDto() convertTo CreatorModel::class.java).apply { this.milestone = expectedMilestone }
+        `when`(this.userRepository.save(any(UserModel::class.java)))
+            .thenReturn(this.userDto convertTo UserModel::class.java)
 
-        expectedMilestone.creator = expectedCreator
+        `when`(this.milestoneRepository.save(any(MilestoneModel::class.java)))
+            .thenReturn(this.milestoneDto convertTo MilestoneModel::class.java)
 
-        `when`(this.issueRepository.save(any(IssueModel::class.java)))
-            .thenReturn(this.issueModel.apply { this.payload = payloadModel })
-
-        `when`(this.userRepository.save(any(UserModel::class.java))).thenReturn(expectedUser)
-
-        `when`(this.assigneeRepository.save(any(AssigneeModel::class.java))).thenReturn(expectedAssignee)
-
-        `when`(this.milestoneRepository.save(any(MilestoneModel::class.java))).thenReturn(expectedMilestone)
-
-        `when`(this.creatorRepository.save(any(CreatorModel::class.java))).thenReturn(expectedCreator)
-
-        val expectedIssue: IssueModel = this.issueModel.apply {
-            this.labels = expectedLabels
-            this.assignees = expectedAssignees
-            this.assignee = expectedAssignee
-            this.user = expectedUser
-            this.milestone = expectedMilestone
-            this.payload = payloadModel
-        }
-
-        `when`(this.issueRepository.save(any(IssueModel::class.java))).thenReturn(expectedIssue)
-
-        val issueModel: IssueModel = this.eventService.saveIssue(issueModel, payloadModel)
-
-        assertEquals(expectedIssue, issueModel)
-    }
-
-    @Test
-    @DisplayName("Issue -> Deve salvar a issue (sem milestone) e retornar os objeto com as FKs configuradas")
-    fun saveIssueWithoutMilestone() {
-        val expectedAssignees: HashSet<AssigneesModel> =
-            (this.builder.assignees() convertTo AssigneesModel::class.java).map {
-                it.apply { this.issue = issueModel }
-            }.toHashSet()
-
-        val expectedLabels: HashSet<LabelsModel> = (this.builder.labels() convertTo LabelsModel::class.java).map {
-            it.apply { this.issue = issueModel }
-        }.toHashSet()
-
-        val expectedUser: UserModel =
-            (this.builder.userDto() convertTo UserModel::class.java).apply { this.issue = issueModel }
-
-        val expectedAssignee: AssigneeModel =
-            (this.builder.assigneeDto() convertTo AssigneeModel::class.java).apply { this.issue = issueModel }
+        `when`(this.creatorRepository.save(any(CreatorModel::class.java)))
+            .thenReturn(this.creatorDto convertTo CreatorModel::class.java)
 
         `when`(this.issueRepository.save(any(IssueModel::class.java)))
-            .thenReturn(this.issueModel.apply { this.payload = payloadModel })
+            .thenReturn(this.issueDto convertTo IssueModel::class.java)
 
-        `when`(this.userRepository.save(any(UserModel::class.java))).thenReturn(expectedUser)
+        `when`(this.licenseRepository.save(any(LicenseModel::class.java)))
+            .thenReturn(this.licenseDto convertTo LicenseModel::class.java)
 
-        `when`(this.assigneeRepository.save(any(AssigneeModel::class.java))).thenReturn(expectedAssignee)
+        `when`(this.ownerRepository.save(any(OwnerModel::class.java)))
+            .thenReturn(this.ownerDto convertTo OwnerModel::class.java)
 
-        val expectedIssue: IssueModel = this.issueModel.apply {
-            this.labels = expectedLabels
-            this.assignees = expectedAssignees
-            this.assignee = expectedAssignee
-            this.user = expectedUser
-            this.payload = payloadModel
-        }
+        `when`(this.repositoryRepository.save(any(RepositoryModel::class.java)))
+            .thenReturn(this.repositoryDto convertTo RepositoryModel::class.java)
 
-        `when`(this.issueRepository.save(any(IssueModel::class.java))).thenReturn(expectedIssue)
+        `when`(this.senderRepository.save(any(SenderModel::class.java)))
+            .thenReturn(this.senderDto convertTo SenderModel::class.java)
 
-        verify(this.milestoneRepository, never()).save(any(MilestoneModel::class.java))
+        `when`(this.payloadRepository.save(any(PayloadModel::class.java)))
+            .thenReturn(this.payloadDto convertTo PayloadModel::class.java)
 
-        val issueModel: IssueModel = this.eventService.saveIssue(issueModel, payloadModel)
+        val payloadDto: PayloadDto = this.eventService.savePayload(this.payloadDto)
 
         assertAll({
-            assertEquals(expectedIssue, issueModel, "Must be equal to expected")
-            assertTrue(expectedIssue.milestone == null, "Milestone must be null ")
+            assertEquals(this.payloadDto, payloadDto)
+            assertEquals(this.payloadDto.issue, payloadDto.issue)
+            assertEquals(this.payloadDto.repository, payloadDto.repository)
+            assertEquals(this.payloadDto.sender, payloadDto.sender)
         })
     }
 
     @Test
-    @DisplayName("Issue -> Deve salvar a issue (sem labels) e retornar os objeto com as FKs configuradas")
-    fun saveIssueWithoutLabels() {
-        val expectedAssignees: HashSet<AssigneesModel> =
-            (this.builder.assignees() convertTo AssigneesModel::class.java).map {
-                it.apply { this.issue = issueModel }
-            }.toHashSet()
+    @DisplayName("Payload -> Deve salvar o payload (sem labels em issue) e retornar os objeto com as FKs configuradas")
+    fun savePayloadWithoutLabelsAtIssue() {
+        this.payloadDto.apply { this.issue!!.labels = hashSetOf() }
 
-        val expectedUser: UserModel =
-            (this.builder.userDto() convertTo UserModel::class.java).apply { this.issue = issueModel }
-
-        val expectedAssignee: AssigneeModel =
-            (this.builder.assigneeDto() convertTo AssigneeModel::class.java).apply { this.issue = issueModel }
-
-        val expectedMilestone: MilestoneModel =
-            (this.builder.milestoneDto() convertTo MilestoneModel::class.java).apply { this.issue = issueModel }
-
-        val expectedCreator: CreatorModel =
-            (this.builder.creatorDto() convertTo CreatorModel::class.java).apply { this.milestone = expectedMilestone }
-
-        expectedMilestone.creator = expectedCreator
-
-        `when`(this.issueRepository.save(any(IssueModel::class.java)))
-            .thenReturn(this.issueModel.apply { this.payload = payloadModel })
-
-        `when`(this.userRepository.save(any(UserModel::class.java))).thenReturn(expectedUser)
-
-        `when`(this.assigneeRepository.save(any(AssigneeModel::class.java))).thenReturn(expectedAssignee)
-
-        `when`(this.milestoneRepository.save(any(MilestoneModel::class.java))).thenReturn(expectedMilestone)
-
-        `when`(this.creatorRepository.save(any(CreatorModel::class.java))).thenReturn(expectedCreator)
-
-        val expectedIssue: IssueModel = this.issueModel.apply {
-            this.assignees = expectedAssignees
-            this.assignee = expectedAssignee
-            this.user = expectedUser
-            this.milestone = expectedMilestone
-            this.payload = payloadModel
-        }
-
-        `when`(this.issueRepository.save(any(IssueModel::class.java))).thenReturn(expectedIssue)
-
-        verify(this.labelRepository, never()).save(any(LabelsModel::class.java))
-
-        val issueModel: IssueModel = this.eventService.saveIssue(issueModel, payloadModel)
-
-        assertAll({
-            assertEquals(expectedIssue, issueModel, "Must be equal to expected")
-            assertTrue(expectedIssue.labels.isEmpty(), "Labels must be an empty Set")
-        })
-    }
-
-    @Test
-    @DisplayName("Issue -> Deve salvar a issue (sem assignee/assignees)e retornar os objeto com as FKs configuradas")
-    fun saveIssueWithoutAssigneesAndAssignee() {
-        val expectedLabels: HashSet<LabelsModel> = (this.builder.labels() convertTo LabelsModel::class.java).map {
-            it.apply { this.issue = issueModel }
-        }.toHashSet()
-
-        val expectedUser: UserModel =
-            (this.builder.userDto() convertTo UserModel::class.java).apply { this.issue = issueModel }
-
-        val expectedMilestone: MilestoneModel =
-            (this.builder.milestoneDto() convertTo MilestoneModel::class.java).apply { this.issue = issueModel }
-
-        val expectedCreator: CreatorModel =
-            (this.builder.creatorDto() convertTo CreatorModel::class.java).apply { this.milestone = expectedMilestone }
-
-        expectedMilestone.creator = expectedCreator
-
-        `when`(this.issueRepository.save(any(IssueModel::class.java)))
-            .thenReturn(this.issueModel.apply { this.payload = payloadModel })
-
-        `when`(this.creatorRepository.save(any(CreatorModel::class.java))).thenReturn(expectedCreator)
-
-        `when`(this.milestoneRepository.save(any(MilestoneModel::class.java))).thenReturn(expectedMilestone)
-
-        `when`(this.userRepository.save(any(UserModel::class.java))).thenReturn(expectedUser)
-
-        val expectedIssue: IssueModel = this.issueModel.apply {
-            this.labels = expectedLabels
-            this.user = expectedUser
-            this.milestone = expectedMilestone
-            this.payload = payloadModel
-        }
-
-        `when`(this.issueRepository.save(any(IssueModel::class.java))).thenReturn(expectedIssue)
-
-        val issueModel: IssueModel = this.eventService.saveIssue(issueModel, payloadModel)
-
-        verify(this.assigneeRepository, never()).save(any(AssigneeModel::class.java))
-
-        verify(this.assigneesRepository, never()).save(any(AssigneesModel::class.java))
-
-        assertAll({
-            assertEquals(expectedIssue, issueModel, "Must be equal to expected")
-            assertTrue(expectedIssue.assignees.isEmpty(), "Labels must be an empty Set")
-            assertTrue(expectedIssue.assignee == null, "Assignee must be null")
-        })
-    }
-
-
-    @Test
-    @DisplayName("User -> Deve salvar o user e retornar os objeto com a FK configurada")
-    fun saveUser() {
-        val user: UserModel = this.builder.userDto() convertTo UserModel::class.java
-
-        val expectedUser: UserModel =
-            (this.builder.userDto() convertTo UserModel::class.java).apply { this.issue = issueModel }
-
-        `when`(this.userRepository.save(any(UserModel::class.java))).thenReturn(expectedUser)
-
-        val userModel: UserModel = this.eventService.saveUser(user, issueModel)
-
-        assertEquals(expectedUser, userModel)
-    }
-
-    @Test
-    @DisplayName("Assignee -> Deve salvar o assignee e retornar os objeto com a FK configurada")
-    fun saveAssignee() {
-        val assignee: AssigneeModel = this.builder.assigneeDto() convertTo AssigneeModel::class.java
-
-        val expectedAssignee: AssigneeModel =
-            (this.builder.assigneeDto() convertTo AssigneeModel::class.java).apply { this.issue = issueModel }
-
-        `when`(this.assigneeRepository.save(any(AssigneeModel::class.java))).thenReturn(expectedAssignee)
-
-        val assigneeModel: AssigneeModel = this.eventService.saveAssignee(assignee, issueModel)
-
-        assertEquals(expectedAssignee, assigneeModel)
-    }
-
-    @Test
-    @DisplayName("Assignees -> Deve salvar os assignees e retornar um Set com as FKs configuradas")
-    fun saveAssignees() {
-        val assignees: Set<AssigneesModel> = this.builder.assignees() convertTo AssigneesModel::class.java
+        val issueModel: IssueModel = issueDto convertTo IssueModel::class.java
 
         val expectedAssignees: HashSet<AssigneesModel> =
             (this.builder.assignees() convertTo AssigneesModel::class.java).map {
@@ -400,161 +175,343 @@ internal class EventServiceTest {
 
         `when`(this.assigneesRepository.saveAll(anySet())).thenReturn(expectedAssignees.toMutableList())
 
-        val assigneesModel: HashSet<AssigneesModel> = this.eventService.saveAssignees(assignees, this.issueModel)
+        `when`(this.labelsRepository.saveAll(anySet())).thenReturn(mutableListOf())
 
-        assertEquals(expectedAssignees, assigneesModel)
+        `when`(this.assigneeRepository.save(any(AssigneeModel::class.java)))
+            .thenReturn(this.assigneeDto convertTo AssigneeModel::class.java)
+
+        `when`(this.userRepository.save(any(UserModel::class.java)))
+            .thenReturn(this.userDto convertTo UserModel::class.java)
+
+        `when`(this.milestoneRepository.save(any(MilestoneModel::class.java)))
+            .thenReturn(this.milestoneDto convertTo MilestoneModel::class.java)
+
+        `when`(this.creatorRepository.save(any(CreatorModel::class.java)))
+            .thenReturn(this.creatorDto convertTo CreatorModel::class.java)
+
+        `when`(this.issueRepository.save(any(IssueModel::class.java)))
+            .thenReturn(this.issueDto convertTo IssueModel::class.java)
+
+        `when`(this.licenseRepository.save(any(LicenseModel::class.java)))
+            .thenReturn(this.licenseDto convertTo LicenseModel::class.java)
+
+        `when`(this.ownerRepository.save(any(OwnerModel::class.java)))
+            .thenReturn(this.ownerDto convertTo OwnerModel::class.java)
+
+        `when`(this.repositoryRepository.save(any(RepositoryModel::class.java)))
+            .thenReturn(this.repositoryDto convertTo RepositoryModel::class.java)
+
+        `when`(this.senderRepository.save(any(SenderModel::class.java)))
+            .thenReturn(this.senderDto convertTo SenderModel::class.java)
+
+        `when`(this.payloadRepository.save(any(PayloadModel::class.java)))
+            .thenReturn(this.payloadDto convertTo PayloadModel::class.java)
+
+        val payloadDto: PayloadDto = this.eventService.savePayload(this.payloadDto)
+
+        assertAll({
+            assertEquals(this.payloadDto, payloadDto)
+            assertEquals(this.payloadDto.issue, payloadDto.issue)
+            assertEquals(this.payloadDto.repository, payloadDto.repository)
+            assertEquals(this.payloadDto.sender, payloadDto.sender)
+        })
     }
 
     @Test
-    @DisplayName("Labels -> Deve salvar as labels e retornar um Set com as FKs configuradas")
-    fun saveLabels() {
-        val labels: Set<LabelsModel> = this.builder.labels() convertTo LabelsModel::class.java
+    @DisplayName("Payload -> Deve salvar o payload (sem assignees em issue) e retornar os objeto com as FKs configuradas")
+    fun savePayloadWithoutAssigneesAtIssue() {
+        this.payloadDto.apply { this.issue!!.assignees = hashSetOf() }
+
+        val issueModel: IssueModel = issueDto convertTo IssueModel::class.java
 
         val expectedLabels: HashSet<LabelsModel> = (this.builder.labels() convertTo LabelsModel::class.java).map {
             it.apply { this.issue = issueModel }
         }.toHashSet()
 
-        `when`(this.labelRepository.saveAll(anySet())).thenReturn(expectedLabels.toMutableList())
+        `when`(this.assigneesRepository.saveAll(anySet())).thenReturn(mutableListOf())
 
-        val labelsModel: HashSet<LabelsModel> = this.eventService.saveLabels(labels, this.issueModel)
+        `when`(this.labelsRepository.saveAll(anySet())).thenReturn(expectedLabels.toMutableList())
 
-        assertEquals(expectedLabels, labelsModel)
-    }
+        `when`(this.assigneeRepository.save(any(AssigneeModel::class.java)))
+            .thenReturn(this.assigneeDto convertTo AssigneeModel::class.java)
 
-    @Test
-    @DisplayName("Milestone -> Deve salvar o milestone e retornar os objeto com a FK configurada")
-    fun saveMilestone() {
-        val expectedCreator: CreatorModel =
-            (this.builder.creatorDto() convertTo CreatorModel::class.java).apply { this.milestone = milestoneModel }
-
-        val expectedMilestone: MilestoneModel = milestoneModel.apply {
-            this.creator = expectedCreator
-            this.issue = issueModel
-        }
+        `when`(this.userRepository.save(any(UserModel::class.java)))
+            .thenReturn(this.userDto convertTo UserModel::class.java)
 
         `when`(this.milestoneRepository.save(any(MilestoneModel::class.java)))
-            .thenReturn(this.milestoneModel.apply { this.issue = issueModel })
+            .thenReturn(this.milestoneDto convertTo MilestoneModel::class.java)
 
-        `when`(this.creatorRepository.save(any(CreatorModel::class.java))).thenReturn(expectedCreator)
+        `when`(this.creatorRepository.save(any(CreatorModel::class.java)))
+            .thenReturn(this.creatorDto convertTo CreatorModel::class.java)
 
-        `when`(this.milestoneRepository.save(any(MilestoneModel::class.java))).thenReturn(expectedMilestone)
+        `when`(this.issueRepository.save(any(IssueModel::class.java)))
+            .thenReturn(this.issueDto convertTo IssueModel::class.java)
 
-        val milestoneModel: MilestoneModel = this.eventService.saveMilestone(this.milestoneModel, this.issueModel)
+        `when`(this.licenseRepository.save(any(LicenseModel::class.java)))
+            .thenReturn(this.licenseDto convertTo LicenseModel::class.java)
 
-        assertEquals(expectedMilestone, milestoneModel)
+        `when`(this.ownerRepository.save(any(OwnerModel::class.java)))
+            .thenReturn(this.ownerDto convertTo OwnerModel::class.java)
+
+        `when`(this.repositoryRepository.save(any(RepositoryModel::class.java)))
+            .thenReturn(this.repositoryDto convertTo RepositoryModel::class.java)
+
+        `when`(this.senderRepository.save(any(SenderModel::class.java)))
+            .thenReturn(this.senderDto convertTo SenderModel::class.java)
+
+        `when`(this.payloadRepository.save(any(PayloadModel::class.java)))
+            .thenReturn(this.payloadDto convertTo PayloadModel::class.java)
+
+        val payloadDto: PayloadDto = this.eventService.savePayload(this.payloadDto)
+
+        assertAll({
+            assertEquals(this.payloadDto, payloadDto)
+            assertEquals(this.payloadDto.issue, payloadDto.issue)
+            assertEquals(this.payloadDto.repository, payloadDto.repository)
+            assertEquals(this.payloadDto.sender, payloadDto.sender)
+        })
     }
 
     @Test
-    @DisplayName("Creator -> Deve salvar o creator e retornar os objeto com a FK configurada")
-    fun saveCreator() {
-        val creator: CreatorModel = this.builder.creatorDto() convertTo CreatorModel::class.java
+    @DisplayName("Issue -> Deve salvar a issue e retornar os objeto com as FKs configuradas")
+    fun saveIssue() {
+        `when`(this.userRepository.save(any(UserModel::class.java)))
+            .thenReturn(this.userDto convertTo UserModel::class.java)
 
-        val expectedCreator: CreatorModel =
-            (this.builder.creatorDto() convertTo CreatorModel::class.java).apply { this.milestone = milestoneModel }
+        `when`(this.assigneeRepository.save(any(AssigneeModel::class.java)))
+            .thenReturn(this.assigneeDto convertTo AssigneeModel::class.java)
+
+        `when`(this.creatorRepository.save(any(CreatorModel::class.java)))
+            .thenReturn(this.creatorDto convertTo CreatorModel::class.java)
+
+        `when`(this.milestoneRepository.save(any(MilestoneModel::class.java)))
+            .thenReturn(this.milestoneDto convertTo MilestoneModel::class.java)
+
+        val expectedIssue: IssueModel = this.issueDto convertTo IssueModel::class.java
+
+        `when`(this.issueRepository.save(any(IssueModel::class.java))).thenReturn(expectedIssue)
+
+        val issueModel: IssueModel = this.eventService.saveIssue(this.issueDto)
+
+        assertAll({
+            assertEquals(expectedIssue, issueModel)
+            assertEquals(expectedIssue.user, issueModel.user, "Fk must be equal User")
+            assertEquals(expectedIssue.assignee, issueModel.assignee, "Fk must be equal Assignee")
+            assertEquals(expectedIssue.milestone, issueModel.milestone, "Fk must be equal Milestone")
+            assertFalse(expectedIssue.user == null, "User must not be null")
+            assertFalse(expectedIssue.assignee == null, "Assignee must not be null")
+            assertFalse(expectedIssue.milestone == null, "Milestone must not be null")
+        })
+    }
+
+    @Test
+    @DisplayName("Issue -> Deve salvar a issue (sem milestone) e retornar os objeto com as FKs configuradas")
+    fun saveIssueWithoutMilestone() {
+        this.issueDto.apply { this.milestone = null }
+
+        `when`(this.userRepository.save(any(UserModel::class.java)))
+            .thenReturn(this.userDto convertTo UserModel::class.java)
+
+        `when`(this.assigneeRepository.save(any(AssigneeModel::class.java)))
+            .thenReturn(this.assigneeDto convertTo AssigneeModel::class.java)
+
+        val expectedIssue: IssueModel = this.issueDto convertTo IssueModel::class.java
+
+        `when`(this.issueRepository.save(any(IssueModel::class.java))).thenReturn(expectedIssue)
+
+        val issueModel: IssueModel = this.eventService.saveIssue(this.issueDto)
+
+        verify(this.milestoneRepository, never()).save(any(MilestoneModel::class.java))
+
+        assertAll({
+            assertEquals(expectedIssue, issueModel)
+            assertEquals(expectedIssue.user, issueModel.user, "Fk must be equal User")
+            assertEquals(expectedIssue.assignee, issueModel.assignee, "Fk must be equal Assignee")
+            assertFalse(expectedIssue.user == null, "User must not be null")
+            assertFalse(expectedIssue.assignee == null, "Assignee must not be null")
+            assertTrue(expectedIssue.milestone == null, "Milestone must be null")
+        })
+    }
+
+    @Test
+    @DisplayName("User -> Deve salvar o user e retornar o objeto salvo")
+    fun saveUser() {
+        val expectedUser: UserModel = this.userDto convertTo UserModel::class.java
+
+        `when`(this.userRepository.save(any(UserModel::class.java)))
+            .thenReturn(expectedUser)
+
+        val userModel: UserModel = this.eventService.saveUser(this.userDto)
+
+        assertEquals(expectedUser, userModel)
+    }
+
+    @Test
+    @DisplayName("Assignee -> Deve salvar o assignee e retornar os objeto com a FK configurada")
+    fun saveAssignee() {
+        val expectedAssignee: AssigneeModel = this.assigneeDto convertTo AssigneeModel::class.java
+
+        `when`(this.assigneeRepository.save(any(AssigneeModel::class.java)))
+            .thenReturn(expectedAssignee)
+
+        val assigneeModel: AssigneeModel = this.eventService.saveAssignee(this.assigneeDto)
+
+        assertEquals(expectedAssignee, assigneeModel)
+    }
+
+    @Test
+    @DisplayName("Assignees -> Deve salvar os assignees e retornar um Set com as FKs configuradas")
+    fun saveAssignees() {
+        val issueModel: IssueModel = issueDto convertTo IssueModel::class.java
+
+        val expectedAssignees: HashSet<AssigneesModel> =
+            (this.builder.assignees() convertTo AssigneesModel::class.java).map {
+                it.apply { this.issue = issueModel }
+            }.toHashSet()
+
+        `when`(this.assigneesRepository.saveAll(anySet())).thenReturn(expectedAssignees.toMutableList())
+
+        val assigneesModel: HashSet<AssigneesModel> =
+            this.eventService.saveAssignees(this.assigneesDto, issueModel)
+
+        assertAll({
+            assertEquals(expectedAssignees, assigneesModel)
+            expectedAssignees.forEach { assertEquals(issueModel, it.issue, "FK must be equal to Issue") }
+        })
+    }
+
+    @Test
+    @DisplayName("Labels -> Deve salvar as labels e retornar um Set com as FKs configuradas")
+    fun saveLabels() {
+        val issueModel: IssueModel = issueDto convertTo IssueModel::class.java
+
+        val expectedLabels: HashSet<LabelsModel> = (this.builder.labels() convertTo LabelsModel::class.java).map {
+            it.apply { this.issue = issueModel }
+        }.toHashSet()
+
+        `when`(this.labelsRepository.saveAll(anySet())).thenReturn(expectedLabels.toMutableList())
+
+        val labelsModel: HashSet<LabelsModel> = this.eventService.saveLabels(this.labelsDto, issueModel)
+
+        assertAll({
+            assertEquals(expectedLabels, labelsModel)
+            expectedLabels.forEach { assertEquals(issueModel, it.issue, "FK must be equal to Issue") }
+        })
+    }
+
+    @Test
+    @DisplayName("Milestone -> Deve salvar o milestone e retornar o objeto salvo")
+    fun saveMilestone() {
+        val expectedMilestone: MilestoneModel = this.milestoneDto convertTo MilestoneModel::class.java
+
+        `when`(this.creatorRepository.save(any(CreatorModel::class.java)))
+            .thenReturn(this.creatorDto convertTo CreatorModel::class.java)
+
+        `when`(this.milestoneRepository.save(any(MilestoneModel::class.java)))
+            .thenReturn(this.milestoneDto convertTo MilestoneModel::class.java)
+
+        val milestoneModel: MilestoneModel = this.eventService.saveMilestone(this.milestoneDto)
+
+        assertAll({
+            assertEquals(expectedMilestone, milestoneModel)
+            assertFalse(expectedMilestone.creator == null, "Creator must not be null")
+        })
+    }
+
+    @Test
+    @DisplayName("Creator -> Deve salvar o creator e retornar o objeto salvo")
+    fun saveCreator() {
+        val expectedCreator: CreatorModel = (this.builder.creatorDto() convertTo CreatorModel::class.java)
 
         `when`(this.creatorRepository.save(any(CreatorModel::class.java))).thenReturn(expectedCreator)
 
-        val creatorModel: CreatorModel = this.eventService.saveCreator(creator, this.milestoneModel)
+        val creatorModel: CreatorModel = this.eventService.saveCreator(this.creatorDto)
 
         assertEquals(expectedCreator, creatorModel)
     }
 
     @Test
-    @DisplayName("Repository -> Deve salvar o repository e retornar os objeto com a FK configurada")
+    @DisplayName("Repository -> Deve salvar o repository e retornar o objeto salvo")
     fun saveRepository() {
-        val expectedOwner: OwnerModel =
-            (this.builder.ownerDto() convertTo OwnerModel::class.java).apply { this.repository = repositoryModel }
+        `when`(this.ownerRepository.save(any(OwnerModel::class.java)))
+            .thenReturn(this.ownerDto convertTo OwnerModel::class.java)
 
-        val expectedLicense: LicenseModel =
-            (this.builder.licenseDto() convertTo LicenseModel::class.java).apply { this.repository = repositoryModel }
-
-
-        val expectedRepository: RepositoryModel = this.repositoryModel.apply {
-            this.owner = expectedOwner
-            this.license = expectedLicense
-            this.payload = payloadModel
-        }
+        `when`(this.licenseRepository.save(any(LicenseModel::class.java)))
+            .thenReturn(this.licenseDto convertTo LicenseModel::class.java)
 
         `when`(this.repositoryRepository.save(any(RepositoryModel::class.java)))
-            .thenReturn(this.repositoryModel.apply { this.payload = payloadModel })
+            .thenReturn(this.repositoryDto convertTo RepositoryModel::class.java)
 
-        `when`(this.ownerRepository.save(any(OwnerModel::class.java))).thenReturn(expectedOwner)
+        val expectedRepository: RepositoryModel = this.repositoryDto convertTo RepositoryModel::class.java
 
-        `when`(this.licenseRepository.save(any(LicenseModel::class.java))).thenReturn(expectedLicense)
+        val repositoryModel: RepositoryModel = this.eventService.saveRepository(this.repositoryDto)
 
-        `when`(this.repositoryRepository.save(any(RepositoryModel::class.java))).thenReturn(expectedRepository)
-
-        val repositoryModel: RepositoryModel = this.eventService.saveRepository(this.repositoryModel, this.payloadModel)
-
-        assertEquals(expectedRepository, repositoryModel)
+        assertAll({
+            assertEquals(expectedRepository, repositoryModel)
+            assertFalse(expectedRepository.license == null, "License must not be null")
+            assertFalse(expectedRepository.owner == null, "Owner must not be null")
+        })
     }
 
     @Test
-    @DisplayName("Repository -> Deve salvar o repository (sem license) e retornar os objeto com a FK configurada")
+    @DisplayName("Repository -> Deve salvar o repository (sem license) e retornar o objeto salvo")
     fun saveRepositoryWithoutLicense() {
-        val expectedOwner: OwnerModel =
-            (this.builder.ownerDto() convertTo OwnerModel::class.java).apply { this.repository = repositoryModel }
+        this.repositoryDto.apply { this.license = null }
 
-        val expectedRepository: RepositoryModel = this.repositoryModel.apply {
-            this.owner = expectedOwner
-            this.payload = payloadModel
-        }
+        val ownerModel: OwnerModel = ownerDto convertTo OwnerModel::class.java
 
-        `when`(this.repositoryRepository.save(any(RepositoryModel::class.java)))
-            .thenReturn(this.repositoryModel.apply { this.payload = payloadModel })
+        val expectedRepository: RepositoryModel =
+            (this.repositoryDto convertTo RepositoryModel::class.java)
 
-        `when`(this.ownerRepository.save(any(OwnerModel::class.java))).thenReturn(expectedOwner)
+        `when`(this.ownerRepository.save(any(OwnerModel::class.java))).thenReturn(ownerModel)
 
         `when`(this.repositoryRepository.save(any(RepositoryModel::class.java))).thenReturn(expectedRepository)
 
-        val repositoryModel: RepositoryModel = this.eventService.saveRepository(this.repositoryModel, this.payloadModel)
+        val repositoryModel: RepositoryModel = this.eventService.saveRepository(this.repositoryDto)
 
         verify(this.licenseRepository, never()).save(any(LicenseModel::class.java))
 
-        assertEquals(expectedRepository, repositoryModel)
+        assertAll({
+            assertEquals(expectedRepository, repositoryModel)
+            assertTrue(expectedRepository.license == null, "License must be null")
+        })
     }
 
     @Test
-    @DisplayName("License -> Deve salvar a license e retornar os objeto com a FK configurada")
+    @DisplayName("License -> Deve salvar a license e retornar o objeto salvo")
     fun saveLicense() {
-        val license: LicenseModel = this.builder.licenseDto() convertTo LicenseModel::class.java
+        val expectedLicense = this.licenseDto convertTo LicenseModel::class.java
 
-        val expectedLicense: LicenseModel =
-            (this.builder.licenseDto() convertTo LicenseModel::class.java).apply { this.repository = repositoryModel }
+        `when`(this.licenseRepository.save(any(LicenseModel::class.java)))
+            .thenReturn(this.licenseDto convertTo LicenseModel::class.java)
 
-        `when`(this.licenseRepository.save(any(LicenseModel::class.java))).thenReturn(expectedLicense)
-
-        val licenseModel: LicenseModel = this.eventService.saveLicense(license, this.repositoryModel)
+        val licenseModel: LicenseModel = this.eventService.saveLicense(this.licenseDto)
 
         assertEquals(expectedLicense, licenseModel)
     }
 
     @Test
-    @DisplayName("Owner -> Deve salvar o owner e retornar os objeto com a FK configurada")
+    @DisplayName("Owner -> Deve salvar o owner e retornar o objeto salvo")
     fun saveOwner() {
-        val owner: OwnerModel = this.builder.ownerDto() convertTo OwnerModel::class.java
+        val expectedOwner: OwnerModel = this.ownerDto convertTo OwnerModel::class.java
 
-        val expectedOwner: OwnerModel =
-            (this.builder.ownerDto() convertTo OwnerModel::class.java).apply { this.repository = repositoryModel }
+        `when`(this.ownerRepository.save(any(OwnerModel::class.java)))
+            .thenReturn(this.ownerDto convertTo OwnerModel::class.java)
 
-        `when`(this.ownerRepository.save(any(OwnerModel::class.java))).thenReturn(expectedOwner)
-
-        val ownerModel: OwnerModel = this.eventService.saveOwner(owner, this.repositoryModel)
+        val ownerModel: OwnerModel = this.eventService.saveOwner(this.ownerDto)
 
         assertEquals(expectedOwner, ownerModel)
     }
 
     @Test
-    @DisplayName("Sender -> Deve salvar o sender e retornar os objeto com a FK configurada")
+    @DisplayName("Sender -> Deve salvar o sender e retornar o objeto salvo")
     fun saveSender() {
-        val sender: SenderModel = this.builder.senderDto() convertTo SenderModel::class.java
+        val expectedSender: SenderModel = this.senderDto convertTo SenderModel::class.java
 
-        val expectedSender: SenderModel =
-            (this.builder.senderDto() convertTo SenderModel::class.java).apply { this.payload = payloadModel }
+        `when`(this.senderRepository.save(any(SenderModel::class.java)))
+            .thenReturn(this.senderDto convertTo SenderModel::class.java)
 
-        `when`(this.senderRepository.save(any(SenderModel::class.java))).thenReturn(expectedSender)
-
-        val senderModel: SenderModel = this.eventService.saveSender(sender, this.payloadModel)
+        val senderModel: SenderModel = this.eventService.saveSender(this.senderDto)
 
         assertEquals(expectedSender, senderModel)
     }
@@ -562,6 +519,8 @@ internal class EventServiceTest {
     @Test
     @DisplayName("Deve retornar a issue com o número solicitado")
     fun getIssueByNumber() {
+        val issueModel: IssueModel = issueDto convertTo IssueModel::class.java
+
         val expectedAssignees: HashSet<AssigneesModel> =
             (this.builder.assignees() convertTo AssigneesModel::class.java).map {
                 it.apply { this.issue = issueModel }
@@ -571,36 +530,126 @@ internal class EventServiceTest {
             it.apply { this.issue = issueModel }
         }.toHashSet()
 
-        val expectedUser: UserModel =
-            (this.builder.userDto() convertTo UserModel::class.java).apply { this.issue = issueModel }
-
-        val expectedAssignee: AssigneeModel =
-            (this.builder.assigneeDto() convertTo AssigneeModel::class.java).apply { this.issue = issueModel }
-
-        val expectedMilestone: MilestoneModel =
-            (this.builder.milestoneDto() convertTo MilestoneModel::class.java).apply { this.issue = issueModel }
-
-        val expectedCreator: CreatorModel =
-            (this.builder.creatorDto() convertTo CreatorModel::class.java).apply { this.milestone = expectedMilestone }
-
-        expectedMilestone.creator = expectedCreator
-
-        val expectedIssue: IssueModel = this.issueModel.apply {
-            this.labels = expectedLabels
-            this.assignees = expectedAssignees
-            this.assignee = expectedAssignee
-            this.user = expectedUser
-            this.milestone = expectedMilestone
-            this.payload = payloadModel
+        val expectedIssue: IssueDto = this.issueDto.apply {
+            this.assignees = expectedAssignees convertTo AssigneesDto::class.java
+            this.labels = expectedLabels convertTo LabelsDto::class.java
         }
 
-        `when`(this.issueRepository.findIssueModelByNumber(anyInt())).thenReturn(expectedIssue)
+        `when`(this.labelsRepository.findLabels()).thenReturn(expectedLabels)
+
+        `when`(this.assigneesRepository.findAssignees()).thenReturn(expectedAssignees)
+
+        `when`(this.issueRepository.findIssueModelByNumber(anyInt()))
+            .thenReturn(hashSetOf(this.issueDto convertTo IssueModel::class.java))
 
         assertDoesNotThrow { this.eventService.getIssueByNumber(Random.nextInt()) }
 
-        val issueByNumber: IssueDto = this.eventService.getIssueByNumber(Random.nextInt())
+        val issueByNumber: HashSet<IssueDto> = this.eventService.getIssueByNumber(Random.nextInt())
 
-        assertEquals(expectedIssue.toDto(), issueByNumber)
+        issueByNumber.forEach {
+            assertAll({
+                assertEquals(expectedIssue, it)
+                assertEquals(expectedIssue.assignees, it.assignees, "Assignees must be equal to expected")
+                assertEquals(expectedIssue.labels, it.labels, "Labels must be equal to expected")
+            })
+        }
+    }
+
+    @Test
+    @DisplayName("Deve retornar a issue (sem assignees) com o número solicitado")
+    fun getIssueByNumberWithoutAssignees() {
+        val issueModel: IssueModel = issueDto convertTo IssueModel::class.java
+
+        val expectedLabels: HashSet<LabelsModel> = (this.builder.labels() convertTo LabelsModel::class.java).map {
+            it.apply { this.issue = issueModel }
+        }.toHashSet()
+
+        val expectedIssue: IssueDto = this.issueDto.apply {
+            this.assignees = hashSetOf()
+            this.labels = expectedLabels convertTo LabelsDto::class.java
+        }
+
+        `when`(this.labelsRepository.findLabels()).thenReturn(expectedLabels)
+
+        `when`(this.assigneesRepository.findAssignees()).thenReturn(hashSetOf())
+
+        `when`(this.issueRepository.findIssueModelByNumber(anyInt()))
+            .thenReturn(hashSetOf(this.issueDto convertTo IssueModel::class.java))
+
+        assertDoesNotThrow { this.eventService.getIssueByNumber(Random.nextInt()) }
+
+        val issueByNumber: HashSet<IssueDto> = this.eventService.getIssueByNumber(Random.nextInt())
+
+        issueByNumber.forEach {
+            assertAll({
+                assertEquals(expectedIssue, it)
+                assertEquals(expectedIssue.labels, it.labels, "Labels must be equal to expected")
+                assertTrue(it.assignees.isEmpty(), "Assignees must be an empty Set")
+            })
+        }
+    }
+
+    @Test
+    @DisplayName("Deve retornar a issue (sem a label) com o número solicitado")
+    fun getIssueByNumberWithoutLabels() {
+        val issueModel: IssueModel = issueDto convertTo IssueModel::class.java
+
+        val expectedAssignees: HashSet<AssigneesModel> =
+            (this.builder.assignees() convertTo AssigneesModel::class.java).map {
+                it.apply { this.issue = issueModel }
+            }.toHashSet()
+
+        val expectedIssue: IssueDto = this.issueDto.apply {
+            this.assignees = expectedAssignees convertTo AssigneesDto::class.java
+            this.labels = hashSetOf()
+        }
+
+        `when`(this.labelsRepository.findLabels()).thenReturn(hashSetOf())
+
+        `when`(this.assigneesRepository.findAssignees()).thenReturn(expectedAssignees)
+
+        `when`(this.issueRepository.findIssueModelByNumber(anyInt()))
+            .thenReturn(hashSetOf(this.issueDto convertTo IssueModel::class.java))
+
+        assertDoesNotThrow { this.eventService.getIssueByNumber(Random.nextInt()) }
+
+        val issueByNumber: HashSet<IssueDto> = this.eventService.getIssueByNumber(Random.nextInt())
+
+        issueByNumber.forEach {
+            assertAll({
+                assertEquals(expectedIssue, it)
+                assertTrue(it.labels.isEmpty(), "Labels must be an empty Set")
+                assertEquals(expectedIssue.assignees, it.assignees, "Assignees must be equal to expected")
+            })
+        }
+    }
+
+    @Test
+    @DisplayName("Deve retornar a issue (sem assignees e labels) com o número solicitado")
+    fun getIssueByNumberWithoutAssigneesAndLabels() {
+        val expectedIssue: IssueDto = this.issueDto.apply {
+            this.assignees = hashSetOf()
+            this.labels = hashSetOf()
+        }
+
+        `when`(this.labelsRepository.findLabels()).thenReturn(hashSetOf())
+
+        `when`(this.assigneesRepository.findAssignees()).thenReturn(hashSetOf())
+
+        `when`(this.issueRepository.findIssueModelByNumber(anyInt()))
+            .thenReturn(hashSetOf(this.issueDto convertTo IssueModel::class.java))
+
+        assertDoesNotThrow { this.eventService.getIssueByNumber(Random.nextInt()) }
+
+        val issueByNumber: HashSet<IssueDto> = this.eventService.getIssueByNumber(Random.nextInt())
+
+        issueByNumber.forEach {
+            assertAll({
+                assertEquals(expectedIssue, it)
+                assertTrue(it.assignees.isEmpty(), "Assignees must be an empty Set")
+                assertTrue(it.labels.isEmpty(), "Labels must be an empty Set")
+            })
+        }
     }
 
     @Test

@@ -24,7 +24,7 @@ class EventController {
         this.eventService.savePayload(payloadDto).run { status(HttpStatus.CREATED).body(this) }
 
     @GetMapping("/{number}")
-    fun getIssueByNumber(@PathVariable("number") number: Int): ResponseEntity<IssueDto> =
+    fun getIssueByNumber(@PathVariable("number") number: Int): ResponseEntity<HashSet<IssueDto>> =
         this.eventService.getIssueByNumber(number).run { ok(this) }
 
 }

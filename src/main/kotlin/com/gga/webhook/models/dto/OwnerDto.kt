@@ -1,60 +1,60 @@
 package com.gga.webhook.models.dto
 
-import com.fasterxml.jackson.annotation.JsonPropertyOrder
+import com.fasterxml.jackson.annotation.JsonProperty
 import java.io.Serializable
 
 data class OwnerDto @JvmOverloads constructor(
-    @JsonPropertyOrder("login")
+    @JsonProperty("login")
     var login: String = "",
 
-    @JsonPropertyOrder("id")
+    @JsonProperty("id")
     var id: Long = 0L,
 
-    @JsonPropertyOrder("node_id")
+    @JsonProperty("node_id")
     var nodeId: String = "",
 
-    @JsonPropertyOrder("avatar_url")
+    @JsonProperty("avatar_url")
     var avatarUrl: String = "",
 
-    @JsonPropertyOrder("gravatar_id")
+    @JsonProperty("gravatar_id")
     var gravatarId: String = "",
 
-    @JsonPropertyOrder("url")
+    @JsonProperty("url")
     var url: String = "",
 
-    @JsonPropertyOrder("html_url")
+    @JsonProperty("html_url")
     var htmlUrl: String = "",
 
-    @JsonPropertyOrder("followers_url")
+    @JsonProperty("followers_url")
     var followersUrl: String = "",
 
-    @JsonPropertyOrder("following_url")
+    @JsonProperty("following_url")
     var followingUrl: String = "",
 
-    @JsonPropertyOrder("gists_url")
+    @JsonProperty("gists_url")
     var gistsUrl: String = "",
 
-    @JsonPropertyOrder("starred_url")
+    @JsonProperty("starred_url")
     var starredUrl: String = "",
 
-    @JsonPropertyOrder("subscriptions_url")
+    @JsonProperty("subscriptions_url")
     var subscriptionsUrl: String = "",
 
-    @JsonPropertyOrder("organizations_url")
+    @JsonProperty("organizations_url")
     var organizationsUrl: String = "",
 
-    @JsonPropertyOrder("repos_url")
+    @JsonProperty("repos_url")
     var reposUrl: String = "",
 
-    @JsonPropertyOrder("events_url")
+    @JsonProperty("events_url")
     var eventsUrl: String = "",
 
-    @JsonPropertyOrder("received_events_url")
+    @JsonProperty("received_events_url")
     var receivedEventsUrl: String = "",
 
-    @JsonPropertyOrder("type")
+    @JsonProperty("type")
     var type: String = "",
 
-    @JsonPropertyOrder("site_admin")
+    @JsonProperty("site_admin")
     var siteAdmin: Boolean = false
 ) : Serializable

@@ -7,7 +7,6 @@ import java.util.*
 internal class PayloadBuilder {
 
     companion object {
-        @JvmStatic
         private val INSTANT_MOCK: Instant = Instant.now()
     }
 
@@ -41,7 +40,7 @@ internal class PayloadBuilder {
         description = "mock"
     )
 
-    fun labels(): HashSet<LabelsDto> = hashSetOf(this.label(), this.label().apply { this.id = 3L })
+    fun labels(): HashSet<LabelsDto> = hashSetOf(this.label().apply { this.nodeId = "simsimsimsim" }, this.label().apply { this.id = 3L })
 
     fun creatorDto(): CreatorDto = CreatorDto(
         login = "mock@mock.com",
@@ -153,7 +152,7 @@ internal class PayloadBuilder {
         nodeId = "mock423mock"
     )
 
-    private fun repositoryDto(): RepositoryDto = RepositoryDto(
+    fun repositoryDto(): RepositoryDto = RepositoryDto(
         id = 10L,
         nodeId = "mock464mock",
         name = "mock",

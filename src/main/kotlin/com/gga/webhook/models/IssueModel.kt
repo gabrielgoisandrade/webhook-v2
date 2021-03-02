@@ -1,6 +1,5 @@
 package com.gga.webhook.models
 
-import org.hibernate.annotations.NaturalId
 import java.io.Serializable
 import java.time.Instant
 import javax.persistence.*
@@ -8,83 +7,76 @@ import javax.persistence.*
 @Entity
 @Table(name = "ISSUE")
 data class IssueModel @JvmOverloads constructor(
-        @Column(name = "URL")
-        var url: String = "",
+    @Column(name = "URL")
+    var url: String = "",
 
-        @Column(name = "REPOSITORY_URL")
-        var repositoryUrl: String = "",
+    @Column(name = "REPOSITORY_URL")
+    var repositoryUrl: String = "",
 
-        @Column(name = "LABELS_URL")
-        var labelsUrl: String = "",
+    @Column(name = "LABELS_URL")
+    var labelsUrl: String = "",
 
-        @Column(name = "COMMENTS_URL")
-        var commentsUrl: String = "",
+    @Column(name = "COMMENTS_URL")
+    var commentsUrl: String = "",
 
-        @Column(name = "EVENTS_URL")
-        var eventsUrl: String = "",
+    @Column(name = "EVENTS_URL")
+    var eventsUrl: String = "",
 
-        @Column(name = "HTML_URL")
-        var htmlUrl: String = "",
+    @Column(name = "HTML_URL")
+    var htmlUrl: String = "",
 
-        @Id
-        @Column(name = "ISSUE_ID")
-        var id: Long = 0,
+    @Id
+    @Column(name = "ISSUE_ID")
+    var id: Long = 0,
 
-        @NaturalId
-        @Column(name = "NODE_ID", unique = true)
-        var nodeId: String = "",
+    @Column(name = "NODE_ID")
+    var nodeId: String = "",
 
-        @Column(name = "NUMBER")
-        var number: Int = 0,
+    @Column(name = "NUMBER")
+    var number: Int = 0,
 
-        @Column(name = "TITLE")
-        var title: String = "",
+    @Column(name = "TITLE")
+    var title: String = "",
 
-        @OneToOne(mappedBy = "issue")
-        var user: UserModel? = null,
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "USER_ID", foreignKey = ForeignKey(name = "C_ISSUE_USER"))
+    var user: UserModel? = null,
 
-        @OneToMany(mappedBy = "issue", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
-        var labels: Set<LabelsModel> = hashSetOf(),
+    @Column(name = "STATE")
+    var state: String = "",
 
-        @Column(name = "STATE")
-        var state: String = "",
+    @Column(name = "LOCKED")
+    var locked: Boolean = false,
 
-        @Column(name = "LOCKED")
-        var locked: Boolean = false,
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ASSIGNEE_ID", foreignKey = ForeignKey(name = "C_ISSUE_ASSIGNEE"))
+    var assignee: AssigneeModel? = null,
 
-        @OneToOne(mappedBy = "issue", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
-        var assignee: AssigneeModel? = null,
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "MILESTONE_ID", foreignKey = ForeignKey(name = "C_ISSUE_MILESTONE"))
+    var milestone: MilestoneModel? = null,
 
-        @OneToMany(mappedBy = "issue", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
-        var assignees: Set<AssigneesModel> = hashSetOf(),
+    @Column(name = "COMMENTS")
+    var comments: Int = 0,
 
-        @OneToOne(mappedBy = "issue", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
-        var milestone: MilestoneModel? = null,
+    @Column(name = "CREATED_AT")
+    var createdAt: Instant? = null,
 
-        @Column(name = "COMMENTS")
-        var comments: Int = 0,
+    @Column(name = "UPDATED_AT")
+    var updatedAt: Instant? = null,
 
-        @Column(name = "CREATED_AT")
-        var createdAt: Instant? = null,
+    @Column(name = "CLOSED_AT")
+    var closedAt: Instant? = null,
 
-        @Column(name = "UPDATED_AT")
-        var updatedAt: Instant? = null,
+    @Column(name = "AUTHOR_ASSOCIATION")
+    var authorAssociation: String = "",
 
-        @Column(name = "CLOSED_AT")
-        var closedAt: Instant? = null,
+    @Column(name = "ACTIVE_LOCK_REASON")
+    var activeLockReason: String? = null,
 
-        @Column(name = "AUTHOR_ASSOCIATION")
-        var authorAssociation: String = "",
+    @Column(name = "BODY")
+    var body: String = "",
 
-        @Column(name = "ACTIVE_LOCK_REASON")
-        var activeLockReason: String? = null,
-
-        @Column(name = "BODY")
-        var body: String = "",
-
-        @Column(name = "PERFORMED_VIA_GITHUB_APP")
-        var performedViaGithubApp: String? = null,
-
-        @OneToOne(mappedBy = "issue")
-        var payload: PayloadModel? = null
+    @Column(name = "PERFORMED_VIA_GITHUB_APP")
+    var performedViaGithubApp: String? = null
 ) : Serializable

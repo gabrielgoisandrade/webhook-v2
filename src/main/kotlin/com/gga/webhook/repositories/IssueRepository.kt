@@ -6,6 +6,6 @@ import org.springframework.data.repository.query.Param
 
 interface IssueRepository : JpaRepository<IssueModel, Long> {
 
-    fun findIssueModelByNumber(@Param("number") number: Int): IssueModel?
+    fun findIssueModelByNumber(@Param("number") number: Int): Set<IssueModel>
 
 }

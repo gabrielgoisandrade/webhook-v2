@@ -2,10 +2,9 @@ package com.gga.webhook.services
 
 import com.gga.webhook.errors.exceptions.IssueNotFoundException
 import com.gga.webhook.models.*
-import com.gga.webhook.models.dto.IssueDto
-import com.gga.webhook.models.dto.PayloadDto
+import com.gga.webhook.models.dto.*
 import com.gga.webhook.repositories.*
-import com.gga.webhook.utils.MapperUtil.Companion.toDto
+import com.gga.webhook.utils.MapperUtil.Companion.convertTo
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
@@ -16,7 +15,7 @@ class EventService @Autowired constructor(
     private val userRepository: UserRepository,
     private val assigneeRepository: AssigneeRepository,
     private val assigneesRepository: AssigneesRepository,
-    private val labelRepository: LabelRepository,
+    private val labelsRepository: LabelsRepository,
     private val milestoneRepository: MilestoneRepository,
     private val creatorRepository: CreatorRepository,
     private val repositoryRepository: RepositoryRepository,
@@ -25,112 +24,95 @@ class EventService @Autowired constructor(
     private val senderRepository: SenderRepository
 ) : IEventService {
 
-    override fun savePayload(payload: PayloadDto): PayloadDto {
-        val payloadModel = PayloadModel(action = payload.action)
+    private lateinit var assigneesDto: Set<AssigneesDto>
 
-        this.payloadRepository.save(payloadModel).apply {
-            this.issue = saveIssue(this.issue!!, this)
-            this.repository = saveRepository(this.repository!!, this)
-            this.sender = saveSender(this.sender!!, this)
-        }.run {
-            return payloadRepository.save(this).toDto()
+    private lateinit var labelsDto: Set<LabelsDto>
+
+    override fun savePayload(payload: PayloadDto): PayloadDto = (payload convertTo PayloadModel::class.java).apply {
+        this.issue = saveIssue(payload.issue!!)
+        this.repository = saveRepository(payload.repository!!)
+        this.sender = saveSender(payload.sender!!)
+    }.run {
+        (payloadRepository.save(this) convertTo PayloadDto::class.java).apply {
+            this.issue!!.labels = labelsDto
+            this.issue!!.assignees = assigneesDto
         }
     }
 
-    override fun saveIssue(issue: IssueModel, fk: PayloadModel): IssueModel {
-        val labels: Set<LabelsModel> = issue.labels
-
-        val assignee: AssigneeModel? = issue.assignee
-
-        val assignees: Set<AssigneesModel> = issue.assignees
-
-        val user: UserModel = issue.user!!
-
-        val milestone: MilestoneModel? = issue.milestone
-
-        val issueModel: IssueModel = issue.apply {
-            this.labels = hashSetOf()
-            this.assignee = null
-            this.assignees = hashSetOf()
-            this.user = null
-            this.milestone = null
-            this.payload = fk
-        }
-
-        issueRepository.save(issueModel).apply {
-            this.labels = saveLabels(labels, this)
-            this.assignee = assignee?.let { saveAssignee(it, this) }
-            this.assignees = saveAssignees(assignees, this)
-            this.user = saveUser(user, this)
-            this.milestone = milestone?.let { saveMilestone(it, this) }
-        }.run {
-            return issueRepository.save(this)
-        }
+    override fun saveIssue(issue: IssueDto): IssueModel = (issue convertTo IssueModel::class.java).apply {
+        this.assignee = issue.assignee?.let { saveAssignee(it) }
+        this.user = saveUser(issue.user!!)
+        this.milestone = issue.milestone?.let { saveMilestone(it) }
+    }.run {
+        issueRepository.save(this)
+    }.also {
+        this.assigneesDto = this.saveAssignees(issue.assignees, it) convertTo AssigneesDto::class.java
+        this.labelsDto = this.saveLabels(issue.labels, it) convertTo LabelsDto::class.java
     }
 
-    override fun saveUser(user: UserModel, fk: IssueModel): UserModel =
-        user.apply { this.issue = fk }.run { userRepository.save(this) }
+    override fun saveUser(user: UserDto): UserModel =
+        (user convertTo UserModel::class.java).run { userRepository.save(this) }
 
-    override fun saveAssignee(assignee: AssigneeModel, fk: IssueModel): AssigneeModel =
-        assignee.apply { this.issue = fk }.run { assigneeRepository.save(this) }
+    override fun saveAssignee(assignee: AssigneeDto): AssigneeModel =
+        (assignee convertTo AssigneeModel::class.java).run { assigneeRepository.save(this) }
 
-    override fun saveAssignees(assignees: Set<AssigneesModel>, fk: IssueModel): HashSet<AssigneesModel> =
-        assignees.run {
-            this.map { it.issue = fk }
+    override fun saveAssignees(assignees: Set<AssigneesDto>, issue: IssueModel): HashSet<AssigneesModel> {
+        if (assignees.isEmpty()) hashSetOf<AssigneeModel>()
+
+        return (assignees convertTo AssigneesModel::class.java).run {
+            this.map { it.issue = issue }
             assigneesRepository.saveAll(this)
         }.toHashSet()
-
-    override fun saveLabels(labels: Set<LabelsModel>, fk: IssueModel): HashSet<LabelsModel> = labels.run {
-        this.map { it.issue = fk }
-        labelRepository.saveAll(this)
-    }.toHashSet()
-
-    override fun saveMilestone(milestone: MilestoneModel, fk: IssueModel): MilestoneModel {
-        val creator: CreatorModel = milestone.creator!!
-        val milestoneModel: MilestoneModel = milestone.apply {
-            this.creator = null
-            this.issue = fk
-        }
-
-        this.milestoneRepository.save(milestoneModel).apply {
-            this.creator = saveCreator(creator, this)
-        }.run {
-            return milestoneRepository.save(this)
-        }
     }
 
-    override fun saveCreator(creator: CreatorModel, fk: MilestoneModel): CreatorModel =
-        creator.apply { this.milestone = fk }.run { creatorRepository.save(this) }
+    override fun saveLabels(labels: Set<LabelsDto>, issue: IssueModel): HashSet<LabelsModel> {
+        if (labels.isEmpty()) hashSetOf<AssigneeModel>()
 
-    override fun saveRepository(repository: RepositoryModel, fk: PayloadModel): RepositoryModel {
-        val owner: OwnerModel = repository.owner!!
-
-        val license: LicenseModel? = repository.license
-
-        val repositoryModel: RepositoryModel = repository.apply {
-            this.owner = null
-            this.license = null
-            this.payload = fk
-        }
-
-        this.repositoryRepository.save(repositoryModel).apply {
-            this.owner = saveOwner(owner, this)
-            this.license = license?.let { saveLicense(it, this) }
-        }.run {
-            return repositoryRepository.save(this)
-        }
+        return (labels convertTo LabelsModel::class.java).run {
+            this.map { it.issue = issue }
+            labelsRepository.saveAll(this)
+        }.toHashSet()
     }
 
-    override fun saveLicense(license: LicenseModel, fk: RepositoryModel): LicenseModel =
-        license.apply { this.repository = fk }.run { licenseRepository.save(this) }
+    override fun saveMilestone(milestone: MilestoneDto): MilestoneModel =
+        (milestone convertTo MilestoneModel::class.java).apply {
+            this.creator = saveCreator(milestone.creator!!)
+        }.run { milestoneRepository.save(this) }
 
-    override fun saveOwner(owner: OwnerModel, fk: RepositoryModel): OwnerModel =
-        owner.apply { this.repository = fk }.run { ownerRepository.save(this) }
+    override fun saveCreator(creator: CreatorDto): CreatorModel =
+        (creator convertTo CreatorModel::class.java).run { creatorRepository.save(this) }
 
-    override fun saveSender(sender: SenderModel, fk: PayloadModel): SenderModel =
-        sender.apply { this.payload = fk }.run { senderRepository.save(this) }
+    override fun saveRepository(
+        repository: RepositoryDto
+    ): RepositoryModel {
+        val repositoryModel: RepositoryModel = repository convertTo RepositoryModel::class.java
 
-    override fun getIssueByNumber(number: Int): IssueDto = issueRepository.findIssueModelByNumber(number)?.toDto()
-        ?: throw IssueNotFoundException("Issue #$number not found.")
+        return repositoryModel.apply {
+            this.owner = saveOwner(repository.owner!!)
+            this.license = repository.license?.let { saveLicense(it) }
+        }.run { repositoryRepository.save(this) }
+    }
+
+    override fun saveLicense(license: LicenseDto): LicenseModel =
+        (license convertTo LicenseModel::class.java).run { licenseRepository.save(this) }
+
+    override fun saveOwner(owner: OwnerDto): OwnerModel =
+        (owner convertTo OwnerModel::class.java).run { ownerRepository.save(this) }
+
+    override fun saveSender(sender: SenderDto): SenderModel =
+        (sender convertTo SenderModel::class.java).run { senderRepository.save(this) }
+
+    override fun getIssueByNumber(number: Int): HashSet<IssueDto> {
+        val issue: Set<IssueModel> = issueRepository.findIssueModelByNumber(number)
+
+        if (issue.isEmpty()) throw IssueNotFoundException("Issue #$number not found.")
+
+        return (issue convertTo (IssueDto::class.java)).map {
+            it.apply {
+                this.assignees = assigneesRepository.findAssignees() convertTo AssigneesDto::class.java
+                this.labels = labelsRepository.findLabels() convertTo LabelsDto::class.java
+            }
+        }.toHashSet()
+    }
 
 }
