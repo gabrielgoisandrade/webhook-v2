@@ -51,7 +51,8 @@ internal class SenderControllerTest {
     fun verifySenderLink() {
         given(this.senderServiceImpl.getSender()).willReturn((this.expectedSender))
 
-        this.mockMvc.perform(getRequest(SENDER)).andExpect(status().isOk)
+        this.mockMvc.perform(getRequest(SENDER))
+            .andExpect(status().isOk)
             .andExpect(jsonPath("links").isNotEmpty)
     }
 
