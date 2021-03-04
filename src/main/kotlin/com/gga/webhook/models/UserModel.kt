@@ -23,7 +23,6 @@ data class UserModel @JvmOverloads constructor(
     @Column(name = "AVATAR_URL")
     var avatarUrl: String = "",
 
-    @NaturalId
     @Column(name = "GRAVATAR_ID")
     var gravatarId: String = "",
 

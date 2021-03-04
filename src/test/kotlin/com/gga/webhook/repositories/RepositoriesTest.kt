@@ -140,7 +140,7 @@ internal class RepositoriesTest {
             it.apply { this.issue = issueToSave }
         }.toHashSet()
 
-        toSave.forEach { this.entityManager.persist(it) }
+        toSave.forEach { this.entityManager.merge(it) }
 
         this.labelsRepository.findAll().also { assertTrue(it.isNotEmpty()) }
     }
@@ -154,7 +154,7 @@ internal class RepositoriesTest {
             it.apply { this.issue = issueToSave }
         }.toHashSet()
 
-        toSave.forEach { this.entityManager.persist(it) }
+        toSave.forEach { this.entityManager.merge(it) }
 
         this.assigneesRepository.findAll().also { assertTrue(it.isNotEmpty()) }
     }

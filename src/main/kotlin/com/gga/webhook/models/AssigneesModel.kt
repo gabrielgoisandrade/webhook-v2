@@ -11,6 +11,7 @@ data class AssigneesModel @JvmOverloads constructor(
 
     @Id
     @Column(name = "ASSIGNEES_ID")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long = 0L,
 
     @Column(name = "NODE_ID")
@@ -61,7 +62,7 @@ data class AssigneesModel @JvmOverloads constructor(
     @Column(name = "SITE_ADMIN")
     var siteAdmin: Boolean = false,
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
     @JoinColumn(name = "ISSUE_ID", foreignKey = ForeignKey(name = "C_ASSIGNEES_ISSUE"))
     var issue: IssueModel? = null
 ) : Serializable

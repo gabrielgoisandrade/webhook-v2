@@ -8,6 +8,7 @@ import javax.persistence.*
 data class LabelsModel @JvmOverloads constructor(
     @Id
     @Column(name = "LABELS_ID")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long = 0L,
 
     @Column(name = "NODE_ID")
@@ -28,7 +29,7 @@ data class LabelsModel @JvmOverloads constructor(
     @Column(name = "DESCRIPTION")
     var description: String? = null,
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
     @JoinColumn(name = "ISSUE_ID", foreignKey = ForeignKey(name = "C_LABELS_ISSUE"))
     var issue: IssueModel? = null
 ) : Serializable

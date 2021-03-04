@@ -13,15 +13,10 @@ import java.util.*
 @RestControllerAdvice
 class AdviceController {
 
-    companion object {
-        @JvmStatic
-        private val TIMESTAMP: Date = Date()
-    }
-
     @ExceptionHandler(IssueNotFoundException::class)
     fun handler(ex: IssueNotFoundException, request: WebRequest): ResponseEntity<ApiError> =
-        ApiError(ex.message!!, request.getDescription(false), TIMESTAMP).run {
-            status(HttpStatus.BAD_REQUEST).body(this)
+        ApiError(ex.message!!, request.getDescription(false), Date()).run {
+            status(HttpStatus.NOT_FOUND).body(this)
         }
 
 }

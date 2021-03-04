@@ -2,6 +2,65 @@ spring:
   # Jackson config
   jackson:
     date-format: yyyy-MM-dd'T'HH:mm:ss.SSSZ
-    time-zone: UTC
+    time-zone: America/Sao_Paulo
   profiles:
-    active: dev
+    active: test
+
+  # SQL config
+  jpa:
+    properties:
+      hibernate:
+        format_sql: true
+  cache:
+    cache-names: [ issueByNumber ]
+
+# Log config
+logging:
+  file:
+    name: app.log
+  logback:
+    rollingpolicy:
+      clean-history-on-start: true
+
+# OpenAPI config
+doc:
+  info:
+    name: ${project.name}
+    description: ${project.description}
+    version: ${project.version}
+
+  contact:
+    url: https://github.com/gabrielgoisandrade/
+    name: Gabriel Gois Andrade
+    email: gabriel.gois.andrade14@gmail.com
+
+  license:
+    url: https://www.apache.org/licenses/LICENSE-2.0.txt
+    name: Apache License 2.0
+
+  server:
+    description: Service hosted at heroku.
+    url: http://localhost:8080/
+
+  terms-of-service: http://springdoc.org/
+
+# SpringDoc config
+springdoc:
+  swagger-ui:
+    path: /
+
+# Actuator config
+management:
+  endpoint:
+    health:
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+
+info:
+  app:
+    name: ${project.name}
+    description: ${project.description}
+    version: ${project.version}
