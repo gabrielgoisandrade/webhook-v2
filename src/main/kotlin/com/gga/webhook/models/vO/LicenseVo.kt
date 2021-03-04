@@ -1,10 +1,10 @@
-package com.gga.webhook.models.dto
+package com.gga.webhook.models.vO
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 import java.io.Serializable
 
-data class LicenseDto @JvmOverloads constructor(
+data class LicenseVo @JvmOverloads constructor(
     @JsonIgnore
     @JsonProperty("id")
     var id: Long = 0L,

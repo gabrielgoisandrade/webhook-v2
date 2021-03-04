@@ -1,9 +1,11 @@
 package com.gga.webhook.services
 
 import com.gga.webhook.models.*
-import com.gga.webhook.models.dto.*
+import com.gga.webhook.models.dTO.*
+import com.gga.webhook.models.vO.PayloadVo
+import org.springframework.data.domain.Page
 
-interface IEventService {
+interface PayloadService {
 
     fun savePayload(payload: PayloadDto): PayloadDto
 
@@ -29,6 +31,8 @@ interface IEventService {
 
     fun saveSender(sender: SenderDto): SenderModel
 
-    fun getIssueByNumber(number: Int): HashSet<IssueDto>
+    fun getPayloadById(id: Long): PayloadVo
+
+    fun getAllPayloads(page: Int = 0, limit: Int = 10, direction: String): Page<PayloadVo>
 
 }

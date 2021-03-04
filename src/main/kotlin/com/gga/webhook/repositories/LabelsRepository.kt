@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.Query
 
 interface LabelsRepository : JpaRepository<LabelsModel, Long> {
 
-    @Query("SELECT L FROM LabelsModel L JOIN FETCH L.issue")
+    @Query("select l from LabelsModel l join IssueModel i on i.id = l.issue.id")
     fun findLabels(): HashSet<LabelsModel>
 
 }

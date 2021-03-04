@@ -39,12 +39,6 @@ class OpenApiConfig {
     @Value("\${doc.terms-of-service}")
     private lateinit var termsOfService: String
 
-    @Value("\${doc.server.description}")
-    private lateinit var serverDescription: String
-
-    @Value("\${doc.server.url}")
-    private lateinit var serverUrl: String
-
     private fun info(): Info = Info()
         .title(this.title)
         .description("## *${this.description}*")
@@ -60,9 +54,7 @@ class OpenApiConfig {
 
     private fun license(): License = License().name(this.licenseName).url(this.licenseUrl)
 
-    private fun server(): Server = Server().url(this.serverUrl).description(this.serverDescription)
-
     @Bean
-    fun openApi(): OpenAPI = OpenAPI().info(this.info()).addServersItem(this.server())
+    fun openApi(): OpenAPI = OpenAPI().info(this.info())
 
 }

@@ -1,6 +1,6 @@
 package com.gga.webhook.builder
 
-import com.gga.webhook.models.dto.*
+import com.gga.webhook.models.dTO.*
 import java.time.Instant
 import java.util.*
 

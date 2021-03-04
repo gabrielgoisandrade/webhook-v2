@@ -3,8 +3,8 @@ package com.gga.webhook.utils
 import com.gga.webhook.builder.PayloadBuilder
 import com.gga.webhook.models.LabelsModel
 import com.gga.webhook.models.SenderModel
-import com.gga.webhook.models.dto.LabelsDto
-import com.gga.webhook.models.dto.SenderDto
+import com.gga.webhook.models.dTO.LabelsDto
+import com.gga.webhook.models.dTO.SenderDto
 import com.gga.webhook.utils.MapperUtil.Companion.convertTo
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test

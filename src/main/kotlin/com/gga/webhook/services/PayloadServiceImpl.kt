@@ -1,19 +1,21 @@
 package com.gga.webhook.services
 
-import com.gga.webhook.errors.exceptions.IssueNotFoundException
+import com.gga.webhook.errors.exceptions.InvalidDirectionException
+import com.gga.webhook.errors.exceptions.PayloadNotFoundException
 import com.gga.webhook.models.*
-import com.gga.webhook.models.dto.*
+import com.gga.webhook.models.dTO.*
+import com.gga.webhook.models.vO.PayloadVo
 import com.gga.webhook.repositories.*
 import com.gga.webhook.utils.MapperUtil.Companion.convertTo
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.cache.annotation.Cacheable
-import org.springframework.cache.annotation.EnableCaching
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-@EnableCaching
-class EventService @Autowired constructor(
+class PayloadServiceImpl @Autowired constructor(
     private val payloadRepository: PayloadRepository,
     private val issueRepository: IssueRepository,
     private val userRepository: UserRepository,
@@ -26,7 +28,7 @@ class EventService @Autowired constructor(
     private val licenseRepository: LicenseRepository,
     private val ownerRepository: OwnerRepository,
     private val senderRepository: SenderRepository
-) : IEventService {
+) : PayloadService {
 
     private lateinit var assigneesDto: Set<AssigneesDto>
 
@@ -118,18 +120,25 @@ class EventService @Autowired constructor(
     override fun saveSender(sender: SenderDto): SenderModel =
         (sender convertTo SenderModel::class.java).run { senderRepository.save(this) }
 
-    @Cacheable(cacheNames = ["issueByNumber"])
-    override fun getIssueByNumber(number: Int): HashSet<IssueDto> {
-        val issue: Set<IssueModel> = issueRepository.findIssueModelByNumber(number)
+    override fun getPayloadById(id: Long): PayloadVo = this.payloadRepository.findById(id).orElseThrow {
+        PayloadNotFoundException("Payload with ID $id not found.")
+    }.run { this convertTo PayloadVo::class.java }
 
-        if (issue.isEmpty()) throw IssueNotFoundException("Issue #$number not found.")
+    override fun getAllPayloads(page: Int, limit: Int, direction: String): Page<PayloadVo> {
+        val sort: Sort = this.verifyDirection(direction)
 
-        return (issue convertTo (IssueDto::class.java)).map {
-            it.apply {
-                this.assignees = assigneesRepository.findAssignees() convertTo AssigneesDto::class.java
-                this.labels = labelsRepository.findLabels() convertTo LabelsDto::class.java
-            }
-        }.toHashSet()
+        return PageRequest.of(page, limit, sort).run {
+            payloadRepository.findAll(this).map { it convertTo PayloadVo::class.java }
+        }
+
+    }
+
+    private fun verifyDirection(direction: String): Sort = when (direction) {
+        "asc" -> Sort.by("id").ascending()
+
+        "desc" -> Sort.by("id").descending()
+
+        else -> throw InvalidDirectionException("Direction $direction isn't a valid direction.")
     }
 
 }

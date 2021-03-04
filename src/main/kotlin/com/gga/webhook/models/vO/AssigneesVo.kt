@@ -1,9 +1,9 @@
-package com.gga.webhook.models.dto
+package com.gga.webhook.models.vO
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import java.io.Serializable
 
-data class SenderDto @JvmOverloads constructor(
+data class AssigneesVo @JvmOverloads constructor(
     @JsonProperty("login")
     var login: String = "",
 

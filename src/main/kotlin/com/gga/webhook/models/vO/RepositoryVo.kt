@@ -1,10 +1,10 @@
-package com.gga.webhook.models.dto
+package com.gga.webhook.models.vO
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import java.io.Serializable
 import java.time.Instant
 
-data class RepositoryDto @JvmOverloads constructor(
+data class RepositoryVo @JvmOverloads constructor(
     @JsonProperty("id")
     var id: Long = 0,
 
@@ -21,7 +21,7 @@ data class RepositoryDto @JvmOverloads constructor(
     var private: Boolean = false,
 
     @JsonProperty("owner")
-    var owner: OwnerDto? = null,
+    var owner: OwnerVo? = null,
 
     @JsonProperty("html_url")
     var htmlUrl: String = "",
@@ -210,7 +210,7 @@ data class RepositoryDto @JvmOverloads constructor(
     var openIssuesCount: Int = 0,
 
     @JsonProperty("license")
-    var license: LicenseDto? = null,
+    var license: LicenseVo? = null,
 
     @JsonProperty("forks")
     var forks: Int = 0,

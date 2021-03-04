@@ -1,28 +1,24 @@
 package com.gga.webhook.services
 
 import com.gga.webhook.builder.PayloadBuilder
-import com.gga.webhook.errors.exceptions.IssueNotFoundException
 import com.gga.webhook.models.*
-import com.gga.webhook.models.dto.*
+import com.gga.webhook.models.dTO.*
 import com.gga.webhook.repositories.*
 import com.gga.webhook.utils.MapperUtil.Companion.convertTo
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.*
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
-import kotlin.random.Random
 
 @ActiveProfiles("test")
 @ExtendWith(SpringExtension::class)
-internal class EventServiceTest {
+internal class PayloadServiceImplTest {
 
     @MockBean
     private lateinit var payloadRepository: PayloadRepository
@@ -60,8 +56,8 @@ internal class EventServiceTest {
     @MockBean
     private lateinit var senderRepository: SenderRepository
 
-    private val eventService: EventService by lazy {
-        EventService(
+    private val payloadServiceImpl: PayloadServiceImpl by lazy {
+        PayloadServiceImpl(
             payloadRepository,
             issueRepository,
             userRepository,
@@ -151,7 +147,7 @@ internal class EventServiceTest {
         `when`(this.payloadRepository.save(any(PayloadModel::class.java)))
             .thenReturn(this.payloadDto convertTo PayloadModel::class.java)
 
-        val payloadDto: PayloadDto = this.eventService.savePayload(this.payloadDto)
+        val payloadDto: PayloadDto = this.payloadServiceImpl.savePayload(this.payloadDto)
 
         assertAll({
             assertEquals(this.payloadDto, payloadDto)
@@ -207,7 +203,7 @@ internal class EventServiceTest {
         `when`(this.payloadRepository.save(any(PayloadModel::class.java)))
             .thenReturn(this.payloadDto convertTo PayloadModel::class.java)
 
-        val payloadDto: PayloadDto = this.eventService.savePayload(this.payloadDto)
+        val payloadDto: PayloadDto = this.payloadServiceImpl.savePayload(this.payloadDto)
 
         assertAll({
             assertEquals(this.payloadDto, payloadDto)
@@ -262,7 +258,7 @@ internal class EventServiceTest {
         `when`(this.payloadRepository.save(any(PayloadModel::class.java)))
             .thenReturn(this.payloadDto convertTo PayloadModel::class.java)
 
-        val payloadDto: PayloadDto = this.eventService.savePayload(this.payloadDto)
+        val payloadDto: PayloadDto = this.payloadServiceImpl.savePayload(this.payloadDto)
 
         assertAll({
             assertEquals(this.payloadDto, payloadDto)
@@ -291,7 +287,7 @@ internal class EventServiceTest {
 
         `when`(this.issueRepository.save(any(IssueModel::class.java))).thenReturn(expectedIssue)
 
-        val issueModel: IssueModel = this.eventService.saveIssue(this.issueDto)
+        val issueModel: IssueModel = this.payloadServiceImpl.saveIssue(this.issueDto)
 
         assertAll({
             assertEquals(expectedIssue, issueModel)
@@ -319,7 +315,7 @@ internal class EventServiceTest {
 
         `when`(this.issueRepository.save(any(IssueModel::class.java))).thenReturn(expectedIssue)
 
-        val issueModel: IssueModel = this.eventService.saveIssue(this.issueDto)
+        val issueModel: IssueModel = this.payloadServiceImpl.saveIssue(this.issueDto)
 
         verify(this.milestoneRepository, never()).save(any(MilestoneModel::class.java))
 
@@ -341,7 +337,7 @@ internal class EventServiceTest {
         `when`(this.userRepository.save(any(UserModel::class.java)))
             .thenReturn(expectedUser)
 
-        val userModel: UserModel = this.eventService.saveUser(this.userDto)
+        val userModel: UserModel = this.payloadServiceImpl.saveUser(this.userDto)
 
         assertEquals(expectedUser, userModel)
     }
@@ -354,7 +350,7 @@ internal class EventServiceTest {
         `when`(this.assigneeRepository.save(any(AssigneeModel::class.java)))
             .thenReturn(expectedAssignee)
 
-        val assigneeModel: AssigneeModel = this.eventService.saveAssignee(this.assigneeDto)
+        val assigneeModel: AssigneeModel = this.payloadServiceImpl.saveAssignee(this.assigneeDto)
 
         assertEquals(expectedAssignee, assigneeModel)
     }
@@ -372,7 +368,7 @@ internal class EventServiceTest {
         `when`(this.assigneesRepository.saveAll(anySet())).thenReturn(expectedAssignees.toMutableList())
 
         val assigneesModel: HashSet<AssigneesModel> =
-            this.eventService.saveAssignees(this.assigneesDto, issueModel)
+            this.payloadServiceImpl.saveAssignees(this.assigneesDto, issueModel)
 
         assertAll({
             assertEquals(expectedAssignees, assigneesModel)
@@ -391,7 +387,7 @@ internal class EventServiceTest {
 
         `when`(this.labelsRepository.saveAll(anySet())).thenReturn(expectedLabels.toMutableList())
 
-        val labelsModel: HashSet<LabelsModel> = this.eventService.saveLabels(this.labelsDto, issueModel)
+        val labelsModel: HashSet<LabelsModel> = this.payloadServiceImpl.saveLabels(this.labelsDto, issueModel)
 
         assertAll({
             assertEquals(expectedLabels, labelsModel)
@@ -410,7 +406,7 @@ internal class EventServiceTest {
         `when`(this.milestoneRepository.save(any(MilestoneModel::class.java)))
             .thenReturn(this.milestoneDto convertTo MilestoneModel::class.java)
 
-        val milestoneModel: MilestoneModel = this.eventService.saveMilestone(this.milestoneDto)
+        val milestoneModel: MilestoneModel = this.payloadServiceImpl.saveMilestone(this.milestoneDto)
 
         assertAll({
             assertEquals(expectedMilestone, milestoneModel)
@@ -425,7 +421,7 @@ internal class EventServiceTest {
 
         `when`(this.creatorRepository.save(any(CreatorModel::class.java))).thenReturn(expectedCreator)
 
-        val creatorModel: CreatorModel = this.eventService.saveCreator(this.creatorDto)
+        val creatorModel: CreatorModel = this.payloadServiceImpl.saveCreator(this.creatorDto)
 
         assertEquals(expectedCreator, creatorModel)
     }
@@ -444,7 +440,7 @@ internal class EventServiceTest {
 
         val expectedRepository: RepositoryModel = this.repositoryDto convertTo RepositoryModel::class.java
 
-        val repositoryModel: RepositoryModel = this.eventService.saveRepository(this.repositoryDto)
+        val repositoryModel: RepositoryModel = this.payloadServiceImpl.saveRepository(this.repositoryDto)
 
         assertAll({
             assertEquals(expectedRepository, repositoryModel)
@@ -467,7 +463,7 @@ internal class EventServiceTest {
 
         `when`(this.repositoryRepository.save(any(RepositoryModel::class.java))).thenReturn(expectedRepository)
 
-        val repositoryModel: RepositoryModel = this.eventService.saveRepository(this.repositoryDto)
+        val repositoryModel: RepositoryModel = this.payloadServiceImpl.saveRepository(this.repositoryDto)
 
         verify(this.licenseRepository, never()).save(any(LicenseModel::class.java))
 
@@ -485,7 +481,7 @@ internal class EventServiceTest {
         `when`(this.licenseRepository.save(any(LicenseModel::class.java)))
             .thenReturn(this.licenseDto convertTo LicenseModel::class.java)
 
-        val licenseModel: LicenseModel = this.eventService.saveLicense(this.licenseDto)
+        val licenseModel: LicenseModel = this.payloadServiceImpl.saveLicense(this.licenseDto)
 
         assertEquals(expectedLicense, licenseModel)
     }
@@ -498,7 +494,7 @@ internal class EventServiceTest {
         `when`(this.ownerRepository.save(any(OwnerModel::class.java)))
             .thenReturn(this.ownerDto convertTo OwnerModel::class.java)
 
-        val ownerModel: OwnerModel = this.eventService.saveOwner(this.ownerDto)
+        val ownerModel: OwnerModel = this.payloadServiceImpl.saveOwner(this.ownerDto)
 
         assertEquals(expectedOwner, ownerModel)
     }
@@ -511,158 +507,9 @@ internal class EventServiceTest {
         `when`(this.senderRepository.save(any(SenderModel::class.java)))
             .thenReturn(this.senderDto convertTo SenderModel::class.java)
 
-        val senderModel: SenderModel = this.eventService.saveSender(this.senderDto)
+        val senderModel: SenderModel = this.payloadServiceImpl.saveSender(this.senderDto)
 
         assertEquals(expectedSender, senderModel)
-    }
-
-    @Test
-    @DisplayName("Deve retornar a issue com o número solicitado")
-    fun getIssueByNumber() {
-        val issueModel: IssueModel = issueDto convertTo IssueModel::class.java
-
-        val expectedAssignees: HashSet<AssigneesModel> =
-            (this.builder.assignees() convertTo AssigneesModel::class.java).map {
-                it.apply { this.issue = issueModel }
-            }.toHashSet()
-
-        val expectedLabels: HashSet<LabelsModel> = (this.builder.labels() convertTo LabelsModel::class.java).map {
-            it.apply { this.issue = issueModel }
-        }.toHashSet()
-
-        val expectedIssue: IssueDto = this.issueDto.apply {
-            this.assignees = expectedAssignees convertTo AssigneesDto::class.java
-            this.labels = expectedLabels convertTo LabelsDto::class.java
-        }
-
-        `when`(this.labelsRepository.findLabels()).thenReturn(expectedLabels)
-
-        `when`(this.assigneesRepository.findAssignees()).thenReturn(expectedAssignees)
-
-        `when`(this.issueRepository.findIssueModelByNumber(anyInt()))
-            .thenReturn(hashSetOf(this.issueDto convertTo IssueModel::class.java))
-
-        assertDoesNotThrow { this.eventService.getIssueByNumber(Random.nextInt()) }
-
-        val issueByNumber: HashSet<IssueDto> = this.eventService.getIssueByNumber(Random.nextInt())
-
-        issueByNumber.forEach {
-            assertAll({
-                assertEquals(expectedIssue, it)
-                assertEquals(expectedIssue.assignees, it.assignees, "Assignees must be equal to expected")
-                assertEquals(expectedIssue.labels, it.labels, "Labels must be equal to expected")
-            })
-        }
-    }
-
-    @Test
-    @DisplayName("Deve retornar a issue (sem assignees) com o número solicitado")
-    fun getIssueByNumberWithoutAssignees() {
-        val issueModel: IssueModel = issueDto convertTo IssueModel::class.java
-
-        val expectedLabels: HashSet<LabelsModel> = (this.builder.labels() convertTo LabelsModel::class.java).map {
-            it.apply { this.issue = issueModel }
-        }.toHashSet()
-
-        val expectedIssue: IssueDto = this.issueDto.apply {
-            this.assignees = hashSetOf()
-            this.labels = expectedLabels convertTo LabelsDto::class.java
-        }
-
-        `when`(this.labelsRepository.findLabels()).thenReturn(expectedLabels)
-
-        `when`(this.assigneesRepository.findAssignees()).thenReturn(hashSetOf())
-
-        `when`(this.issueRepository.findIssueModelByNumber(anyInt()))
-            .thenReturn(hashSetOf(this.issueDto convertTo IssueModel::class.java))
-
-        assertDoesNotThrow { this.eventService.getIssueByNumber(Random.nextInt()) }
-
-        val issueByNumber: HashSet<IssueDto> = this.eventService.getIssueByNumber(Random.nextInt())
-
-        issueByNumber.forEach {
-            assertAll({
-                assertEquals(expectedIssue, it)
-                assertEquals(expectedIssue.labels, it.labels, "Labels must be equal to expected")
-                assertTrue(it.assignees.isEmpty(), "Assignees must be an empty Set")
-            })
-        }
-    }
-
-    @Test
-    @DisplayName("Deve retornar a issue (sem a label) com o número solicitado")
-    fun getIssueByNumberWithoutLabels() {
-        val issueModel: IssueModel = issueDto convertTo IssueModel::class.java
-
-        val expectedAssignees: HashSet<AssigneesModel> =
-            (this.builder.assignees() convertTo AssigneesModel::class.java).map {
-                it.apply { this.issue = issueModel }
-            }.toHashSet()
-
-        val expectedIssue: IssueDto = this.issueDto.apply {
-            this.assignees = expectedAssignees convertTo AssigneesDto::class.java
-            this.labels = hashSetOf()
-        }
-
-        `when`(this.labelsRepository.findLabels()).thenReturn(hashSetOf())
-
-        `when`(this.assigneesRepository.findAssignees()).thenReturn(expectedAssignees)
-
-        `when`(this.issueRepository.findIssueModelByNumber(anyInt()))
-            .thenReturn(hashSetOf(this.issueDto convertTo IssueModel::class.java))
-
-        assertDoesNotThrow { this.eventService.getIssueByNumber(Random.nextInt()) }
-
-        val issueByNumber: HashSet<IssueDto> = this.eventService.getIssueByNumber(Random.nextInt())
-
-        issueByNumber.forEach {
-            assertAll({
-                assertEquals(expectedIssue, it)
-                assertTrue(it.labels.isEmpty(), "Labels must be an empty Set")
-                assertEquals(expectedIssue.assignees, it.assignees, "Assignees must be equal to expected")
-            })
-        }
-    }
-
-    @Test
-    @DisplayName("Deve retornar a issue (sem assignees e labels) com o número solicitado")
-    fun getIssueByNumberWithoutAssigneesAndLabels() {
-        val expectedIssue: IssueDto = this.issueDto.apply {
-            this.assignees = hashSetOf()
-            this.labels = hashSetOf()
-        }
-
-        `when`(this.labelsRepository.findLabels()).thenReturn(hashSetOf())
-
-        `when`(this.assigneesRepository.findAssignees()).thenReturn(hashSetOf())
-
-        `when`(this.issueRepository.findIssueModelByNumber(anyInt()))
-            .thenReturn(hashSetOf(this.issueDto convertTo IssueModel::class.java))
-
-        assertDoesNotThrow { this.eventService.getIssueByNumber(Random.nextInt()) }
-
-        val issueByNumber: HashSet<IssueDto> = this.eventService.getIssueByNumber(Random.nextInt())
-
-        issueByNumber.forEach {
-            assertAll({
-                assertEquals(expectedIssue, it)
-                assertTrue(it.assignees.isEmpty(), "Assignees must be an empty Set")
-                assertTrue(it.labels.isEmpty(), "Labels must be an empty Set")
-            })
-        }
-    }
-
-    @Test
-    @DisplayName("Deve retornar um erro caso não exista uma issue com o número solicitado")
-    fun throwErrorByIssueNotFound() {
-        val number: Int = Random.nextInt()
-
-        `when`(this.issueRepository.findIssueModelByNumber(anyInt()))
-            .thenThrow(IssueNotFoundException("Issue #$number not found"))
-
-        assertThrows<IssueNotFoundException> { this.eventService.getIssueByNumber(number) }.also {
-            assertThat(it).isInstanceOf(IssueNotFoundException::class.java).hasMessage("Issue #$number not found")
-        }
     }
 
 }

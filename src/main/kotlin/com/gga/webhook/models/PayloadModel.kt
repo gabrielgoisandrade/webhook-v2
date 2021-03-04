@@ -14,15 +14,15 @@ data class PayloadModel @JvmOverloads constructor(
     @Column(name = "ACTION")
     var action: String = "",
 
-    @OneToOne(cascade= [CascadeType.ALL], fetch = FetchType.LAZY)
+    @OneToOne(cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
     @JoinColumn(name = "ISSUE_ID", foreignKey = ForeignKey(name = "C_PAYLOAD_ISSUE"))
     var issue: IssueModel? = null,
 
-    @OneToOne(cascade= [CascadeType.ALL], fetch = FetchType.LAZY)
+    @OneToOne(cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
     @JoinColumn(name = "REPOSITORY_ID", foreignKey = ForeignKey(name = "C_PAYLOAD_REPOSITORY"))
     var repository: RepositoryModel? = null,
 
-    @OneToOne(cascade= [CascadeType.ALL], fetch = FetchType.LAZY)
+    @OneToOne(cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
     @JoinColumn(name = "SENDER_ID", foreignKey = ForeignKey(name = "C_PAYLOAD_SENDER"))
     var sender: SenderModel? = null
 ) : Serializable
