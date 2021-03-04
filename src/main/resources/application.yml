@@ -10,7 +10,7 @@ spring:
 
   # Profiles config
   profiles:
-    active: test
+    active: dev
 
   # SQL config
   jpa:
