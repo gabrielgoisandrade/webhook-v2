@@ -297,7 +297,7 @@ internal class EventControllerTest {
             .accept(APPLICATION_JSON)
 
         this.mockMvc.perform(request)
-            .andExpect(status().isBadRequest)
+            .andExpect(status().isNotFound)
             .andExpect(jsonPath("message").value("Issue #${body.number} not found."))
     }
 
