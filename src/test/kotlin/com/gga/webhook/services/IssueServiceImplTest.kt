@@ -11,8 +11,9 @@ import com.gga.webhook.models.dTO.LabelsDto
 import com.gga.webhook.repositories.AssigneesRepository
 import com.gga.webhook.repositories.IssueRepository
 import com.gga.webhook.repositories.LabelsRepository
+import com.gga.webhook.services.impls.IssueServiceImpl
 import com.gga.webhook.utils.MapperUtil.Companion.convertTo
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
@@ -38,7 +39,7 @@ internal class IssueServiceImplTest {
     @MockBean
     private lateinit var labelsRepository: LabelsRepository
 
-    private val payloadServiceImpl: IssueServiceImpl by lazy {
+    private val issueServiceImpl: IssueServiceImpl by lazy {
         IssueServiceImpl(issueRepository, assigneesRepository, labelsRepository)
     }
 
@@ -65,16 +66,16 @@ internal class IssueServiceImplTest {
             this.labels = expectedLabels convertTo LabelsDto::class.java
         }
 
-        `when`(this.labelsRepository.findLabels()).thenReturn(expectedLabels)
+        `when`(this.labelsRepository.getLabels()).thenReturn(expectedLabels)
 
-        `when`(this.assigneesRepository.findAssignees()).thenReturn(expectedAssignees)
+        `when`(this.assigneesRepository.getAssignees()).thenReturn(expectedAssignees)
 
         `when`(this.issueRepository.findIssueModelByNumber(anyInt()))
             .thenReturn(hashSetOf(this.issueDto convertTo IssueModel::class.java))
 
-        org.junit.jupiter.api.Assertions.assertDoesNotThrow { this.payloadServiceImpl.getIssueByNumber(Random.nextInt()) }
+        org.junit.jupiter.api.Assertions.assertDoesNotThrow { this.issueServiceImpl.getIssueByNumber(Random.nextInt()) }
 
-        val issueByNumber: HashSet<IssueDto> = this.payloadServiceImpl.getIssueByNumber(Random.nextInt())
+        val issueByNumber: HashSet<IssueDto> = this.issueServiceImpl.getIssueByNumber(Random.nextInt())
 
         issueByNumber.forEach {
             assertAll({
@@ -107,16 +108,16 @@ internal class IssueServiceImplTest {
             this.labels = expectedLabels convertTo LabelsDto::class.java
         }
 
-        `when`(this.labelsRepository.findLabels()).thenReturn(expectedLabels)
+        `when`(this.labelsRepository.getLabels()).thenReturn(expectedLabels)
 
-        `when`(this.assigneesRepository.findAssignees()).thenReturn(hashSetOf())
+        `when`(this.assigneesRepository.getAssignees()).thenReturn(hashSetOf())
 
         `when`(this.issueRepository.findIssueModelByNumber(anyInt()))
             .thenReturn(hashSetOf(this.issueDto convertTo IssueModel::class.java))
 
-        org.junit.jupiter.api.Assertions.assertDoesNotThrow { this.payloadServiceImpl.getIssueByNumber(Random.nextInt()) }
+        org.junit.jupiter.api.Assertions.assertDoesNotThrow { this.issueServiceImpl.getIssueByNumber(Random.nextInt()) }
 
-        val issueByNumber: HashSet<IssueDto> = this.payloadServiceImpl.getIssueByNumber(Random.nextInt())
+        val issueByNumber: HashSet<IssueDto> = this.issueServiceImpl.getIssueByNumber(Random.nextInt())
 
         issueByNumber.forEach {
             assertAll({
@@ -146,16 +147,16 @@ internal class IssueServiceImplTest {
             this.labels = hashSetOf()
         }
 
-        `when`(this.labelsRepository.findLabels()).thenReturn(hashSetOf())
+        `when`(this.labelsRepository.getLabels()).thenReturn(hashSetOf())
 
-        `when`(this.assigneesRepository.findAssignees()).thenReturn(expectedAssignees)
+        `when`(this.assigneesRepository.getAssignees()).thenReturn(expectedAssignees)
 
         `when`(this.issueRepository.findIssueModelByNumber(anyInt()))
             .thenReturn(hashSetOf(this.issueDto convertTo IssueModel::class.java))
 
-        org.junit.jupiter.api.Assertions.assertDoesNotThrow { this.payloadServiceImpl.getIssueByNumber(Random.nextInt()) }
+        org.junit.jupiter.api.Assertions.assertDoesNotThrow { this.issueServiceImpl.getIssueByNumber(Random.nextInt()) }
 
-        val issueByNumber: HashSet<IssueDto> = this.payloadServiceImpl.getIssueByNumber(Random.nextInt())
+        val issueByNumber: HashSet<IssueDto> = this.issueServiceImpl.getIssueByNumber(Random.nextInt())
 
         issueByNumber.forEach {
             assertAll({
@@ -178,16 +179,16 @@ internal class IssueServiceImplTest {
             this.labels = hashSetOf()
         }
 
-        `when`(this.labelsRepository.findLabels()).thenReturn(hashSetOf())
+        `when`(this.labelsRepository.getLabels()).thenReturn(hashSetOf())
 
-        `when`(this.assigneesRepository.findAssignees()).thenReturn(hashSetOf())
+        `when`(this.assigneesRepository.getAssignees()).thenReturn(hashSetOf())
 
         `when`(this.issueRepository.findIssueModelByNumber(anyInt()))
             .thenReturn(hashSetOf(this.issueDto convertTo IssueModel::class.java))
 
-        org.junit.jupiter.api.Assertions.assertDoesNotThrow { this.payloadServiceImpl.getIssueByNumber(Random.nextInt()) }
+        org.junit.jupiter.api.Assertions.assertDoesNotThrow { this.issueServiceImpl.getIssueByNumber(Random.nextInt()) }
 
-        val issueByNumber: HashSet<IssueDto> = this.payloadServiceImpl.getIssueByNumber(Random.nextInt())
+        val issueByNumber: HashSet<IssueDto> = this.issueServiceImpl.getIssueByNumber(Random.nextInt())
 
         issueByNumber.forEach {
             assertAll({
@@ -206,9 +207,19 @@ internal class IssueServiceImplTest {
         `when`(this.issueRepository.findIssueModelByNumber(anyInt()))
             .thenThrow(IssueNotFoundException("Issue #$number not found"))
 
-        assertThrows<IssueNotFoundException> { this.payloadServiceImpl.getIssueByNumber(number) }.also {
-            Assertions.assertThat(it).isInstanceOf(IssueNotFoundException::class.java)
+        assertThrows<IssueNotFoundException> { this.issueServiceImpl.getIssueByNumber(number) }.also {
+            assertThat(it).isInstanceOf(IssueNotFoundException::class.java)
                 .hasMessage("Issue #$number not found")
+        }
+    }
+
+    @Test
+    @DisplayName("Deve retornar um erro ao não retornar nenhuma issue de determinado payload")
+    fun throwErrorByNoIssueFound() {
+        `when`(this.issueRepository.getIssue()).thenThrow(IssueNotFoundException("No issue found."))
+
+        assertThrows<IssueNotFoundException> { this.issueServiceImpl.getIssue() }.also {
+            assertThat(it).isInstanceOf(IssueNotFoundException::class.java).hasMessage("No issue found.")
         }
     }
 

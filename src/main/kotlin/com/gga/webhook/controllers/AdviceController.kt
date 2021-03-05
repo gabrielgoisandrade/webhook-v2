@@ -1,10 +1,7 @@
 package com.gga.webhook.controllers
 
 import com.gga.webhook.errors.ApiError
-import com.gga.webhook.errors.exceptions.InvalidDirectionException
-import com.gga.webhook.errors.exceptions.IssueNotFoundException
-import com.gga.webhook.errors.exceptions.PayloadNotFoundException
-import com.gga.webhook.errors.exceptions.SenderNotFoundException
+import com.gga.webhook.errors.exceptions.*
 import org.springframework.http.HttpStatus.BAD_REQUEST
 import org.springframework.http.HttpStatus.NOT_FOUND
 import org.springframework.http.ResponseEntity
@@ -41,6 +38,36 @@ class AdviceController {
 
     @ExceptionHandler(SenderNotFoundException::class)
     fun handler(ex: SenderNotFoundException, request: WebRequest): ResponseEntity<ApiError> =
+        ApiError(ex.message!!, request.getDescription(false), DATE).run {
+            status(NOT_FOUND).body(this)
+        }
+
+    @ExceptionHandler(AssigneeNotFoundException::class)
+    fun handler(ex: AssigneeNotFoundException, request: WebRequest): ResponseEntity<ApiError> =
+        ApiError(ex.message!!, request.getDescription(false), DATE).run {
+            status(NOT_FOUND).body(this)
+        }
+
+    @ExceptionHandler(UserNotFoundException::class)
+    fun handler(ex: UserNotFoundException, request: WebRequest): ResponseEntity<ApiError> =
+        ApiError(ex.message!!, request.getDescription(false), DATE).run {
+            status(NOT_FOUND).body(this)
+        }
+
+    @ExceptionHandler(CreatorNotFoundException::class)
+    fun handler(ex: CreatorNotFoundException, request: WebRequest): ResponseEntity<ApiError> =
+        ApiError(ex.message!!, request.getDescription(false), DATE).run {
+            status(NOT_FOUND).body(this)
+        }
+
+    @ExceptionHandler(RepositoryNotFoundException::class)
+    fun handler(ex: RepositoryNotFoundException, request: WebRequest): ResponseEntity<ApiError> =
+        ApiError(ex.message!!, request.getDescription(false), DATE).run {
+            status(NOT_FOUND).body(this)
+        }
+
+    @ExceptionHandler(OwnerNotFoundException::class)
+    fun handler(ex: OwnerNotFoundException, request: WebRequest): ResponseEntity<ApiError> =
         ApiError(ex.message!!, request.getDescription(false), DATE).run {
             status(NOT_FOUND).body(this)
         }

@@ -1,6 +1,7 @@
 package com.gga.webhook.models.dTO
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import org.springframework.hateoas.RepresentationModel
 import java.io.Serializable
 import java.time.Instant
 
@@ -223,4 +224,4 @@ data class RepositoryDto @JvmOverloads constructor(
 
     @JsonProperty("default_branch")
     var defaultBranch: String = ""
-) : Serializable
+) : Serializable, RepresentationModel<RepositoryDto>()

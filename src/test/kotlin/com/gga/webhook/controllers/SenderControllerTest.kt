@@ -1,8 +1,9 @@
 package com.gga.webhook.controllers
 
 import com.gga.webhook.builder.PayloadBuilder
+import com.gga.webhook.errors.exceptions.SenderNotFoundException
 import com.gga.webhook.models.vO.SenderVo
-import com.gga.webhook.services.SenderServiceImpl
+import com.gga.webhook.services.impls.SenderServiceImpl
 import com.gga.webhook.utils.MapperUtil.Companion.convertTo
 import com.gga.webhook.utils.RequestUtil.Companion.SENDER
 import com.gga.webhook.utils.RequestUtil.Companion.getRequest
@@ -42,7 +43,7 @@ internal class SenderControllerTest {
         `when`(this.senderServiceImpl.getSender()).thenReturn((this.expectedSender))
 
         this.senderController.getSender().also {
-            assertEquals(expectedSender, it.body!!, "The body must be equal to expected")
+            assertEquals(expectedSender, it.body!!)
         }
     }
 
@@ -54,6 +55,16 @@ internal class SenderControllerTest {
         this.mockMvc.perform(getRequest(SENDER))
             .andExpect(status().isOk)
             .andExpect(jsonPath("links").isNotEmpty)
+    }
+
+    @Test
+    @DisplayName("GET -> Deve retornar um erro ao não retornar nenhum sender")
+    fun throwErrorByNoSenderFound() {
+        given(this.senderServiceImpl.getSender()).willThrow(SenderNotFoundException("No sender found."))
+
+        this.mockMvc.perform(getRequest(SENDER))
+            .andExpect(status().isNotFound)
+            .andExpect(jsonPath("message").value("No sender found."))
     }
 
 }

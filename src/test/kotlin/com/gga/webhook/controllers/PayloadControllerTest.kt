@@ -4,10 +4,11 @@ import com.gga.webhook.builder.PayloadBuilder
 import com.gga.webhook.errors.exceptions.PayloadNotFoundException
 import com.gga.webhook.models.dTO.PayloadDto
 import com.gga.webhook.models.vO.PayloadVo
-import com.gga.webhook.services.PayloadServiceImpl
+import com.gga.webhook.services.impls.PayloadServiceImpl
 import com.gga.webhook.utils.MapperUtil.Companion.convertTo
 import com.gga.webhook.utils.RequestUtil.Companion.PAYLOAD
 import com.gga.webhook.utils.RequestUtil.Companion.getRequest
+import org.hamcrest.Matchers.hasSize
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
@@ -191,7 +192,7 @@ internal class PayloadControllerTest {
 
     @Test
     @DisplayName("GET -> Deve retornar um erro ao não achar o Payload com o id solicitado")
-    fun throwErrorToPayloadNotFound() {
+    fun throwErrorByPayloadNotFound() {
         val id: Long = this.payload.id
 
         given(this.service.getPayloadById(id)).willThrow(PayloadNotFoundException("Payload with ID $id not found."))
@@ -213,6 +214,8 @@ internal class PayloadControllerTest {
         this.mockMvc.perform(getRequest("$PAYLOAD/?limit=10&page=0"))
             .andExpect(status().isOk)
             .andExpect(jsonPath("links").isNotEmpty)
+            .andExpect(jsonPath("content[0]['links'][1]['rel']").value("sender"))
+            .andExpect(jsonPath("content[0]['links']", hasSize<Int>(2)))
             .andExpect(jsonPath("content").isNotEmpty)
     }
 

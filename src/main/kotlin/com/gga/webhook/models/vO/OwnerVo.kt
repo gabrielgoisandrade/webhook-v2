@@ -1,6 +1,7 @@
 package com.gga.webhook.models.vO
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import org.springframework.hateoas.RepresentationModel
 import java.io.Serializable
 
 data class OwnerVo @JvmOverloads constructor(
@@ -57,4 +58,4 @@ data class OwnerVo @JvmOverloads constructor(
 
     @JsonProperty("site_admin")
     var siteAdmin: Boolean = false
-) : Serializable
+) : Serializable, RepresentationModel<OwnerVo>()

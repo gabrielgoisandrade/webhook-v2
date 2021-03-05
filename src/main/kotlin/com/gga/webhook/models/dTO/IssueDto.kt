@@ -1,6 +1,7 @@
 package com.gga.webhook.models.dTO
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import org.springframework.hateoas.RepresentationModel
 import java.io.Serializable
 import java.time.Instant
 
@@ -79,4 +80,4 @@ data class IssueDto @JvmOverloads constructor(
 
     @JsonProperty("performed_via_github_app")
     var performedViaGithubApp: String? = null
-) : Serializable
+) : Serializable, RepresentationModel<IssueDto>()

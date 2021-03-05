@@ -1,4 +1,4 @@
-package com.gga.webhook.services
+package com.gga.webhook.services.impls
 
 import com.gga.webhook.errors.exceptions.InvalidDirectionException
 import com.gga.webhook.errors.exceptions.PayloadNotFoundException
@@ -6,6 +6,7 @@ import com.gga.webhook.models.*
 import com.gga.webhook.models.dTO.*
 import com.gga.webhook.models.vO.PayloadVo
 import com.gga.webhook.repositories.*
+import com.gga.webhook.services.PayloadService
 import com.gga.webhook.utils.MapperUtil.Companion.convertTo
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page

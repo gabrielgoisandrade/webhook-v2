@@ -2,6 +2,7 @@ package com.gga.webhook.models.vO
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
+import org.springframework.hateoas.RepresentationModel
 import java.io.Serializable
 
 data class LicenseVo @JvmOverloads constructor(
@@ -23,4 +24,4 @@ data class LicenseVo @JvmOverloads constructor(
 
     @JsonProperty("node_id")
     var nodeId: String = ""
-) : Serializable
+) : Serializable, RepresentationModel<LicenseVo>()

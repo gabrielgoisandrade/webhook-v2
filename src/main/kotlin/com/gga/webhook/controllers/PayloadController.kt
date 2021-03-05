@@ -3,7 +3,7 @@ package com.gga.webhook.controllers
 import com.gga.webhook.errors.ApiError
 import com.gga.webhook.models.dTO.PayloadDto
 import com.gga.webhook.models.vO.PayloadVo
-import com.gga.webhook.services.PayloadServiceImpl
+import com.gga.webhook.services.impls.PayloadServiceImpl
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
@@ -47,6 +47,7 @@ class PayloadController {
                 linkTo(methodOn(this@PayloadController::class.java).findPayloadById(id)).withSelfRel(),
                 linkTo(methodOn(SenderController::class.java).getSender()).withRel("sender")
             )
+
             ok(this)
         }
 
@@ -63,6 +64,11 @@ class PayloadController {
         this.payloadServiceImpl.getAllPayloads(page, limit, direction).run {
             this.forEach {
                 it.add(linkTo(methodOn(this@PayloadController::class.java).findPayloadById(it.id)).withSelfRel())
+
+                it.add(linkTo(methodOn(IssueController::class.java).getIssue()).withRel("issue"))
+
+                it.add(linkTo(methodOn(RepositoryController::class.java).getRepository()).withRel("repository"))
+
                 it.add(linkTo(methodOn(SenderController::class.java).getSender()).withRel("sender"))
             }
 

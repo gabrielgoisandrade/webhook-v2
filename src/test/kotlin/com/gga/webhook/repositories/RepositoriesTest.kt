@@ -26,37 +26,10 @@ internal class RepositoriesTest {
     private lateinit var payloadRepository: PayloadRepository
 
     @Autowired
-    private lateinit var issueRepository: IssueRepository
-
-    @Autowired
-    private lateinit var userRepository: UserRepository
-
-    @Autowired
-    private lateinit var assigneeRepository: AssigneeRepository
-
-    @Autowired
     private lateinit var assigneesRepository: AssigneesRepository
 
     @Autowired
     private lateinit var labelsRepository: LabelsRepository
-
-    @Autowired
-    private lateinit var milestoneRepository: MilestoneRepository
-
-    @Autowired
-    private lateinit var creatorRepository: CreatorRepository
-
-    @Autowired
-    private lateinit var repositoryRepository: RepositoryRepository
-
-    @Autowired
-    private lateinit var licenseRepository: LicenseRepository
-
-    @Autowired
-    private lateinit var ownerRepository: OwnerRepository
-
-    @Autowired
-    private lateinit var senderRepository: SenderRepository
 
     private val builder: PayloadBuilder = PayloadBuilder()
 
@@ -114,24 +87,6 @@ internal class RepositoriesTest {
     }
 
     @Test
-    @DisplayName("Deve persistir Issue no database")
-    fun saveIssue() {
-        val milestoneModel: MilestoneModel = (this.milestoneDto convertTo MilestoneModel::class.java).apply {
-            this.creator = entityManager.persist(creatorDto convertTo CreatorModel::class.java)
-        }
-
-        val toSave: IssueModel = (this.issueDto convertTo IssueModel::class.java).apply {
-            this.assignee = entityManager.persist(assigneeDto convertTo AssigneeModel::class.java)
-            this.milestone = entityManager.persist(milestoneModel)
-            this.user = entityManager.persist(userDto convertTo UserModel::class.java)
-        }
-
-        this.entityManager.persist(toSave)
-
-        this.issueRepository.findAll().also { assertTrue(it.isNotEmpty()) }
-    }
-
-    @Test
     @DisplayName("Deve persistir Labels no database")
     fun saveLabels() {
         val issueToSave: IssueModel = this.entityManager.persist(this.issueDto convertTo IssueModel::class.java)
@@ -157,78 +112,6 @@ internal class RepositoriesTest {
         toSave.forEach { this.entityManager.merge(it) }
 
         this.assigneesRepository.findAll().also { assertTrue(it.isNotEmpty()) }
-    }
-
-    @Test
-    @DisplayName("Deve persistir Assignee no database")
-    fun saveAssignee() {
-        this.entityManager.persist(this.assigneeDto convertTo AssigneeModel::class.java)
-
-        this.assigneeRepository.findAll().also { assertTrue(it.isNotEmpty()) }
-    }
-
-    @Test
-    @DisplayName("Deve persistir User no database")
-    fun saveUser() {
-        this.entityManager.persist(this.userDto convertTo UserModel::class.java)
-
-        this.userRepository.findAll().also { assertTrue(it.isNotEmpty()) }
-    }
-
-    @Test
-    @DisplayName("Deve persistir Milestone no database")
-    fun saveMilestone() {
-        val toSave: MilestoneModel = (this.milestoneDto convertTo MilestoneModel::class.java).apply {
-            this.creator = entityManager.persist(creatorDto convertTo CreatorModel::class.java)
-        }
-
-        this.entityManager.persist(toSave)
-
-        this.milestoneRepository.findAll().also { assertTrue(it.isNotEmpty()) }
-    }
-
-    @Test
-    @DisplayName("Deve persistir Creator no database")
-    fun saveCreator() {
-        this.entityManager.persist(this.creatorDto convertTo CreatorModel::class.java)
-
-        this.creatorRepository.findAll().also { assertTrue(it.isNotEmpty()) }
-    }
-
-    @Test
-    @DisplayName("Deve persistir Repository no database")
-    fun saveRepository() {
-        val toSave: RepositoryModel = (this.repositoryDto convertTo RepositoryModel::class.java).apply {
-            this.license = entityManager.merge(licenseDto convertTo LicenseModel::class.java)
-        }
-
-        this.entityManager.persist(toSave)
-
-        this.repositoryRepository.findAll().also { assertTrue(it.isNotEmpty()) }
-    }
-
-    @Test
-    @DisplayName("Deve persistir License no database")
-    fun saveLicense() {
-        this.entityManager.merge(this.licenseDto convertTo LicenseModel::class.java)
-
-        this.licenseRepository.findAll().also { assertTrue(it.isNotEmpty()) }
-    }
-
-    @Test
-    @DisplayName("Deve persistir Owner no database")
-    fun saveOwner() {
-        this.entityManager.persist(this.ownerDto convertTo OwnerModel::class.java)
-
-        this.ownerRepository.findAll().also { assertTrue(it.isNotEmpty()) }
-    }
-
-    @Test
-    @DisplayName("Deve persistir Sender no database")
-    fun saveSender() {
-        this.entityManager.persist(this.senderDto convertTo SenderModel::class.java)
-
-        this.senderRepository.findAll().also { assertTrue(it.isNotEmpty()) }
     }
 
 }

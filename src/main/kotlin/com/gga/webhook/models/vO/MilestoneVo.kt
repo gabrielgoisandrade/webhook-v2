@@ -1,6 +1,7 @@
 package com.gga.webhook.models.vO
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import org.springframework.hateoas.RepresentationModel
 import java.io.Serializable
 import java.time.Instant
 
@@ -29,9 +30,6 @@ data class MilestoneVo @JvmOverloads constructor(
     @JsonProperty("description")
     var description: String? = null,
 
-    @JsonProperty("creator")
-    var creator: CreatorVo? = null,
-
     @JsonProperty("open_issues")
     var openIssues: Int = 0,
 
@@ -52,4 +50,4 @@ data class MilestoneVo @JvmOverloads constructor(
 
     @JsonProperty("closed_at")
     var closedAt: Instant? = null
-) : Serializable
+) : Serializable, RepresentationModel<MilestoneVo>()

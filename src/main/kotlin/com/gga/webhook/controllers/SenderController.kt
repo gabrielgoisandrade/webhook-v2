@@ -2,7 +2,7 @@ package com.gga.webhook.controllers
 
 import com.gga.webhook.errors.ApiError
 import com.gga.webhook.models.vO.SenderVo
-import com.gga.webhook.services.SenderServiceImpl
+import com.gga.webhook.services.impls.SenderServiceImpl
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/sender")
+@RequestMapping("/sender", produces = [MediaType.APPLICATION_JSON_VALUE])
 @Tag(name = "Sender controller", description = "Methods available for resource 'sender'")
 class SenderController {
 
@@ -28,16 +28,17 @@ class SenderController {
 
     @Operation(
         description = "Return the sender of current payload",
-        responses = [ApiResponse(description = "Senders found", responseCode = "200"),
+        responses = [ApiResponse(description = "Sender found", responseCode = "200"),
             ApiResponse(
-                description = "Sender not found.",
+                description = "No sender found.",
                 responseCode = "404",
                 content = [Content(schema = Schema(implementation = ApiError::class))]
             )]
     )
-    @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
+    @GetMapping
     fun getSender(): ResponseEntity<SenderVo> = this.senderServiceImpl.getSender().run {
-        this.add(linkTo(methodOn(SenderController::class.java).getSender()).withSelfRel())
+        this.add(linkTo(methodOn(this@SenderController::class.java).getSender()).withSelfRel())
+
         ok(this)
     }
 

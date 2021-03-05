@@ -1,6 +1,7 @@
 package com.gga.webhook.models.vO
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import org.springframework.hateoas.RepresentationModel
 import java.io.Serializable
 import java.time.Instant
 
@@ -19,9 +20,6 @@ data class RepositoryVo @JvmOverloads constructor(
 
     @JsonProperty("private")
     var private: Boolean = false,
-
-    @JsonProperty("owner")
-    var owner: OwnerVo? = null,
 
     @JsonProperty("html_url")
     var htmlUrl: String = "",
@@ -209,9 +207,6 @@ data class RepositoryVo @JvmOverloads constructor(
     @JsonProperty("open_issues_count")
     var openIssuesCount: Int = 0,
 
-    @JsonProperty("license")
-    var license: LicenseVo? = null,
-
     @JsonProperty("forks")
     var forks: Int = 0,
 
@@ -223,4 +218,4 @@ data class RepositoryVo @JvmOverloads constructor(
 
     @JsonProperty("default_branch")
     var defaultBranch: String = ""
-) : Serializable
+) : Serializable, RepresentationModel<RepositoryVo>()

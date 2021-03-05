@@ -15,6 +15,24 @@ class RequestUtil private constructor() {
 
         const val SENDER: String = "/sender"
 
+        const val USER: String = "/user"
+
+        const val ASSIGNEE: String = "/assignee"
+
+        const val ASSIGNEES: String = "/assignees"
+
+        const val LABELS: String = "/labels"
+
+        const val LICENSE: String = "/license"
+
+        const val OWNER: String = "/owner"
+
+        const val REPOSITORY: String = "/repository"
+
+        const val MILESTONE: String = "/milestone"
+
+        const val CREATOR: String = "/creator"
+
         @JvmStatic
         fun postRequest(uri: String, body: String): MockHttpServletRequestBuilder = post(uri)
             .contentType(APPLICATION_JSON_VALUE)

@@ -1,6 +1,7 @@
 package com.gga.webhook.models.vO
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import org.springframework.hateoas.RepresentationModel
 import java.io.Serializable
 import java.time.Instant
 
@@ -35,9 +36,6 @@ data class IssueVo @JvmOverloads constructor(
     @JsonProperty("title")
     var title: String = "",
 
-    @JsonProperty("user")
-    var user: UserVo? = null,
-
     @JsonProperty("labels")
     var labels: Set<LabelsVo> = hashSetOf(),
 
@@ -47,14 +45,8 @@ data class IssueVo @JvmOverloads constructor(
     @JsonProperty("locked")
     var locked: Boolean = false,
 
-    @JsonProperty("assignee")
-    var assignee: AssigneeVo? = null,
-
     @JsonProperty("assignees")
     var assignees: Set<AssigneesVo> = hashSetOf(),
-
-    @JsonProperty("milestone")
-    var milestone: MilestoneVo? = null,
 
     @JsonProperty("comments")
     var comments: Int = 0,
@@ -79,4 +71,4 @@ data class IssueVo @JvmOverloads constructor(
 
     @JsonProperty("performed_via_github_app")
     var performedViaGithubApp: String? = null
-) : Serializable
+) : Serializable, RepresentationModel<IssueVo>()
