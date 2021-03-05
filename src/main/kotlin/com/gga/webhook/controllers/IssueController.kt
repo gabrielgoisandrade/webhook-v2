@@ -1,7 +1,6 @@
 package com.gga.webhook.controllers
 
 import com.gga.webhook.errors.ApiError
-import com.gga.webhook.models.dTO.IssueDto
 import com.gga.webhook.models.vO.IssueVo
 import com.gga.webhook.services.impls.IssueServiceImpl
 import io.swagger.v3.oas.annotations.Operation
@@ -41,8 +40,20 @@ class IssueController {
         ]
     )
     @GetMapping("/{number}")
-    fun getIssueByNumber(@PathVariable("number") number: Int): ResponseEntity<HashSet<IssueDto>> =
-        this.issueServiceImpl.getIssueByNumber(number).run { ok(this) }
+    fun getIssueByNumber(@PathVariable("number") number: Int): ResponseEntity<HashSet<IssueVo>> =
+        this.issueServiceImpl.getIssueByNumber(number).run {
+            this.forEach {
+                it.add(linkTo(methodOn(this@IssueController::class.java).getIssue()).withSelfRel())
+
+                it.add(linkTo(methodOn(UserController::class.java).getUser()).withRel("user"))
+
+                it.add(linkTo(methodOn(AssigneeController::class.java).getAssignee()).withRel("assignee"))
+
+                it.add(linkTo(methodOn(MilestoneController::class.java).getMilestone()).withRel("milestone"))
+            }
+
+            ok(this)
+        }
 
     @Operation(
         description = "Return the issue of current payload",

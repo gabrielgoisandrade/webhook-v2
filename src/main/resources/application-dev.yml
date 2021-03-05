@@ -18,4 +18,3 @@ spring:
     url: jdbc:postgresql://localhost:5432/webhook
     schemas: public
     check-location: true
-    baseline-on-migrate: true

@@ -36,8 +36,8 @@ data class IssueVo @JvmOverloads constructor(
     @JsonProperty("title")
     var title: String = "",
 
-    @JsonProperty("labels")
-    var labels: Set<LabelsVo> = hashSetOf(),
+   /* @JsonProperty("labels")
+    var labels: Set<LabelsVo> = hashSetOf(),*/
 
     @JsonProperty("state")
     var state: String = "",
@@ -45,9 +45,9 @@ data class IssueVo @JvmOverloads constructor(
     @JsonProperty("locked")
     var locked: Boolean = false,
 
-    @JsonProperty("assignees")
+    /*@JsonProperty("assignees")
     var assignees: Set<AssigneesVo> = hashSetOf(),
-
+*/
     @JsonProperty("comments")
     var comments: Int = 0,
 

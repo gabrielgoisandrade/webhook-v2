@@ -2,14 +2,14 @@ package com.gga.webhook.controllers
 
 import com.gga.webhook.builder.PayloadBuilder
 import com.gga.webhook.errors.exceptions.IssueNotFoundException
-import com.gga.webhook.models.dTO.IssueDto
 import com.gga.webhook.models.vO.IssueVo
 import com.gga.webhook.services.impls.IssueServiceImpl
 import com.gga.webhook.utils.MapperUtil.Companion.convertTo
 import com.gga.webhook.utils.RequestUtil.Companion.ISSUE
 import com.gga.webhook.utils.RequestUtil.Companion.getRequest
 import org.hamcrest.Matchers.hasSize
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertAll
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.mockito.BDDMockito.given
@@ -43,37 +43,9 @@ internal class IssueControllerTest {
     private val expectedIssue: IssueVo = this.builder.issue() convertTo IssueVo::class.java
 
     @Test
-    @DisplayName(
-        "GET -> Deve retornar a issue com o número passado via path, sem nenhum assignee, uma lista vazia de " +
-                "assignees e o status code 200"
-    )
-    fun getIssueByNumberWithNullAssignee() {
-        val body: HashSet<IssueDto> = hashSetOf(this.builder.issueWithoutAssignee().issue!!)
-
-        given(this.serviceImpl.getIssueByNumber(50)).willReturn(body)
-
-        this.controller.getIssueByNumber(50).also {
-            assertEquals(it.statusCode, HttpStatus.OK)
-
-            assertEquals(body, it.body!!, "The response body must be equal to mock")
-
-            it.body!!.forEach { issueDto: IssueDto ->
-                with(issueDto) {
-                    assertAll({
-                        assertFalse(this.milestone == null, "Milestone must not be null")
-                        assertFalse(this.labels.isEmpty(), "Labels must not be an empty list")
-                        assertTrue(this.assignee == null, "Assignee must be null")
-                        assertTrue(this.assignees.isEmpty(), "Assignees must be an empty list")
-                    })
-                }
-            }
-        }
-    }
-
-    @Test
     @DisplayName("GET -> Deve retornar uma mensagem de erro ao buscar uma issue que não existe")
     fun throwErrorIssueNotFound() {
-        val body: IssueDto = this.builder.payload().issue!!
+        val body: IssueVo = this.builder.payload().issue!! convertTo IssueVo::class.java
 
         given(this.serviceImpl.getIssueByNumber(body.number))
             .willThrow(IssueNotFoundException("Issue #${body.number} not found."))
@@ -84,85 +56,17 @@ internal class IssueControllerTest {
     }
 
     @Test
-    @DisplayName(
-        "GET -> Deve retornar a issue com o número passado via path, sem nenhum objeto interno como null e o " +
-                "status code 200"
-    )
-    fun getIssueByNumberWithoutNullObjects() {
-        val body: HashSet<IssueDto> = hashSetOf(this.builder.payload().issue!!)
+    @DisplayName("GET -> Deve retornar a issue com o número passado via path")
+    fun getIssueByNumber() {
+        val body: HashSet<IssueVo> = hashSetOf(this.builder.payload().issue!! convertTo IssueVo::class.java)
 
         given(this.serviceImpl.getIssueByNumber(5)).willReturn(body)
 
         this.controller.getIssueByNumber(5).also {
-            assertEquals(HttpStatus.OK, it.statusCode)
-
-            assertEquals(body, it.body!!, "The response body must be equal to mock")
-
-            it.body!!.forEach { issueDto: IssueDto ->
-                with(issueDto) {
-                    assertAll({
-                        assertFalse(this.milestone == null, "Milestone must not be null")
-                        assertFalse(this.assignee == null, "Assignee must not be null")
-                        assertFalse(this.assignees.isEmpty(), "Assignees must not be an empty list")
-                        assertFalse(this.labels.isEmpty(), "Labels must not be an empty list")
-                    })
-                }
-            }
-        }
-    }
-
-    @Test
-    @DisplayName(
-        "GET -> Deve retornar a issue com o número passado via path, com uma lista vazia de labels " +
-                "e o status code 200"
-    )
-    fun getIssueByNumberWithEmptyLabels() {
-        val body: HashSet<IssueDto> = hashSetOf(this.builder.issueWithoutLabels().issue!!)
-
-        given(this.serviceImpl.getIssueByNumber(10)).willReturn(body)
-
-        this.controller.getIssueByNumber(10).also {
-            assertEquals(HttpStatus.OK, it.statusCode)
-
-            assertEquals(body, it.body!!, "The response body must be equal to mock")
-
-            it.body!!.forEach { issueDto: IssueDto ->
-                with(issueDto) {
-                    assertAll({
-                        assertFalse(this.milestone == null, "Milestone must not be null")
-                        assertFalse(this.assignees.isEmpty(), "Assignees must not be an empty list")
-                        assertFalse(this.assignee == null, "Assignee must not be null")
-                        assertTrue(this.labels.isEmpty(), "Labels must be an empty list")
-                    })
-                }
-            }
-        }
-    }
-
-    @Test
-    @DisplayName(
-        "GET -> Deve retornar a issue com o número passado via path, sem nenhum milestone e o status code 200"
-    )
-    fun getIssueByNumberWithNullMilestone() {
-        val body: HashSet<IssueDto> = hashSetOf(this.builder.issueWithoutMilestone().issue!!)
-
-        given(this.serviceImpl.getIssueByNumber(11)).willReturn(body)
-
-        this.controller.getIssueByNumber(11).also {
-            assertEquals(HttpStatus.OK, it.statusCode)
-
-            assertEquals(body, it.body!!, "The response body must be equal to mock")
-
-            it.body!!.forEach { issueDto: IssueDto ->
-                with(issueDto) {
-                    assertAll({
-                        assertFalse(this.assignee == null, "Assignee must not be null")
-                        assertFalse(this.assignees.isEmpty(), "Assignees must not be an empty list")
-                        assertFalse(this.labels.isEmpty(), "Labels must not be an empty list")
-                        assertTrue(this.milestone == null, "Milestone must be null")
-                    })
-                }
-            }
+            assertAll({
+                assertEquals(HttpStatus.OK, it.statusCode, "The status code must be equal to 200")
+                assertEquals(body, it.body!!, "The response body must be equal to mock")
+            })
         }
     }
 
@@ -171,7 +75,12 @@ internal class IssueControllerTest {
     fun verifyIssueBody() {
         `when`(this.serviceImpl.getIssue()).thenReturn((this.expectedIssue))
 
-        this.controller.getIssue().also { assertEquals(this.expectedIssue, it.body!!) }
+        this.controller.getIssue().also {
+            assertAll({
+                assertEquals(HttpStatus.OK, it.statusCode, "The status code must be equal to 200")
+                assertEquals(this.expectedIssue, it.body!!, "The response body must be equal to expected")
+            })
+        }
     }
 
     @Test

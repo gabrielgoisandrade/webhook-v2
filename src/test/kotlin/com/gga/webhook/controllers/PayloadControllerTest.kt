@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.http.HttpStatus
 import org.springframework.test.context.ActiveProfiles
@@ -214,9 +215,22 @@ internal class PayloadControllerTest {
         this.mockMvc.perform(getRequest("$PAYLOAD/?limit=10&page=0"))
             .andExpect(status().isOk)
             .andExpect(jsonPath("links").isNotEmpty)
-            .andExpect(jsonPath("content[0]['links'][1]['rel']").value("sender"))
-            .andExpect(jsonPath("content[0]['links']", hasSize<Int>(2)))
+            .andExpect(jsonPath("content[0]['links'][1]['rel']").value("issue"))
+            .andExpect(jsonPath("content[0]['links'][2]['rel']").value("repository"))
+            .andExpect(jsonPath("content[0]['links'][3]['rel']").value("sender"))
+            .andExpect(jsonPath("content[0]['links']", hasSize<Int>(4)))
             .andExpect(jsonPath("content").isNotEmpty)
+    }
+
+    @Test
+    @DisplayName("GET -> Deve retornar um objeto de paginação vazio")
+    fun getEmptyPagedPayloads() {
+        given(this.service.getAllPayloads(0, 10, "asc")).willReturn(Page.empty())
+
+        this.mockMvc.perform(getRequest("$PAYLOAD/?limit=10&page=0"))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("links").isNotEmpty)
+            .andExpect(jsonPath("content").isEmpty)
     }
 
 }
