@@ -212,6 +212,7 @@ internal class PayloadControllerTest {
 
         this.mockMvc.perform(getRequest("$PAYLOAD/?limit=10&page=0"))
             .andExpect(status().isOk)
+            .andExpect(jsonPath("links").isNotEmpty)
             .andExpect(jsonPath("content").isNotEmpty)
     }
 

@@ -100,9 +100,9 @@ tasks.processResources {
 // JACOCO CONFIGURATION
 tasks.jacocoTestReport {
     reports {
-        xml.isEnabled = true
-        xml.destination = file("${buildDir}/reports/jacoco/report.xml")
+        xml.isEnabled = false
         csv.isEnabled = false
-        html.isEnabled = false
+        html.isEnabled = true
+        html.destination = file("${buildDir}/reports/jacoco/report.xml")
     }
 }

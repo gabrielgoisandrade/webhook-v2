@@ -1,5 +1,4 @@
 spring:
-
     # Datasource config
   datasource:
     username: postgres

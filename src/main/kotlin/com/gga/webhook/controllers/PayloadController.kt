@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.hateoas.CollectionModel
+import org.springframework.hateoas.Link
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn
 import org.springframework.http.HttpStatus
@@ -65,7 +66,12 @@ class PayloadController {
                 it.add(linkTo(methodOn(SenderController::class.java).getSender()).withRel("sender"))
             }
 
-            ok(CollectionModel.of(this))
+            val link: Link =
+                linkTo(
+                    methodOn(this@PayloadController::class.java).findAllPayloads(page, limit, direction)
+                ).withSelfRel()
+
+            ok(CollectionModel.of(this, link))
         }
 
     @Operation(
