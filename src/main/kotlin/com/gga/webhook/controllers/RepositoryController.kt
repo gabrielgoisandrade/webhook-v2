@@ -37,11 +37,11 @@ class RepositoryController {
     )
     @GetMapping
     fun getRepository(): ResponseEntity<RepositoryVo> = this.repositoryServiceImpl.getRepository().run {
-        this.add(linkTo(methodOn(this@RepositoryController::class.java).getRepository()).withSelfRel())
-
-        this.add(linkTo(methodOn(OwnerController::class.java).getOwner()).withRel("owner"))
-
-        this.add(linkTo(methodOn(LicenseController::class.java).getLicense()).withRel("license"))
+        this.add(
+            linkTo(methodOn(this@RepositoryController::class.java).getRepository()).withSelfRel(),
+            linkTo(methodOn(OwnerController::class.java).getOwner()).withRel("owner"),
+            linkTo(methodOn(LicenseController::class.java).getLicense()).withRel("license")
+        )
 
         ok(this)
     }

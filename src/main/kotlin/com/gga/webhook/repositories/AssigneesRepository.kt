@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.Query
 
 interface AssigneesRepository : JpaRepository<AssigneesModel, Long> {
 
-    @Query("select a from AssigneesModel a join IssueModel i on i.id = a.issue.id")
+    @Query("select a from AssigneesModel a join IssueModel i on i.id = a.issue.id order by a.id desc ")
     fun getAssignees(): HashSet<AssigneesModel>
 
 }

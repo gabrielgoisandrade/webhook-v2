@@ -43,13 +43,14 @@ class IssueController {
     fun getIssueByNumber(@PathVariable("number") number: Int): ResponseEntity<HashSet<IssueVo>> =
         this.issueServiceImpl.getIssueByNumber(number).run {
             this.forEach {
-                it.add(linkTo(methodOn(this@IssueController::class.java).getIssue()).withSelfRel())
-
-                it.add(linkTo(methodOn(UserController::class.java).getUser()).withRel("user"))
-
-                it.add(linkTo(methodOn(AssigneeController::class.java).getAssignee()).withRel("assignee"))
-
-                it.add(linkTo(methodOn(MilestoneController::class.java).getMilestone()).withRel("milestone"))
+                it.add(
+                    linkTo(methodOn(this@IssueController::class.java).getIssue()).withSelfRel(),
+                    linkTo(methodOn(UserController::class.java).getUser()).withRel("user"),
+                    linkTo(methodOn(AssigneeController::class.java).getAssignee()).withRel("assignee"),
+                    linkTo(methodOn(AssigneesController::class.java).getAssignees()).withRel("assignees"),
+                    linkTo(methodOn(LabelsController::class.java).getLabels()).withRel("labels"),
+                    linkTo(methodOn(MilestoneController::class.java).getMilestone()).withRel("milestone")
+                )
             }
 
             ok(this)
@@ -67,14 +68,14 @@ class IssueController {
     @GetMapping
     fun getIssue(): ResponseEntity<IssueVo> =
         this.issueServiceImpl.getIssue().run {
-            this.add(linkTo(methodOn(this@IssueController::class.java).getIssue()).withSelfRel())
-
-            this.add(linkTo(methodOn(UserController::class.java).getUser()).withRel("user"))
-
-            this.add(linkTo(methodOn(AssigneeController::class.java).getAssignee()).withRel("assignee"))
-
-            this.add(linkTo(methodOn(MilestoneController::class.java).getMilestone()).withRel("milestone"))
-
+            this.add(
+                linkTo(methodOn(this@IssueController::class.java).getIssue()).withSelfRel(),
+                linkTo(methodOn(UserController::class.java).getUser()).withRel("user"),
+                linkTo(methodOn(AssigneeController::class.java).getAssignee()).withRel("assignee"),
+                linkTo(methodOn(AssigneesController::class.java).getAssignees()).withRel("assignees"),
+                linkTo(methodOn(LabelsController::class.java).getLabels()).withRel("labels"),
+                linkTo(methodOn(MilestoneController::class.java).getMilestone()).withRel("milestone")
+            )
             ok(this)
         }
 

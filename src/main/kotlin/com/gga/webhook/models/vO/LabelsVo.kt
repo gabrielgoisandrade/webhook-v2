@@ -1,6 +1,7 @@
 package com.gga.webhook.models.vO
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import org.springframework.hateoas.RepresentationModel
 import java.io.Serializable
 
 data class LabelsVo @JvmOverloads constructor(
@@ -24,4 +25,4 @@ data class LabelsVo @JvmOverloads constructor(
 
     @JsonProperty("description")
     var description: String? = null
-) : Serializable
+) : Serializable, RepresentationModel<LabelsVo>()

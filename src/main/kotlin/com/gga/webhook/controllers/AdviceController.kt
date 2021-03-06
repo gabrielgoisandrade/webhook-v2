@@ -72,4 +72,10 @@ class AdviceController {
             status(NOT_FOUND).body(this)
         }
 
+    @ExceptionHandler(LabelNotFoundException::class)
+    fun handler(ex: LabelNotFoundException, request: WebRequest): ResponseEntity<ApiError> =
+        ApiError(ex.message!!, request.getDescription(false), DATE).run {
+            status(NOT_FOUND).body(this)
+        }
+
 }

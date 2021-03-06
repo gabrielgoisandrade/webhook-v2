@@ -45,6 +45,8 @@ class PayloadController {
         this.payloadServiceImpl.getPayloadById(id).run {
             this.add(
                 linkTo(methodOn(this@PayloadController::class.java).findPayloadById(id)).withSelfRel(),
+                linkTo(methodOn(IssueController::class.java).getIssue()).withRel("issue"),
+                linkTo(methodOn(RepositoryController::class.java).getRepository()).withRel("repository"),
                 linkTo(methodOn(SenderController::class.java).getSender()).withRel("sender")
             )
 
@@ -63,13 +65,12 @@ class PayloadController {
     ): ResponseEntity<CollectionModel<PayloadVo>> =
         this.payloadServiceImpl.getAllPayloads(page, limit, direction).run {
             this.forEach {
-                it.add(linkTo(methodOn(this@PayloadController::class.java).findPayloadById(it.id)).withSelfRel())
-
-                it.add(linkTo(methodOn(IssueController::class.java).getIssue()).withRel("issue"))
-
-                it.add(linkTo(methodOn(RepositoryController::class.java).getRepository()).withRel("repository"))
-
-                it.add(linkTo(methodOn(SenderController::class.java).getSender()).withRel("sender"))
+                it.add(
+                    linkTo(methodOn(this@PayloadController::class.java).findPayloadById(it.id)).withSelfRel(),
+                    linkTo(methodOn(IssueController::class.java).getIssue()).withRel("issue"),
+                    linkTo(methodOn(RepositoryController::class.java).getRepository()).withRel("repository"),
+                    linkTo(methodOn(SenderController::class.java).getSender()).withRel("sender")
+                )
             }
 
             val link: Link =

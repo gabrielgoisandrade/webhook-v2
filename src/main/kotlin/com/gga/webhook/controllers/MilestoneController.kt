@@ -33,9 +33,10 @@ class MilestoneController {
     )
     @GetMapping
     fun getMilestone(): ResponseEntity<MilestoneVo> = this.milestoneServiceImpl.getMilestone()?.run {
-        this.add(linkTo(methodOn(this@MilestoneController::class.java).getMilestone()).withSelfRel())
-
-        this.add(linkTo(methodOn(CreatorController::class.java).getCreator()).withRel("creator"))
+        this.add(
+            linkTo(methodOn(this@MilestoneController::class.java).getMilestone()).withSelfRel(),
+            linkTo(methodOn(CreatorController::class.java).getCreator()).withRel("creator")
+        )
 
         ok(this)
     } ?: noContent().build()
