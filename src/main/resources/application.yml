@@ -1,4 +1,5 @@
 spring:
+
   # Hateoas config
   hateoas:
     use-hal-as-default-json-media-type: false
@@ -10,15 +11,13 @@ spring:
 
   # Profiles config
   profiles:
-    active: dev
+    active: test
 
   # SQL config
   jpa:
     properties:
       hibernate:
         format_sql: true
-  cache:
-    cache-names: [ issueByNumber ]
 
 # Log config
 logging:
@@ -48,8 +47,11 @@ doc:
 
 # SpringDoc config
 springdoc:
+  api-docs:
+    path: /doc
   swagger-ui:
     path: /
+    tags-sorter: alpha
 
 # Actuator config
 management:

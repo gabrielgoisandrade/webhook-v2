@@ -1,65 +1,56 @@
 package com.gga.webhook.controllers
 
-import com.gga.webhook.builder.PayloadBuilder
-import com.gga.webhook.models.vO.LicenseVo
+import com.gga.webhook.constants.MockValuesConstant.REPOSITORY_NAME
+import com.gga.webhook.errors.exceptions.RelationNotFoundException
+import com.gga.webhook.factories.BaseControllerTestFactory
+import com.gga.webhook.models.dTO.LicenseDto
 import com.gga.webhook.services.impls.LicenseServiceImpl
-import com.gga.webhook.utils.MapperUtil.Companion.convertTo
 import com.gga.webhook.utils.RequestUtil.Companion.LICENSE
 import com.gga.webhook.utils.RequestUtil.Companion.getRequest
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.DisplayName
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.mockito.BDDMockito.given
-import org.mockito.Mockito.`when`
+import org.mockito.BDDMockito.*
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
-import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.web.servlet.MockMvc
+import org.springframework.http.HttpStatus
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
-@SpringBootTest
-@AutoConfigureMockMvc
-@ActiveProfiles("test")
-internal class LicenseControllerTest {
+@WebMvcTest(controllers = [LicenseController::class])
+internal class LicenseControllerTest : BaseControllerTestFactory() {
 
     @MockBean
-    private lateinit var licenseServiceImpl: LicenseServiceImpl
+    private lateinit var service: LicenseServiceImpl
 
     @Autowired
-    private lateinit var licenseController: LicenseController
+    private lateinit var controller: LicenseController
 
-    @Autowired
-    private lateinit var mockMvc: MockMvc
-
-    private val expectedLicense: LicenseVo = PayloadBuilder().licenseDto() convertTo LicenseVo::class.java
+    private val expected: LicenseDto = this.dto.licenseDto()
 
     @Test
-    @DisplayName("GET -> Deve retornar o license com as mesmas propriedades que o esperado")
-    fun verifyLicenseBody() {
-        `when`(this.licenseServiceImpl.getLicense()).thenReturn((this.expectedLicense))
+    fun findLicenseByRepositoryName() {
+        `when`(this.service.findLicenseByRepositoryName(anyString())).thenReturn(this.expected)
 
-        this.licenseController.getLicense().also { assertEquals(expectedLicense, it.body!!) }
+        this.controller.findLicenseByRepositoryName(REPOSITORY_NAME).also {
+            assertThat(it.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(it.body).isEqualTo(this.expected)
+
+            with(it.body!!.links) {
+                assertThat(this.isEmpty).isFalse
+                assertThat(this.getLink("self").isPresent).isTrue
+            }
+        }
     }
 
     @Test
-    @DisplayName("GET -> Deve retornar o license com o HATEOAS configurado")
-    fun verifyLicenseLink() {
-        given(this.licenseServiceImpl.getLicense()).willReturn((this.expectedLicense))
+    fun throwErrorByRepositoryNameNotFound() {
+        given(this.service.findLicenseByRepositoryName(anyString()))
+            .willThrow(RelationNotFoundException("There isn't any License related with this Repository"))
 
-        this.mockMvc.perform(getRequest(LICENSE))
-            .andExpect(status().isOk)
-            .andExpect(jsonPath("links").isNotEmpty)
-    }
-
-    @Test
-    @DisplayName("GET -> Deve status code 204 por não haver license no repository")
-    fun getNullLicense() {
-        given(this.licenseServiceImpl.getLicense()).willReturn(null)
-
-        this.mockMvc.perform(getRequest(LICENSE)).andExpect(status().isNoContent)
+        this.mockMvc.perform(getRequest("$LICENSE/repository/$REPOSITORY_NAME"))
+            .andExpect(status().isNotFound)
+            .andExpect(jsonPath("message").value("There isn't any License related with this Repository"))
     }
 
 }

@@ -1,18 +1,17 @@
 package com.gga.webhook.models
 
-import java.io.Serializable
 import javax.persistence.*
 
 @Entity
 @Table(name = "ASSIGNEES")
 data class AssigneesModel @JvmOverloads constructor(
-    @Column(name = "LOGIN")
-    var login: String = "",
-
     @Id
     @Column(name = "ASSIGNEES_ID")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long = 0L,
+
+    @Column(name = "LOGIN")
+    var login: String = "",
 
     @Column(name = "NODE_ID")
     var nodeId: String = "",
@@ -60,9 +59,5 @@ data class AssigneesModel @JvmOverloads constructor(
     var type: String = "",
 
     @Column(name = "SITE_ADMIN")
-    var siteAdmin: Boolean = false,
-
-    @ManyToOne(cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
-    @JoinColumn(name = "ISSUE_ID", foreignKey = ForeignKey(name = "C_ASSIGNEES_ISSUE"))
-    var issue: IssueModel? = null
-) : Serializable
+    var siteAdmin: Boolean = false
+)

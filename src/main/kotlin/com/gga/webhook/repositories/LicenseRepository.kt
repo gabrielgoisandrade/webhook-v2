@@ -3,10 +3,13 @@ package com.gga.webhook.repositories
 import com.gga.webhook.models.LicenseModel
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
+import java.util.*
 
 interface LicenseRepository : JpaRepository<LicenseModel, Long> {
 
-    @Query("select l from LicenseModel l join RepositoryModel r on l.id = r.license.id")
-    fun getLicense(): LicenseModel?
+    fun findByKey(key: String): Optional<LicenseModel>
+
+    @Query("SELECT R.license FROM RepositoryModel R where R.name = :name")
+    fun findByRepositoryName(name: String): Optional<LicenseModel>
 
 }

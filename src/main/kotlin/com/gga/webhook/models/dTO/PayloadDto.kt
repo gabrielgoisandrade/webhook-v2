@@ -1,15 +1,9 @@
 package com.gga.webhook.models.dTO
 
-import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
-import org.springframework.hateoas.RepresentationModel
 import java.io.Serializable
 
 data class PayloadDto @JvmOverloads constructor(
-    @JsonIgnore
-    @JsonProperty("id")
-    var id: Long = 0L,
-
     @JsonProperty("action")
     var action: String = "",
 
@@ -21,4 +15,4 @@ data class PayloadDto @JvmOverloads constructor(
 
     @JsonProperty("sender")
     var sender: SenderDto? = null
-) : Serializable, RepresentationModel<PayloadDto>()
+) : Serializable

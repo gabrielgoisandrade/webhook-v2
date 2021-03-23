@@ -1,20 +1,17 @@
 package com.gga.webhook.models
 
-import java.io.Serializable
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.Id
-import javax.persistence.Table
+import javax.persistence.*
 
 @Entity
 @Table(name = "CREATOR")
 data class CreatorModel @JvmOverloads constructor(
-    @Column(name = "LOGIN")
-    var login: String = "",
-
     @Id
     @Column(name = "CREATOR_ID")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long = 0L,
+
+    @Column(name = "LOGIN")
+    var login: String = "",
 
     @Column(name = "NODE_ID")
     var nodeId: String = "",
@@ -62,5 +59,8 @@ data class CreatorModel @JvmOverloads constructor(
     var type: String = "",
 
     @Column(name = "SITE_ADMIN")
-    var siteAdmin: Boolean = false
-) : Serializable
+    var siteAdmin: Boolean = false,
+
+    @OneToMany(mappedBy = "creator", fetch = FetchType.LAZY)
+    var milestones: Set<MilestoneModel>? = null
+)

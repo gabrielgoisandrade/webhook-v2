@@ -1,9 +1,13 @@
 package com.gga.webhook.services
 
-import com.gga.webhook.models.vO.UserVo
+import com.gga.webhook.models.UserModel
+import com.gga.webhook.models.dTO.UserDto
+
 
 interface UserService {
 
-    fun getUser(): UserVo
+    fun saveUser(user: UserModel): UserModel
+
+    fun findUserByIssueNumber(issueNumber: Int): UserDto
 
 }

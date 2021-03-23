@@ -1,17 +1,17 @@
 package com.gga.webhook.models
 
-import java.io.Serializable
 import javax.persistence.*
 
 @Entity
 @Table(name = "SENDER")
 data class SenderModel @JvmOverloads constructor(
-    @Column(name = "LOGIN")
-    var login: String = "",
-
     @Id
     @Column(name = "SENDER_ID")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long = 0L,
+
+    @Column(name = "LOGIN")
+    var login: String = "",
 
     @Column(name = "NODE_ID")
     var nodeId: String = "",
@@ -59,5 +59,9 @@ data class SenderModel @JvmOverloads constructor(
     var type: String = "",
 
     @Column(name = "SITE_ADMIN")
-    var siteAdmin: Boolean = false
-) : Serializable
+    var siteAdmin: Boolean = false,
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "EVENT_ID", foreignKey = ForeignKey(name = "C_SENDER_EVENT"))
+    var event: EventModel? = null,
+)

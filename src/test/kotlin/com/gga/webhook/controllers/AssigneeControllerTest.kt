@@ -1,65 +1,56 @@
 package com.gga.webhook.controllers
 
-import com.gga.webhook.builder.PayloadBuilder
-import com.gga.webhook.models.vO.AssigneeVo
+import com.gga.webhook.constants.MockValuesConstant.ISSUE_NUMBER
+import com.gga.webhook.errors.exceptions.RelationNotFoundException
+import com.gga.webhook.factories.BaseControllerTestFactory
+import com.gga.webhook.models.dTO.AssigneeDto
 import com.gga.webhook.services.impls.AssigneeServiceImpl
-import com.gga.webhook.utils.MapperUtil.Companion.convertTo
 import com.gga.webhook.utils.RequestUtil.Companion.ASSIGNEE
 import com.gga.webhook.utils.RequestUtil.Companion.getRequest
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.DisplayName
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.mockito.BDDMockito.given
-import org.mockito.Mockito.`when`
+import org.mockito.BDDMockito.*
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
-import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.web.servlet.MockMvc
+import org.springframework.http.HttpStatus
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
-@SpringBootTest
-@AutoConfigureMockMvc
-@ActiveProfiles("test")
-internal class AssigneeControllerTest {
+@WebMvcTest(controllers = [AssigneeController::class])
+internal class AssigneeControllerTest : BaseControllerTestFactory() {
 
     @MockBean
-    private lateinit var assigneeServiceImpl: AssigneeServiceImpl
+    private lateinit var service: AssigneeServiceImpl
 
     @Autowired
-    private lateinit var assigneeController: AssigneeController
+    private lateinit var controller: AssigneeController
 
-    @Autowired
-    private lateinit var mockMvc: MockMvc
-
-    private val expectedAssignee: AssigneeVo = PayloadBuilder().assigneeDto() convertTo AssigneeVo::class.java
+    private val expected: AssigneeDto = this.dto.assigneeDto()
 
     @Test
-    @DisplayName("GET -> Deve retornar o assignee com as mesmas propriedades que o esperado")
-    fun verifyAssigneeBody() {
-        `when`(this.assigneeServiceImpl.getAssignee()).thenReturn((this.expectedAssignee))
+    fun findAssigneeByIssueNumber() {
+        `when`(this.service.findAssigneeByIssueNumber(anyInt())).thenReturn(this.expected)
 
-        this.assigneeController.getAssignee().also { assertEquals(expectedAssignee, it.body!!) }
+        this.controller.findAssigneeByIssueNumber(ISSUE_NUMBER).also {
+            assertThat(it.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(it.body).isEqualTo(this.expected)
+
+            with(it.body!!.links) {
+                assertThat(this.isEmpty).isFalse
+                assertThat(this.getLink("self").isPresent).isTrue
+            }
+        }
     }
 
     @Test
-    @DisplayName("GET -> Deve retornar o assignee com o HATEOAS configurado")
-    fun verifyAssigneeLink() {
-        given(this.assigneeServiceImpl.getAssignee()).willReturn((this.expectedAssignee))
+    fun throwErrorByIssueNumberNotFound() {
+        given(this.service.findAssigneeByIssueNumber(anyInt()))
+            .willThrow(RelationNotFoundException("There isn't any Assignee related with this Issue"))
 
-        this.mockMvc.perform(getRequest(ASSIGNEE))
-            .andExpect(status().isOk)
-            .andExpect(jsonPath("links").isNotEmpty)
-    }
-
-    @Test
-    @DisplayName("GET -> Deve status code 204 por não haver assignee na issue")
-    fun getNullAssignee() {
-        given(this.assigneeServiceImpl.getAssignee()).willReturn(null)
-
-        this.mockMvc.perform(getRequest(ASSIGNEE)).andExpect(status().isNoContent)
+        this.mockMvc.perform(getRequest("$ASSIGNEE/issue/$ISSUE_NUMBER"))
+            .andExpect(status().isNotFound)
+            .andExpect(jsonPath("message").value("There isn't any Assignee related with this Issue"))
     }
 
 }

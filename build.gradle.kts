@@ -27,12 +27,12 @@ repositories {
 extra["springBootAdminVersion"] = "2.3.1"
 
 dependencies {
-    /* Model mapper */
+    // Model mapper
     implementation("org.modelmapper:modelmapper:2.3.9")
 
     // springDoc
-    implementation("org.springdoc:springdoc-openapi-ui:1.5.4")
-    implementation("org.junit.jupiter:junit-jupiter:5.4.2")
+    implementation("org.springdoc:springdoc-openapi-ui:1.5.6")
+    //implementation("org.springdoc:springdoc-openapi-webmvc-core:1.5.6")
 
     // mockito
     testImplementation("org.mockito:mockito-core:3.7.7")
@@ -72,6 +72,7 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    implementation("org.junit.jupiter:junit-jupiter:5.4.2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
 

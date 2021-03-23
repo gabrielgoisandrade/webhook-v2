@@ -1,6 +1,9 @@
 package com.gga.webhook.models.dTO
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
+import io.swagger.v3.oas.annotations.media.Schema
+import org.springframework.hateoas.Links
 import org.springframework.hateoas.RepresentationModel
 import java.io.Serializable
 import java.time.Instant
@@ -24,7 +27,7 @@ data class IssueDto @JvmOverloads constructor(
     @JsonProperty("html_url")
     var htmlUrl: String = "",
 
-    @JsonProperty("id")
+    @get:JsonIgnore
     var id: Long = 0,
 
     @JsonProperty("node_id")
@@ -36,11 +39,13 @@ data class IssueDto @JvmOverloads constructor(
     @JsonProperty("title")
     var title: String = "",
 
+    @get:JsonIgnore
     @JsonProperty("user")
     var user: UserDto? = null,
 
+    @get:JsonIgnore
     @JsonProperty("labels")
-    var labels: Set<LabelsDto> = hashSetOf(),
+    var labels: List<LabelsDto> = emptyList(),
 
     @JsonProperty("state")
     var state: String = "",
@@ -48,12 +53,15 @@ data class IssueDto @JvmOverloads constructor(
     @JsonProperty("locked")
     var locked: Boolean = false,
 
+    @get:JsonIgnore
     @JsonProperty("assignee")
     var assignee: AssigneeDto? = null,
 
+    @get:JsonIgnore
     @JsonProperty("assignees")
-    var assignees: Set<AssigneesDto> = hashSetOf(),
+    var assignees: List<AssigneesDto> = emptyList(),
 
+    @get:JsonIgnore
     @JsonProperty("milestone")
     var milestone: MilestoneDto? = null,
 
@@ -80,4 +88,10 @@ data class IssueDto @JvmOverloads constructor(
 
     @JsonProperty("performed_via_github_app")
     var performedViaGithubApp: String? = null
-) : Serializable, RepresentationModel<IssueDto>()
+) : Serializable, RepresentationModel<IssueDto>(){
+
+    @Schema(hidden = true)
+    @Suppress("unused")
+    private val links: List<Links> = emptyList()
+
+}

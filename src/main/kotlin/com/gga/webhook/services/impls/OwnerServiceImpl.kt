@@ -1,17 +1,52 @@
 package com.gga.webhook.services.impls
 
-import com.gga.webhook.errors.exceptions.OwnerNotFoundException
-import com.gga.webhook.models.vO.OwnerVo
+import com.gga.webhook.errors.exceptions.RelationNotFoundException
+import com.gga.webhook.helper.PageableHelper
+import com.gga.webhook.models.OwnerModel
+import com.gga.webhook.models.dTO.OwnerDto
 import com.gga.webhook.repositories.OwnerRepository
 import com.gga.webhook.services.OwnerService
 import com.gga.webhook.utils.MapperUtil.Companion.convertTo
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.cache.annotation.CacheEvict
+import org.springframework.cache.annotation.Cacheable
+import org.springframework.cache.annotation.EnableCaching
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+import java.util.*
 
 @Service
-class OwnerServiceImpl @Autowired constructor(private val ownerRepository: OwnerRepository) : OwnerService {
+@EnableCaching
+class OwnerServiceImpl @Autowired constructor(
+    private val repository: OwnerRepository
+) : OwnerService {
 
-    override fun getOwner(): OwnerVo = (this.ownerRepository.getOwner()
-        ?: throw OwnerNotFoundException("No owner found.")) convertTo OwnerVo::class.java
+    private val helper: PageableHelper<OwnerModel> = PageableHelper(this.repository)
+
+    private val log: Logger = LoggerFactory.getLogger(this::class.java)
+
+    @Transactional
+    @CacheEvict("ownerByID", "ownerByRepositoryName", allEntries = true)
+    override fun saveOwner(owner: OwnerModel): OwnerModel {
+        val ownerFound: Optional<OwnerModel> = this.repository.findByLogin(owner.login)
+
+        return if (ownerFound.isPresent) {
+            this.log.info("Owner: Returning existing Owner.")
+
+            ownerFound.get()
+        } else {
+            this.log.info("Owner: Saving new Owner.")
+
+            this.repository.save(owner)
+        }
+    }
+
+    @Cacheable("ownerByRepositoryName")
+    override fun findOwnerByRepositoryName(repositoryName: String): OwnerDto =
+        this.repository.findByRepositoryName(repositoryName).orElseThrow {
+            RelationNotFoundException("There isn't any Owner related with this Repository.")
+        } convertTo OwnerDto::class.java
 
 }

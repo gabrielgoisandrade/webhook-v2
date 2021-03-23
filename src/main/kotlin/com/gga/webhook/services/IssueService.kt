@@ -1,11 +1,12 @@
 package com.gga.webhook.services
 
-import com.gga.webhook.models.vO.IssueVo
+import com.gga.webhook.models.IssueModel
+import com.gga.webhook.models.dTO.IssueDto
 
 interface IssueService {
 
-    fun getIssueByNumber(number: Int): HashSet<IssueVo>
+    fun saveIssue(issue: IssueModel): IssueModel
 
-    fun getIssue(): IssueVo
+    fun findIssueByNumber(number: Int): IssueDto
 
 }

@@ -1,68 +1,56 @@
 package com.gga.webhook.controllers
 
-import com.gga.webhook.builder.PayloadBuilder
-import com.gga.webhook.errors.exceptions.CreatorNotFoundException
-import com.gga.webhook.models.vO.CreatorVo
+import com.gga.webhook.constants.MockValuesConstant.MILESTONE_NUMBER
+import com.gga.webhook.errors.exceptions.RelationNotFoundException
+import com.gga.webhook.factories.BaseControllerTestFactory
+import com.gga.webhook.models.dTO.CreatorDto
 import com.gga.webhook.services.impls.CreatorServiceImpl
-import com.gga.webhook.utils.MapperUtil.Companion.convertTo
 import com.gga.webhook.utils.RequestUtil.Companion.CREATOR
 import com.gga.webhook.utils.RequestUtil.Companion.getRequest
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.DisplayName
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.mockito.BDDMockito.given
-import org.mockito.Mockito.`when`
+import org.mockito.BDDMockito.*
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
-import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.web.servlet.MockMvc
+import org.springframework.http.HttpStatus
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
-@SpringBootTest
-@AutoConfigureMockMvc
-@ActiveProfiles("test")
-internal class CreatorControllerTest {
+@WebMvcTest(controllers = [CreatorController::class])
+internal class CreatorControllerTest : BaseControllerTestFactory() {
 
     @MockBean
-    private lateinit var creatorServiceImpl: CreatorServiceImpl
+    private lateinit var service: CreatorServiceImpl
 
     @Autowired
-    private lateinit var creatorController: CreatorController
+    private lateinit var controller: CreatorController
 
-    @Autowired
-    private lateinit var mockMvc: MockMvc
-
-    private val expectedCreator: CreatorVo = PayloadBuilder().creatorDto() convertTo CreatorVo::class.java
+    private val expected: CreatorDto = this.dto.creatorDto()
 
     @Test
-    @DisplayName("GET -> Deve retornar o creator com as mesmas propriedades que o esperado")
-    fun verifyCreatorBody() {
-        `when`(this.creatorServiceImpl.getCreator()).thenReturn((this.expectedCreator))
+    fun findCreatorByMilestoneNumber() {
+        `when`(this.service.findCreatorByMilestoneNumber(anyInt())).thenReturn(this.expected)
 
-        this.creatorController.getCreator().also { assertEquals(expectedCreator, it.body!!) }
+        this.controller.findCreatorByMilestoneNumber(MILESTONE_NUMBER).also {
+            assertThat(it.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(it.body).isEqualTo(this.expected)
+
+            with(it.body!!.links) {
+                assertThat(this.isEmpty).isFalse
+                assertThat(this.getLink("self").isPresent).isTrue
+            }
+        }
     }
 
     @Test
-    @DisplayName("GET -> Deve retornar o creator com o HATEOAS configurado")
-    fun verifyCreatorLink() {
-        given(this.creatorServiceImpl.getCreator()).willReturn((this.expectedCreator))
+    fun throwErrorByMilestoneNumberNotFound() {
+        given(this.service.findCreatorByMilestoneNumber(anyInt()))
+            .willThrow(RelationNotFoundException("There isn't any Creator related with this Milestone."))
 
-        this.mockMvc.perform(getRequest(CREATOR))
-            .andExpect(status().isOk)
-            .andExpect(jsonPath("links").isNotEmpty)
-    }
-
-    @Test
-    @DisplayName("GET -> Deve retornar um erro ao não retornar nenhum creator")
-    fun throwErrorByNoCreatorFound() {
-        given(this.creatorServiceImpl.getCreator()).willThrow(CreatorNotFoundException("No creator found."))
-
-        this.mockMvc.perform(getRequest(CREATOR))
+        this.mockMvc.perform(getRequest("$CREATOR/milestone/$MILESTONE_NUMBER"))
             .andExpect(status().isNotFound)
-            .andExpect(jsonPath("message").value("No creator found."))
+            .andExpect(jsonPath("message").value("There isn't any Creator related with this Milestone."))
     }
 
 }

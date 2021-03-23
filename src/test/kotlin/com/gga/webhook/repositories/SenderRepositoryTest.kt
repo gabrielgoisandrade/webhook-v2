@@ -1,58 +1,50 @@
 package com.gga.webhook.repositories
 
-import com.gga.webhook.builder.PayloadBuilder
-import com.gga.webhook.models.LicenseModel
-import com.gga.webhook.models.PayloadModel
+import com.gga.webhook.factories.BaseRepositoryTestFactory
+import com.gga.webhook.models.EventModel
 import com.gga.webhook.models.SenderModel
-import com.gga.webhook.models.dTO.PayloadDto
-import com.gga.webhook.models.dTO.SenderDto
-import com.gga.webhook.utils.MapperUtil.Companion.convertTo
-import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.junit.jupiter.SpringExtension
 
-@DataJpaTest
-@ActiveProfiles("test")
-@ExtendWith(SpringExtension::class)
-internal class SenderRepositoryTest {
+internal class SenderRepositoryTest : BaseRepositoryTestFactory() {
 
     @Autowired
-    private lateinit var entityManager: TestEntityManager
+    private lateinit var repository: SenderRepository
 
-    @Autowired
-    private lateinit var senderRepository: SenderRepository
+    private val eventModel: EventModel = this.model.event
 
-    private val builder: PayloadBuilder = PayloadBuilder()
-
-    private val payload: PayloadDto = this.builder.payload()
-
-    private val senderDto: SenderDto = this.builder.senderDto()
+    private val senderModel: SenderModel = this.model.sender
 
     @Test
-    @DisplayName("Deve persistir Sender no database")
+    @DisplayName("Must save Sender")
     fun saveSender() {
-        this.entityManager.persist(this.senderDto convertTo SenderModel::class.java)
+        val expectedEvent: EventModel = this.entityManager.persist(this.eventModel)
 
-        this.senderRepository.findAll().also { Assertions.assertTrue(it.isNotEmpty()) }
+        val expectedSender: SenderModel =
+            this.entityManager.merge(this.senderModel.apply { this.event = expectedEvent })
+
+        this.repository.findById(expectedSender.id).also {
+            assertThat(it.isPresent).isTrue
+            assertThat(it.get()).isEqualTo(expectedSender)
+            assertThat(it.get().event).isEqualTo(expectedEvent)
+        }
     }
 
     @Test
-    @DisplayName("Deve retornar o sender de determinado payload")
-    fun getSender() {
-        val persist: PayloadModel = this.entityManager.persist((this.payload convertTo PayloadModel::class.java).apply {
-            this.repository!!.license = entityManager.merge(builder.licenseDto() convertTo LicenseModel::class.java)
-        })
+    @DisplayName("Must return the Sender by login")
+    fun findByLogin() {
+        val expectedEvent: EventModel = this.entityManager.persist(this.eventModel)
 
-        val sender: SenderModel = this.senderRepository.getSender()!!
+        val expectedSender: SenderModel =
+            this.entityManager.merge(this.senderModel.apply { this.event = expectedEvent })
 
-        assertEquals(persist.sender, sender)
+        this.repository.findByLogin(expectedSender.login).also {
+            assertThat(it.isPresent).isTrue
+            assertThat(it.get()).isEqualTo(expectedSender)
+            assertThat(it.get().event).isEqualTo(expectedEvent)
+        }
     }
 
 }

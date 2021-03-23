@@ -4,6 +4,7 @@ package com.gga.webhook.utils
 
 import org.modelmapper.ModelMapper
 import org.modelmapper.convention.MatchingStrategies.STRICT
+import org.springframework.data.domain.Page
 import java.util.stream.Collectors
 
 class MapperUtil private constructor() {
@@ -18,11 +19,14 @@ class MapperUtil private constructor() {
         }
 
         @JvmStatic
-        infix fun <O, D> Collection<O>.convertTo(to: Class<D>): Set<D> =
-            this.stream().map { mapper.map(it, to) }.collect(Collectors.toSet())
+        infix fun <O, D> Collection<O>.convertTo(destination: Class<D>): List<D> =
+            this.stream().map { mapper.map(it, destination) }.collect(Collectors.toList())
 
         @JvmStatic
-        infix fun <O, D> O.convertTo(to: Class<D>): D = mapper.map(this, to)
+        infix fun <O, D> O.convertTo(destination: Class<D>): D = mapper.map(this, destination)
+
+        @JvmStatic
+        infix fun <O, D> Page<O>.convertTo(destination: Class<D>): Page<D> = this.map { mapper.map(it, destination) }
 
     }
 }

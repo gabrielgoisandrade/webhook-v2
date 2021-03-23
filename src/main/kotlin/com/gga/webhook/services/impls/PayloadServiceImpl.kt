@@ -1,54 +1,95 @@
 package com.gga.webhook.services.impls
 
-import com.gga.webhook.errors.exceptions.InvalidDirectionException
-import com.gga.webhook.errors.exceptions.PayloadNotFoundException
 import com.gga.webhook.models.*
-import com.gga.webhook.models.dTO.*
-import com.gga.webhook.models.vO.PayloadVo
-import com.gga.webhook.repositories.*
+import com.gga.webhook.models.dTO.EventDto
+import com.gga.webhook.models.dTO.PayloadDto
 import com.gga.webhook.services.PayloadService
 import com.gga.webhook.utils.MapperUtil.Companion.convertTo
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.PageRequest
-import org.springframework.data.domain.Sort
+import org.springframework.cache.annotation.EnableCaching
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 
 @Service
+@EnableCaching
 class PayloadServiceImpl @Autowired constructor(
-    private val payloadRepository: PayloadRepository,
-    private val issueRepository: IssueRepository,
-    private val userRepository: UserRepository,
-    private val assigneeRepository: AssigneeRepository,
-    private val assigneesRepository: AssigneesRepository,
-    private val labelsRepository: LabelsRepository,
-    private val milestoneRepository: MilestoneRepository,
-    private val creatorRepository: CreatorRepository,
-    private val repositoryRepository: RepositoryRepository,
-    private val licenseRepository: LicenseRepository,
-    private val ownerRepository: OwnerRepository,
-    private val senderRepository: SenderRepository
+    private val eventServiceImpl: EventServiceImpl,
+    private val repositoryServiceImpl: RepositoryServiceImpl,
+    private val senderServiceImpl: SenderServiceImpl,
+    private val ownerServiceImpl: OwnerServiceImpl,
+    private val creatorServiceImpl: CreatorServiceImpl,
+    private val milestoneServiceImpl: MilestoneServiceImpl,
+    private val userServiceImpl: UserServiceImpl,
+    private val assigneeServiceImpl: AssigneeServiceImpl,
+    private val issueServiceImpl: IssueServiceImpl,
+    private val licenseServiceImpl: LicenseServiceImpl,
+    private val labelsServiceImpl: LabelsServiceImpl,
+    private val assigneesServiceImpl: AssigneesServiceImpl,
+    private val issueResponsibleServiceImpl: IssueResponsibleServiceImpl,
+    private val issueClassifierServiceImpl: IssueClassifierServiceImpl
 ) : PayloadService {
 
-    private lateinit var assigneesDto: Set<AssigneesDto>
+    override fun savePayload(payload: PayloadDto): EventDto {
+        val event = EventDto(action = payload.action)
 
-    private lateinit var labelsDto: Set<LabelsDto>
+        val issue: IssueModel = payload.issue convertTo IssueModel::class.java
 
-    @Transactional
-    override fun savePayload(payload: PayloadDto): PayloadDto =
-        (payload convertTo PayloadModel::class.java).apply {
-            this.issue = saveIssue(payload.issue!!)
-            this.repository = saveRepository(payload.repository!!)
-            this.sender = saveSender(payload.sender!!)
-        }.run {
-            (payloadRepository.save(this) convertTo PayloadDto::class.java).apply {
-                this.issue!!.labels = labelsDto
-                this.issue!!.assignees = assigneesDto
+        val user: UserModel = payload.issue!!.user convertTo UserModel::class.java
+
+        val labels: List<LabelsModel> = payload.issue!!.labels convertTo LabelsModel::class.java
+
+        val assignees: List<AssigneesModel> = payload.issue!!.assignees convertTo AssigneesModel::class.java
+
+        val milestone: MilestoneModel? = this.verifyNullable(payload.issue?.milestone)
+
+        val creator: CreatorModel? = this.verifyNullable(payload.issue?.milestone?.creator)
+
+        val license: LicenseModel? = this.verifyNullable(payload.repository?.license)
+
+        val assignee: AssigneeModel? = this.verifyNullable(payload.issue?.assignee)
+
+        val owner: OwnerModel = payload.repository!!.owner convertTo OwnerModel::class.java
+
+        val repository: RepositoryModel = payload.repository convertTo RepositoryModel::class.java
+
+        val sender: SenderModel = payload.sender convertTo SenderModel::class.java
+
+        this.licenseServiceImpl.saveLicense(license).also { repository.license = it }
+
+        this.ownerServiceImpl.saveOwner(owner).also { repository.owner = it }
+
+        this.userServiceImpl.saveUser(user).also { issue.user = it }
+
+        this.assigneeServiceImpl.saveAssignee(assignee).also { issue.assignee = it }
+
+        this.creatorServiceImpl.saveCreator(creator).also { milestone?.creator = it }
+
+        this.milestoneServiceImpl.saveMilestone(milestone).also { issue.milestone = it }
+
+        var labelsSaved: List<LabelsModel>
+
+        var assigneesSaved: List<AssigneesModel>
+
+        this.labelsServiceImpl.saveLabels(labels).also { labelsSaved = it }
+
+        this.assigneesServiceImpl.saveAssignees(assignees).also { assigneesSaved = it }
+
+        return this.eventServiceImpl.saveEvent(event).also {
+            this.issueServiceImpl.saveIssue(issue.apply { this.event = it }).also { toSave ->
+                this.issueClassifierServiceImpl.saveIssueClassifier(toSave, labelsSaved)
+                this.issueResponsibleServiceImpl.saveIssueResponsible(toSave, assigneesSaved)
             }
-        }
 
-    @Transactional
+            this.repositoryServiceImpl.saveRepository(repository.apply { this.event = it })
+
+            this.senderServiceImpl.saveSender(sender.apply { this.event = it })
+        } convertTo EventDto::class.java
+
+    }
+
+    private inline fun <O, reified D> verifyNullable(value: O?): D? =
+        if (value == null) null else value convertTo D::class.java
+
+    /*@Transactional
     override fun saveIssue(issue: IssueDto): IssueModel =
         (issue convertTo IssueModel::class.java).apply {
             this.assignee = issue.assignee?.let { saveAssignee(it) }
@@ -102,16 +143,31 @@ class PayloadServiceImpl @Autowired constructor(
     @Transactional
     override fun saveRepository(repository: RepositoryDto): RepositoryModel {
         val repositoryModel: RepositoryModel = repository convertTo RepositoryModel::class.java
-
+        repository.license?.let { saveLicense(it) }
         return repositoryModel.apply {
             this.owner = saveOwner(repository.owner!!)
-            this.license = repository.license?.let { saveLicense(it) }
+            //this.license =
         }.run { repositoryRepository.save(this) }
     }
 
     @Transactional
-    override fun saveLicense(license: LicenseDto): LicenseModel =
-        (license convertTo LicenseModel::class.java).run { licenseRepository.save(this) }
+    override fun saveLicense(license: LicenseDto): LicenseModel {
+        val repo = this.payload.repository convertTo RepositoryModel::class.java
+        val licenseModel = license convertTo LicenseModel::class.java
+        repo.license = null
+        licenseModel.repositories = setOf(repo)
+
+        val run = licenseModel.run { licenseRepository.save(this) }
+
+        val update = this.repositoryRepository.findAll().last()
+        run.apply { this.repositories = null }
+
+        this.repositoryRepository.updateFk(run, 14)
+
+        println(run)
+
+        return run
+    }
 
     @Transactional
     override fun saveOwner(owner: OwnerDto): OwnerModel =
@@ -121,25 +177,25 @@ class PayloadServiceImpl @Autowired constructor(
     override fun saveSender(sender: SenderDto): SenderModel =
         (sender convertTo SenderModel::class.java).run { senderRepository.save(this) }
 
+    @Cacheable(cacheNames = ["payloadById"])
     override fun getPayloadById(id: Long): PayloadVo = this.payloadRepository.findById(id).orElseThrow {
         PayloadNotFoundException("Payload with ID $id not found.")
     }.run { this convertTo PayloadVo::class.java }
 
-    override fun getAllPayloads(page: Int, limit: Int, direction: String): Page<PayloadVo> {
-        val sort: Sort = this.verifyDirection(direction)
+    override fun getAllPayloads(page: Int, limit: Int, sort: String): Page<PayloadVo> {
+        val sort: Sort = this.verifySort(sort)
 
         return PageRequest.of(page, limit, sort).run {
             payloadRepository.findAll(this).map { it convertTo PayloadVo::class.java }
         }
-
     }
 
-    private fun verifyDirection(direction: String): Sort = when (direction) {
+    private fun verifySort(sort: String): Sort = when (sort) {
         "asc" -> Sort.by("id").ascending()
 
         "desc" -> Sort.by("id").descending()
 
-        else -> throw InvalidDirectionException("Direction $direction isn't a valid direction.")
-    }
+        else -> throw InvalidSortException("Sort $sort isn't a valid sort.")
+    }*/
 
 }

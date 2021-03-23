@@ -1,11 +1,12 @@
 package com.gga.webhook.services
 
-import com.gga.webhook.models.vO.AssigneesVo
+import com.gga.webhook.models.AssigneesModel
+import com.gga.webhook.models.dTO.AssigneesDto
 
 interface AssigneesService {
 
-    fun getAssignees(): HashSet<AssigneesVo>
+    fun saveAssignees(assignees: List<AssigneesModel>): List<AssigneesModel>
 
-    fun getAssigneeById(id: Long): AssigneesVo?
+    fun findAssigneesByIssueNumber(issueNumber: Int): List<AssigneesDto>
 
 }

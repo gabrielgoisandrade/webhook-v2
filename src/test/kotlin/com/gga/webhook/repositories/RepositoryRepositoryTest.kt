@@ -1,65 +1,65 @@
 package com.gga.webhook.repositories
 
-import com.gga.webhook.builder.PayloadBuilder
-import com.gga.webhook.models.LicenseModel
-import com.gga.webhook.models.PayloadModel
+import com.gga.webhook.factories.BaseRepositoryTestFactory
+import com.gga.webhook.models.EventModel
+import com.gga.webhook.models.OwnerModel
 import com.gga.webhook.models.RepositoryModel
-import com.gga.webhook.models.dTO.LicenseDto
-import com.gga.webhook.models.dTO.PayloadDto
-import com.gga.webhook.models.dTO.RepositoryDto
-import com.gga.webhook.utils.MapperUtil.Companion.convertTo
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.junit.jupiter.SpringExtension
 
-@DataJpaTest
-@ActiveProfiles("test")
-@ExtendWith(SpringExtension::class)
-internal class RepositoryRepositoryTest {
+internal class RepositoryRepositoryTest : BaseRepositoryTestFactory() {
 
     @Autowired
-    private lateinit var entityManager: TestEntityManager
+    private lateinit var repository: RepositoryRepository
 
-    @Autowired
-    private lateinit var repositoryRepository: RepositoryRepository
+    private val eventModel: EventModel = this.model.event
 
-    private val builder: PayloadBuilder = PayloadBuilder()
+    private val ownerModel: OwnerModel = this.model.owner
 
-    private val payload: PayloadDto = this.builder.payload()
-
-    private val repositoryDto: RepositoryDto = this.builder.repositoryDto()
-
-    private val licenseDto: LicenseDto = this.builder.licenseDto()
+    private val repositoryModel: RepositoryModel = this.model.repository.apply { this.license = null }
 
     @Test
-    @DisplayName("Deve persistir Repository no database")
+    @DisplayName("Must save Repository")
     fun saveRepository() {
-        val toSave: RepositoryModel = (this.repositoryDto convertTo RepositoryModel::class.java).apply {
-            this.license = entityManager.merge(licenseDto convertTo LicenseModel::class.java)
+        val expectedEvent: EventModel = this.entityManager.persist(this.eventModel)
+
+        val expectedOwner: OwnerModel = this.entityManager.merge(this.ownerModel)
+
+        val expectedRepository: RepositoryModel =
+            this.entityManager.merge(this.repositoryModel.apply {
+                this.event = expectedEvent
+                this.owner = expectedOwner
+            })
+
+        this.repository.findById(expectedRepository.id).also {
+            assertThat(it.isPresent).isTrue
+            assertThat(it.get()).isEqualTo(expectedRepository)
+            assertThat(it.get().event).isEqualTo(expectedEvent)
+            assertThat(it.get().owner).isEqualTo(expectedOwner)
         }
-
-        this.entityManager.persist(toSave)
-
-        this.repositoryRepository.findAll().also { assertTrue(it.isNotEmpty()) }
     }
 
     @Test
-    @DisplayName("Deve retornar o repository de determinado payload")
-    fun getRepository() {
-        val persist: PayloadModel = this.entityManager.persist((this.payload convertTo PayloadModel::class.java).apply {
-            this.repository!!.license = entityManager.merge(builder.licenseDto() convertTo LicenseModel::class.java)
-        })
+    @DisplayName("Must return the Repository by name")
+    fun findByNodeId() {
+        val expectedEvent: EventModel = this.entityManager.persist(this.eventModel)
 
-        val repository: RepositoryModel = this.repositoryRepository.getRepository()!!
+        val expectedOwner: OwnerModel = this.entityManager.merge(this.ownerModel)
 
-        assertEquals(persist.repository, repository)
+        val expectedRepository: RepositoryModel =
+            this.entityManager.merge(this.repositoryModel.apply {
+                this.event = expectedEvent
+                this.owner = expectedOwner
+            })
+
+        this.repository.findByName(expectedRepository.name).also {
+            assertThat(it.isPresent).isTrue
+            assertThat(it.get()).isEqualTo(expectedRepository)
+            assertThat(it.get().event).isEqualTo(expectedEvent)
+            assertThat(it.get().owner).isEqualTo(expectedOwner)
+        }
     }
 
 }

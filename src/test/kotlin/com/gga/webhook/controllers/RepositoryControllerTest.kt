@@ -1,74 +1,75 @@
 package com.gga.webhook.controllers
 
-import com.gga.webhook.builder.PayloadBuilder
+import com.gga.webhook.constants.MockValuesConstant.REPOSITORY_NAME
 import com.gga.webhook.errors.exceptions.RepositoryNotFoundException
-import com.gga.webhook.models.vO.RepositoryVo
+import com.gga.webhook.factories.BaseControllerTestFactory
+import com.gga.webhook.models.dTO.RepositoryDto
 import com.gga.webhook.services.impls.RepositoryServiceImpl
-import com.gga.webhook.utils.MapperUtil.Companion.convertTo
 import com.gga.webhook.utils.RequestUtil.Companion.REPOSITORY
 import com.gga.webhook.utils.RequestUtil.Companion.getRequest
-import org.hamcrest.Matchers.hasSize
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.DisplayName
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.mockito.BDDMockito.given
-import org.mockito.Mockito.`when`
+import org.mockito.BDDMockito.*
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
-import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.web.servlet.MockMvc
+import org.springframework.http.HttpStatus
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
-@SpringBootTest
-@AutoConfigureMockMvc
-@ActiveProfiles("test")
-internal class RepositoryControllerTest {
+@WebMvcTest(controllers = [RepositoryController::class])
+internal class RepositoryControllerTest : BaseControllerTestFactory() {
 
     @MockBean
-    private lateinit var repositoryServiceImpl: RepositoryServiceImpl
+    private lateinit var service: RepositoryServiceImpl
 
     @Autowired
-    private lateinit var repositoryController: RepositoryController
+    private lateinit var controller: RepositoryController
 
-    @Autowired
-    private lateinit var mockMvc: MockMvc
-
-    private val expectedRepository: RepositoryVo = PayloadBuilder().repositoryDto() convertTo RepositoryVo::class.java
+    private val expected: RepositoryDto = this.dto.repositoryDto()
 
     @Test
-    @DisplayName("GET -> Deve retornar o repository com as mesmas propriedades que o esperado")
-    fun verifyRepositoryBody() {
-        `when`(this.repositoryServiceImpl.getRepository()).thenReturn((this.expectedRepository))
+    fun findRepositoryByName() {
+        `when`(this.service.findRepositoryByName(anyString())).thenReturn(this.expected)
 
-        this.repositoryController.getRepository().also {
-            assertEquals(expectedRepository, it.body!!)
+        this.controller.findRepositoryByName(this.expected.name).also {
+            assertThat(it.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(it.body).isEqualTo(this.expected)
+
+            with(it.body!!.links) {
+                assertThat(this.isEmpty).isFalse
+                assertThat(this.getLink("self").isPresent).isTrue
+                assertThat(this.getLink("owner").isPresent).isTrue
+                assertThat(this.getLink("license").isPresent).isTrue
+            }
         }
     }
 
     @Test
-    @DisplayName("GET -> Deve retornar o repository com o HATEOAS configurado")
-    fun verifyRepositoryLink() {
-        given(this.repositoryServiceImpl.getRepository()).willReturn((this.expectedRepository))
+    fun findRepositoryByNameWithoutLicense() {
+        `when`(this.service.findRepositoryByName(anyString())).thenReturn(this.expected.apply { this.license = null })
 
-        this.mockMvc.perform(getRequest(REPOSITORY))
-            .andExpect(status().isOk)
-            .andExpect(jsonPath("links").isNotEmpty)
-            .andExpect(jsonPath("links[1]['rel']").value("owner"))
-            .andExpect(jsonPath("links[2]['rel']").value("license"))
-            .andExpect(jsonPath("links", hasSize<Int>(3)))
+        this.controller.findRepositoryByName(REPOSITORY_NAME).also {
+            assertThat(it.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(it.body).isEqualTo(this.expected)
+
+            with(it.body!!.links) {
+                assertThat(this.isEmpty).isFalse
+                assertThat(this.getLink("self").isPresent).isTrue
+                assertThat(this.getLink("owner").isPresent).isTrue
+                assertThat(this.getLink("license").isPresent).isFalse
+            }
+        }
     }
 
     @Test
-    @DisplayName("GET -> Deve retornar um erro ao não retornar nenhum repository")
-    fun throwErrorByNoRepositoryFound() {
-        given(this.repositoryServiceImpl.getRepository()).willThrow(RepositoryNotFoundException("No repository found."))
+    fun throwRepositoryNameNotFound() {
+        given(this.service.findRepositoryByName(anyString()))
+            .willThrow(RepositoryNotFoundException("Repository '$REPOSITORY_NAME' not found"))
 
-        this.mockMvc.perform(getRequest(REPOSITORY))
+        this.mockMvc.perform(getRequest("$REPOSITORY/$REPOSITORY_NAME"))
             .andExpect(status().isNotFound)
-            .andExpect(jsonPath("message").value("No repository found."))
+            .andExpect(jsonPath("message").value("Repository '$REPOSITORY_NAME' not found"))
     }
 
 }

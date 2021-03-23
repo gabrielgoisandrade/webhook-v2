@@ -24,14 +24,14 @@ class AdviceController {
             status(NOT_FOUND).body(this)
         }
 
-    @ExceptionHandler(PayloadNotFoundException::class)
-    fun handler(ex: PayloadNotFoundException, request: WebRequest): ResponseEntity<ApiError> =
+    @ExceptionHandler(EventNotFoundException::class)
+    fun handler(ex: EventNotFoundException, request: WebRequest): ResponseEntity<ApiError> =
         ApiError(ex.message!!, request.getDescription(false), DATE).run {
             status(NOT_FOUND).body(this)
         }
 
-    @ExceptionHandler(InvalidDirectionException::class)
-    fun handler(ex: InvalidDirectionException, request: WebRequest): ResponseEntity<ApiError> =
+    @ExceptionHandler(InvalidSortException::class)
+    fun handler(ex: InvalidSortException, request: WebRequest): ResponseEntity<ApiError> =
         ApiError(ex.message!!, request.getDescription(false), DATE).run {
             status(BAD_REQUEST).body(this)
         }
@@ -74,6 +74,24 @@ class AdviceController {
 
     @ExceptionHandler(LabelNotFoundException::class)
     fun handler(ex: LabelNotFoundException, request: WebRequest): ResponseEntity<ApiError> =
+        ApiError(ex.message!!, request.getDescription(false), DATE).run {
+            status(NOT_FOUND).body(this)
+        }
+
+    @ExceptionHandler(LicenseNotFoundException::class)
+    fun handler(ex: LicenseNotFoundException, request: WebRequest): ResponseEntity<ApiError> =
+        ApiError(ex.message!!, request.getDescription(false), DATE).run {
+            status(NOT_FOUND).body(this)
+        }
+
+    @ExceptionHandler(MilestoneNotFoundException::class)
+    fun handler(ex: MilestoneNotFoundException, request: WebRequest): ResponseEntity<ApiError> =
+        ApiError(ex.message!!, request.getDescription(false), DATE).run {
+            status(NOT_FOUND).body(this)
+        }
+
+    @ExceptionHandler(RelationNotFoundException::class)
+    fun handler(ex: RelationNotFoundException, request: WebRequest): ResponseEntity<ApiError> =
         ApiError(ex.message!!, request.getDescription(false), DATE).run {
             status(NOT_FOUND).body(this)
         }

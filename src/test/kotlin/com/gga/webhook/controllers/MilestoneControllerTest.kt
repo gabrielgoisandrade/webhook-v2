@@ -1,68 +1,58 @@
 package com.gga.webhook.controllers
 
-import com.gga.webhook.builder.PayloadBuilder
-import com.gga.webhook.models.vO.MilestoneVo
+import com.gga.webhook.constants.MockValuesConstant.ISSUE_NUMBER
+import com.gga.webhook.errors.exceptions.RelationNotFoundException
+import com.gga.webhook.factories.BaseControllerTestFactory
+import com.gga.webhook.models.dTO.MilestoneDto
 import com.gga.webhook.services.impls.MilestoneServiceImpl
-import com.gga.webhook.utils.MapperUtil.Companion.convertTo
 import com.gga.webhook.utils.RequestUtil.Companion.MILESTONE
 import com.gga.webhook.utils.RequestUtil.Companion.getRequest
-import org.hamcrest.Matchers.hasSize
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.DisplayName
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.mockito.BDDMockito.given
-import org.mockito.Mockito.`when`
+import org.mockito.BDDMockito.*
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
-import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.web.servlet.MockMvc
+import org.springframework.http.HttpStatus
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
-@SpringBootTest
-@AutoConfigureMockMvc
-@ActiveProfiles("test")
-internal class MilestoneControllerTest {
+@WebMvcTest(controllers = [MilestoneController::class])
+internal class MilestoneControllerTest : BaseControllerTestFactory() {
 
     @MockBean
-    private lateinit var milestoneServiceImpl: MilestoneServiceImpl
+    private lateinit var service: MilestoneServiceImpl
 
     @Autowired
-    private lateinit var milestoneController: MilestoneController
+    private lateinit var controller: MilestoneController
 
-    @Autowired
-    private lateinit var mockMvc: MockMvc
-
-    private val expectedMilestone: MilestoneVo = PayloadBuilder().milestoneDto() convertTo MilestoneVo::class.java
+    private val expected: MilestoneDto = this.dto.milestoneDto()
 
     @Test
-    @DisplayName("GET -> Deve retornar o milestone com as mesmas propriedades que o esperado")
-    fun verifyMilestoneBody() {
-        `when`(this.milestoneServiceImpl.getMilestone()).thenReturn((this.expectedMilestone))
+    fun findMilestoneByIssueNumber() {
+        `when`(this.service.findMilestoneByIssueNumber(anyInt())).thenReturn(this.expected)
 
-        this.milestoneController.getMilestone().also { assertEquals(expectedMilestone, it.body!!) }
+        this.controller.findMilestoneByIssueNumber(ISSUE_NUMBER).also {
+            assertThat(it.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(it.body).isEqualTo(this.expected)
+
+            with(it.body!!.links) {
+                assertThat(this.isEmpty).isFalse
+                assertThat(this.getLink("self").isPresent).isTrue
+                assertThat(this.getLink("creator").isPresent).isTrue
+            }
+        }
     }
 
     @Test
-    @DisplayName("GET -> Deve retornar o milestone com o HATEOAS configurado")
-    fun verifyMilestoneLink() {
-        given(this.milestoneServiceImpl.getMilestone()).willReturn((this.expectedMilestone))
+    fun throwErrorByIssueNumberNotFound() {
+        given(this.service.findMilestoneByIssueNumber(anyInt()))
+            .willThrow(RelationNotFoundException("There isn't any Milestone related with this Issue"))
 
-        this.mockMvc.perform(getRequest(MILESTONE))
-            .andExpect(status().isOk)
-            .andExpect(jsonPath("links").isNotEmpty)
-            .andExpect(jsonPath("links[1]['rel']").value("creator"))
-            .andExpect(jsonPath("links", hasSize<Int>(2)))
-    }
-
-    @Test
-    @DisplayName("GET -> Deve status code 204 por não haver milestone na issue")
-    fun getNullMilestone() {
-        given(this.milestoneServiceImpl.getMilestone()).willReturn(null)
-
-        this.mockMvc.perform(getRequest(MILESTONE)).andExpect(status().isNoContent)
+        this.mockMvc.perform(getRequest("$MILESTONE/issue/$ISSUE_NUMBER"))
+            .andExpect(status().isNotFound)
+            .andExpect(jsonPath("message").value("There isn't any Milestone related with this Issue"))
     }
 
 }
+

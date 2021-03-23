@@ -1,12 +1,15 @@
 package com.gga.webhook.models.dTO
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
+import io.swagger.v3.oas.annotations.media.Schema
+import org.springframework.hateoas.Links
 import org.springframework.hateoas.RepresentationModel
 import java.io.Serializable
 import java.time.Instant
 
 data class RepositoryDto @JvmOverloads constructor(
-    @JsonProperty("id")
+    @JsonIgnore
     var id: Long = 0,
 
     @JsonProperty("node_id")
@@ -21,6 +24,7 @@ data class RepositoryDto @JvmOverloads constructor(
     @JsonProperty("private")
     var private: Boolean = false,
 
+    @get:JsonIgnore
     @JsonProperty("owner")
     var owner: OwnerDto? = null,
 
@@ -210,6 +214,7 @@ data class RepositoryDto @JvmOverloads constructor(
     @JsonProperty("open_issues_count")
     var openIssuesCount: Int = 0,
 
+    @get:JsonIgnore
     @JsonProperty("license")
     var license: LicenseDto? = null,
 
@@ -224,4 +229,10 @@ data class RepositoryDto @JvmOverloads constructor(
 
     @JsonProperty("default_branch")
     var defaultBranch: String = ""
-) : Serializable, RepresentationModel<RepositoryDto>()
+) : Serializable, RepresentationModel<RepositoryDto>(){
+
+    @Schema(hidden = true)
+    @Suppress("unused")
+    private val links: List<Links> = emptyList()
+
+}

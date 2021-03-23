@@ -1,57 +1,39 @@
 package com.gga.webhook.repositories
 
-import com.gga.webhook.builder.PayloadBuilder
+import com.gga.webhook.factories.BaseRepositoryTestFactory
 import com.gga.webhook.models.LicenseModel
-import com.gga.webhook.models.PayloadModel
-import com.gga.webhook.models.dTO.LicenseDto
-import com.gga.webhook.models.dTO.PayloadDto
-import com.gga.webhook.utils.MapperUtil.Companion.convertTo
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.junit.jupiter.SpringExtension
 
-@DataJpaTest
-@ActiveProfiles("test")
-@ExtendWith(SpringExtension::class)
-internal class LicenseRepositoryTest {
+internal class LicenseRepositoryTest : BaseRepositoryTestFactory() {
 
     @Autowired
-    private lateinit var entityManager: TestEntityManager
+    private lateinit var repository: LicenseRepository
 
-    @Autowired
-    private lateinit var licenseRepository: LicenseRepository
-
-    private val builder: PayloadBuilder = PayloadBuilder()
-
-    private val payload: PayloadDto = this.builder.payload()
-
-    private val licenseDto: LicenseDto = this.builder.licenseDto()
+    private val licenseModel: LicenseModel = this.model.license
 
     @Test
-    @DisplayName("Deve persistir License no database")
+    @DisplayName("Must save License")
     fun saveLicense() {
-        this.entityManager.merge(this.licenseDto convertTo LicenseModel::class.java)
+        val expectedLicense: LicenseModel = this.entityManager.merge(this.licenseModel)
 
-        this.licenseRepository.findAll().also { assertTrue(it.isNotEmpty()) }
+        this.repository.findById(expectedLicense.id).also {
+            assertThat(it.isPresent).isTrue
+            assertThat(it.get()).isEqualTo(expectedLicense)
+        }
     }
 
     @Test
-    @DisplayName("Deve retornar a license de determinado repository")
-    fun getOwner() {
-        val persist: PayloadModel = this.entityManager.persist((this.payload convertTo PayloadModel::class.java).apply {
-            this.repository!!.license = entityManager.merge(builder.licenseDto() convertTo LicenseModel::class.java)
-        })
+    @DisplayName("Must return the License by key")
+    fun findByKey() {
+        val expectedLicense: LicenseModel = this.entityManager.merge(this.licenseModel)
 
-        val license: LicenseModel = this.licenseRepository.getLicense()!!
-
-        assertEquals(persist.repository!!.license, license)
+        this.repository.findByKey(expectedLicense.key).also {
+            assertThat(it.isPresent).isTrue
+            assertThat(it.get()).isEqualTo(expectedLicense)
+        }
     }
 
 }

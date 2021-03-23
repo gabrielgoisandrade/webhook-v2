@@ -1,70 +1,57 @@
 package com.gga.webhook.controllers
 
-import com.gga.webhook.builder.PayloadBuilder
+import com.gga.webhook.constants.MockValuesConstant.LOGIN
 import com.gga.webhook.errors.exceptions.SenderNotFoundException
-import com.gga.webhook.models.vO.SenderVo
+import com.gga.webhook.factories.BaseControllerTestFactory
+import com.gga.webhook.models.dTO.SenderDto
 import com.gga.webhook.services.impls.SenderServiceImpl
-import com.gga.webhook.utils.MapperUtil.Companion.convertTo
 import com.gga.webhook.utils.RequestUtil.Companion.SENDER
 import com.gga.webhook.utils.RequestUtil.Companion.getRequest
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.DisplayName
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.mockito.ArgumentMatchers.anyString
+import org.mockito.BDDMockito.`when`
 import org.mockito.BDDMockito.given
-import org.mockito.Mockito.`when`
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
-import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.web.servlet.MockMvc
+import org.springframework.http.HttpStatus
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
-@SpringBootTest
-@AutoConfigureMockMvc
-@ActiveProfiles("test")
-internal class SenderControllerTest {
+@WebMvcTest(controllers = [SenderController::class])
+internal class SenderControllerTest : BaseControllerTestFactory() {
 
     @MockBean
-    private lateinit var senderServiceImpl: SenderServiceImpl
+    private lateinit var service: SenderServiceImpl
 
     @Autowired
-    private lateinit var senderController: SenderController
+    private lateinit var controller: SenderController
 
-    @Autowired
-    private lateinit var mockMvc: MockMvc
-
-    private val expectedSender: SenderVo = PayloadBuilder().senderDto() convertTo SenderVo::class.java
+    private val expected: SenderDto = this.dto.senderDto()
 
     @Test
-    @DisplayName("GET -> Deve retornar o sender com as mesmas propriedades que o esperado")
-    fun verifySenderBody() {
-        `when`(this.senderServiceImpl.getSender()).thenReturn((this.expectedSender))
+    fun findSenderByLogin() {
+        `when`(this.service.findSenderByLogin(anyString())).thenReturn(this.expected)
 
-        this.senderController.getSender().also {
-            assertEquals(expectedSender, it.body!!)
+        this.controller.findSenderByLogin(LOGIN).also {
+            assertThat(it.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(it.body).isEqualTo(this.expected)
+
+            with(it.body!!.links) {
+                assertThat(this.isEmpty).isFalse
+                assertThat(this.getLink("self").isPresent).isTrue
+            }
         }
     }
 
     @Test
-    @DisplayName("GET -> Deve retornar o sender com o HATEOAS configurado")
-    fun verifySenderLink() {
-        given(this.senderServiceImpl.getSender()).willReturn((this.expectedSender))
+    fun throwErrorBySenderLoginNotFound() {
+        given(this.service.findSenderByLogin(anyString()))
+            .willThrow(SenderNotFoundException("Sender '$LOGIN' not found"))
 
-        this.mockMvc.perform(getRequest(SENDER))
-            .andExpect(status().isOk)
-            .andExpect(jsonPath("links").isNotEmpty)
-    }
-
-    @Test
-    @DisplayName("GET -> Deve retornar um erro ao não retornar nenhum sender")
-    fun throwErrorByNoSenderFound() {
-        given(this.senderServiceImpl.getSender()).willThrow(SenderNotFoundException("No sender found."))
-
-        this.mockMvc.perform(getRequest(SENDER))
+        this.mockMvc.perform(getRequest("$SENDER/$LOGIN"))
             .andExpect(status().isNotFound)
-            .andExpect(jsonPath("message").value("No sender found."))
+            .andExpect(jsonPath("message").value("Sender '$LOGIN' not found"))
     }
-
 }

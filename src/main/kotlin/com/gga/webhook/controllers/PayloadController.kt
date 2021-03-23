@@ -1,92 +1,45 @@
 package com.gga.webhook.controllers
 
-import com.gga.webhook.errors.ApiError
+import com.gga.webhook.constants.ControllersConstants.EVENT_CONTROLLER
+import com.gga.webhook.constants.ControllersConstants.ISSUE_CONTROLLER
+import com.gga.webhook.constants.ControllersConstants.REPOSITORY_CONTROLLER
+import com.gga.webhook.constants.ControllersConstants.SENDER_CONTROLLER
+import com.gga.webhook.models.dTO.EventDto
 import com.gga.webhook.models.dTO.PayloadDto
-import com.gga.webhook.models.vO.PayloadVo
 import com.gga.webhook.services.impls.PayloadServiceImpl
-import io.swagger.v3.oas.annotations.Operation
-import io.swagger.v3.oas.annotations.media.Content
-import io.swagger.v3.oas.annotations.media.Schema
-import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.hateoas.CollectionModel
-import org.springframework.hateoas.Link
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
-import org.springframework.http.ResponseEntity.ok
 import org.springframework.http.ResponseEntity.status
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/payload", produces = [MediaType.APPLICATION_JSON_VALUE])
-@Tag(name = "Payload controller", description = "Methods available for resource 'payload'.")
+@Tag(name = "Payload controller", description = "Methods available for resource '/payload'.")
 class PayloadController {
 
     @Autowired
-    private lateinit var payloadServiceImpl: PayloadServiceImpl
+    private lateinit var service: PayloadServiceImpl
 
-    @Operation(
-        description = "Returns the payload by ID.",
-        responses = [
-            ApiResponse(description = "Payload found.", responseCode = "200"),
-            ApiResponse(
-                description = "Payload not found.",
-                responseCode = "404",
-                content = [Content(schema = Schema(implementation = ApiError::class))]
-            )
-        ]
-    )
-    @GetMapping("/{id}")
-    fun findPayloadById(@PathVariable("id") id: Long): ResponseEntity<PayloadVo> =
-        this.payloadServiceImpl.getPayloadById(id).run {
-            this.add(
-                linkTo(methodOn(this@PayloadController::class.java).findPayloadById(id)).withSelfRel(),
-                linkTo(methodOn(IssueController::class.java).getIssue()).withRel("issue"),
-                linkTo(methodOn(RepositoryController::class.java).getRepository()).withRel("repository"),
-                linkTo(methodOn(SenderController::class.java).getSender()).withRel("sender")
-            )
-
-            ok(this)
-        }
-
-    @Operation(
-        description = "Get all registered payloads.",
-        responses = [ApiResponse(description = "Payloads found.", responseCode = "200")]
-    )
-    @GetMapping
-    fun findAllPayloads(
-        @RequestParam(value = "page", defaultValue = "10") page: Int,
-        @RequestParam(value = "limit", defaultValue = "1") limit: Int,
-        @RequestParam(value = "direction", defaultValue = "asc") direction: String,
-    ): ResponseEntity<CollectionModel<PayloadVo>> =
-        this.payloadServiceImpl.getAllPayloads(page, limit, direction).run {
-            this.forEach {
-                it.add(
-                    linkTo(methodOn(this@PayloadController::class.java).findPayloadById(it.id)).withSelfRel(),
-                    linkTo(methodOn(IssueController::class.java).getIssue()).withRel("issue"),
-                    linkTo(methodOn(RepositoryController::class.java).getRepository()).withRel("repository"),
-                    linkTo(methodOn(SenderController::class.java).getSender()).withRel("sender")
-                )
-            }
-
-            val link: Link =
-                linkTo(
-                    methodOn(this@PayloadController::class.java).findAllPayloads(page, limit, direction)
-                ).withSelfRel()
-
-            ok(CollectionModel.of(this, link))
-        }
-
-    @Operation(
-        description = "Saves the new Issue opened or updated at GitHub.",
-        responses = [ApiResponse(description = "Issue saved.", responseCode = "201")]
-    )
     @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
-    fun saveIssue(@RequestBody payloadDto: PayloadDto): ResponseEntity<PayloadDto> =
-        this.payloadServiceImpl.savePayload(payloadDto).run { status(HttpStatus.CREATED).body(this) }
+    fun savePayload(@RequestBody payloadDto: PayloadDto): ResponseEntity<EventDto> =
+        this.service.savePayload(payloadDto).run {
+            this.add(
+                linkTo(methodOn(EVENT_CONTROLLER).findEventByAction(this.action)).withSelfRel(),
+                linkTo(methodOn(ISSUE_CONTROLLER).findIssueByNumber(payloadDto.issue!!.number)).withRel("issue"),
+                linkTo(methodOn(REPOSITORY_CONTROLLER).findRepositoryByName(payloadDto.repository!!.name))
+                    .withRel("repository"),
+                linkTo(methodOn(SENDER_CONTROLLER).findSenderByLogin(payloadDto.sender!!.login)).withRel("sender")
+            )
+
+            status(HttpStatus.CREATED).body(this)
+        }
 
 }

@@ -1,20 +1,17 @@
 package com.gga.webhook.models
 
-import java.io.Serializable
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.Id
-import javax.persistence.Table
+import javax.persistence.*
 
 @Entity
 @Table(name = "OWNER")
 data class OwnerModel @JvmOverloads constructor(
-    @Column(name = "LOGIN")
-    var login: String = "",
-
     @Id
     @Column(name = "OWNER_ID")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long = 0L,
+
+    @Column(name = "LOGIN")
+    var login: String = "",
 
     @Column(name = "NODE_ID")
     var nodeId: String = "",
@@ -63,4 +60,4 @@ data class OwnerModel @JvmOverloads constructor(
 
     @Column(name = "SITE_ADMIN")
     var siteAdmin: Boolean = false
-) : Serializable
+)

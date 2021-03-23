@@ -3,10 +3,13 @@ package com.gga.webhook.repositories
 import com.gga.webhook.models.AssigneesModel
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
+import java.util.*
 
 interface AssigneesRepository : JpaRepository<AssigneesModel, Long> {
 
-    @Query("select a from AssigneesModel a join IssueModel i on i.id = a.issue.id order by a.id desc ")
-    fun getAssignees(): HashSet<AssigneesModel>
+    fun findByLogin(login: String): Optional<AssigneesModel>
+
+    @Query("SELECT R.assignees FROM IssueResponsibleModel R WHERE R.issue.number = :number")
+    fun findByIssueNumber(number: Int): Optional<List<AssigneesModel>>
 
 }

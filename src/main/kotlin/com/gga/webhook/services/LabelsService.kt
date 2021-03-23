@@ -1,11 +1,12 @@
 package com.gga.webhook.services
 
-import com.gga.webhook.models.vO.LabelsVo
+import com.gga.webhook.models.LabelsModel
+import com.gga.webhook.models.dTO.LabelsDto
 
 interface LabelsService {
 
-    fun getLabels(): HashSet<LabelsVo>
+    fun saveLabels(labels: List<LabelsModel>): List<LabelsModel>
 
-    fun getLabelById(id: Long): LabelsVo?
+    fun findLabelsByIssueNumber(issueNumber: Int): List<LabelsDto>
 
 }

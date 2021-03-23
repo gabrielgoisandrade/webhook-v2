@@ -1,70 +1,56 @@
 package com.gga.webhook.controllers
 
-import com.gga.webhook.builder.PayloadBuilder
-import com.gga.webhook.errors.exceptions.OwnerNotFoundException
-import com.gga.webhook.models.vO.OwnerVo
+import com.gga.webhook.constants.MockValuesConstant.REPOSITORY_NAME
+import com.gga.webhook.errors.exceptions.RelationNotFoundException
+import com.gga.webhook.factories.BaseControllerTestFactory
+import com.gga.webhook.models.dTO.OwnerDto
 import com.gga.webhook.services.impls.OwnerServiceImpl
-import com.gga.webhook.utils.MapperUtil.Companion.convertTo
 import com.gga.webhook.utils.RequestUtil.Companion.OWNER
 import com.gga.webhook.utils.RequestUtil.Companion.getRequest
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.DisplayName
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.mockito.BDDMockito.given
-import org.mockito.Mockito.`when`
+import org.mockito.BDDMockito.*
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
-import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.web.servlet.MockMvc
+import org.springframework.http.HttpStatus
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
-@SpringBootTest
-@AutoConfigureMockMvc
-@ActiveProfiles("test")
-internal class OwnerControllerTest {
+@WebMvcTest(controllers = [OwnerController::class])
+internal class OwnerControllerTest : BaseControllerTestFactory() {
 
     @MockBean
-    private lateinit var ownerServiceImpl: OwnerServiceImpl
+    private lateinit var service: OwnerServiceImpl
 
     @Autowired
-    private lateinit var ownerController: OwnerController
+    private lateinit var controller: OwnerController
 
-    @Autowired
-    private lateinit var mockMvc: MockMvc
-
-    private val expectedOwner: OwnerVo = PayloadBuilder().ownerDto() convertTo OwnerVo::class.java
+    private val expected: OwnerDto = this.dto.ownerDto()
 
     @Test
-    @DisplayName("GET -> Deve retornar o owner com as mesmas propriedades que o esperado")
-    fun verifyOwnerBody() {
-        `when`(this.ownerServiceImpl.getOwner()).thenReturn((this.expectedOwner))
+    fun findOwnerByRepositoryName() {
+        `when`(this.service.findOwnerByRepositoryName(anyString())).thenReturn(this.expected)
 
-        this.ownerController.getOwner().also {
-            assertEquals(expectedOwner, it.body!!)
+        this.controller.findOwnerByRepositoryName(REPOSITORY_NAME).also {
+            assertThat(it.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(it.body).isEqualTo(this.expected)
+
+            with(it.body!!.links) {
+                assertThat(this.isEmpty).isFalse
+                assertThat(this.getLink("self").isPresent).isTrue
+            }
         }
     }
 
     @Test
-    @DisplayName("GET -> Deve retornar o owner com o HATEOAS configurado")
-    fun verifyOwnerLink() {
-        given(this.ownerServiceImpl.getOwner()).willReturn((this.expectedOwner))
+    fun throwErrorByRepositoryNameNotFound() {
+        given(this.service.findOwnerByRepositoryName(anyString()))
+            .willThrow(RelationNotFoundException("There isn't any Owner related with this Repository"))
 
-        this.mockMvc.perform(getRequest(OWNER))
-            .andExpect(status().isOk)
-            .andExpect(jsonPath("links").isNotEmpty)
-    }
-
-    @Test
-    @DisplayName("GET -> Deve retornar um erro ao não retornar nenhum owner")
-    fun throwErrorByNoOwnerFound() {
-        given(this.ownerServiceImpl.getOwner()).willThrow(OwnerNotFoundException("No owner found."))
-
-        this.mockMvc.perform(getRequest(OWNER))
+        this.mockMvc.perform(getRequest("$OWNER/repository/$REPOSITORY_NAME"))
             .andExpect(status().isNotFound)
-            .andExpect(jsonPath("message").value("No owner found."))
+            .andExpect(jsonPath("message").value("There isn't any Owner related with this Repository"))
     }
 
 }

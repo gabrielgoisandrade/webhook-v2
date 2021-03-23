@@ -7,6 +7,11 @@ import javax.persistence.*
 @Entity
 @Table(name = "ISSUE")
 data class IssueModel @JvmOverloads constructor(
+    @Id
+    @Column(name = "ISSUE_ID")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    var id: Long = 0,
+
     @Column(name = "URL")
     var url: String = "",
 
@@ -25,10 +30,6 @@ data class IssueModel @JvmOverloads constructor(
     @Column(name = "HTML_URL")
     var htmlUrl: String = "",
 
-    @Id
-    @Column(name = "ISSUE_ID")
-    var id: Long = 0,
-
     @Column(name = "NODE_ID")
     var nodeId: String = "",
 
@@ -38,7 +39,7 @@ data class IssueModel @JvmOverloads constructor(
     @Column(name = "TITLE")
     var title: String = "",
 
-    @OneToOne(cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "USER_ID", foreignKey = ForeignKey(name = "C_ISSUE_USER"))
     var user: UserModel? = null,
 
@@ -48,11 +49,11 @@ data class IssueModel @JvmOverloads constructor(
     @Column(name = "LOCKED")
     var locked: Boolean = false,
 
-    @OneToOne(cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ASSIGNEE_ID", foreignKey = ForeignKey(name = "C_ISSUE_ASSIGNEE"))
     var assignee: AssigneeModel? = null,
 
-    @OneToOne(cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MILESTONE_ID", foreignKey = ForeignKey(name = "C_ISSUE_MILESTONE"))
     var milestone: MilestoneModel? = null,
 
@@ -78,5 +79,9 @@ data class IssueModel @JvmOverloads constructor(
     var body: String = "",
 
     @Column(name = "PERFORMED_VIA_GITHUB_APP")
-    var performedViaGithubApp: String? = null
+    var performedViaGithubApp: String? = null,
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "EVENT_ID", foreignKey = ForeignKey(name = "C_ISSUE_EVENT"))
+    var event: EventModel? = null
 ) : Serializable

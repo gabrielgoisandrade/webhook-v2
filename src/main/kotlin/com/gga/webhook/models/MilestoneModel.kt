@@ -19,13 +19,14 @@ data class MilestoneModel @JvmOverloads constructor(
 
     @Id
     @Column(name = "MILESTONE_ID")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long = 0,
 
     @Column(name = "NODE_ID")
     var nodeId: String = "",
 
     @Column(name = "NUMBER")
-    var number: Long = 0,
+    var number: Int = 0,
 
     @Column(name = "TITLE")
     var title: String = "",
@@ -33,7 +34,7 @@ data class MilestoneModel @JvmOverloads constructor(
     @Column(name = "DESCRIPTION")
     var description: String? = null,
 
-    @OneToOne(cascade= [CascadeType.ALL], fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "CREATOR_ID", foreignKey = ForeignKey(name = "C_MILESTONE_CREATOR"))
     var creator: CreatorModel? = null,
 
@@ -56,5 +57,8 @@ data class MilestoneModel @JvmOverloads constructor(
     var dueOn: Instant? = null,
 
     @Column(name = "CLOSED_AT")
-    var closedAt: Instant? = null
+    var closedAt: Instant? = null,
+
+    @OneToMany(mappedBy = "milestone", fetch = FetchType.LAZY)
+    var issues: Set<IssueModel>? = null
 ) : Serializable

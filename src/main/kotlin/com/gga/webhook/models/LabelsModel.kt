@@ -27,9 +27,5 @@ data class LabelsModel @JvmOverloads constructor(
     var default: Boolean = false,
 
     @Column(name = "DESCRIPTION")
-    var description: String? = null,
-
-    @ManyToOne(cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
-    @JoinColumn(name = "ISSUE_ID", foreignKey = ForeignKey(name = "C_LABELS_ISSUE"))
-    var issue: IssueModel? = null
+    var description: String? = null
 ) : Serializable

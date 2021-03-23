@@ -2,11 +2,13 @@ package com.gga.webhook.models.dTO
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
+import io.swagger.v3.oas.annotations.media.Schema
+import org.springframework.hateoas.Links
+import org.springframework.hateoas.RepresentationModel
 import java.io.Serializable
 
 data class LicenseDto @JvmOverloads constructor(
     @JsonIgnore
-    @JsonProperty("id")
     var id: Long = 0L,
 
     @JsonProperty("key")
@@ -23,4 +25,10 @@ data class LicenseDto @JvmOverloads constructor(
 
     @JsonProperty("node_id")
     var nodeId: String = ""
-) : Serializable
+) : Serializable, RepresentationModel<LicenseDto>(){
+
+    @Schema(hidden = true)
+    @Suppress("unused")
+    private val links: List<Links> = emptyList()
+
+}

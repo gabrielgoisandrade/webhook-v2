@@ -1,9 +1,12 @@
 package com.gga.webhook.services
 
-import com.gga.webhook.models.vO.MilestoneVo
+import com.gga.webhook.models.MilestoneModel
+import com.gga.webhook.models.dTO.MilestoneDto
 
 interface MilestoneService {
 
-    fun getMilestone(): MilestoneVo?
+    fun saveMilestone(milestone: MilestoneModel?): MilestoneModel?
+
+    fun findMilestoneByIssueNumber(issueNumber: Int): MilestoneDto
 
 }

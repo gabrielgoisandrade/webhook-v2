@@ -5,9 +5,20 @@ import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
+import kotlin.random.Random
 
-class RequestUtil private constructor() {
+class RequestUtil {
+
+    val randomId: Long = Random.nextLong()
+
+    val eventAction: String = "some action"
+
+    val repositoryName: String = "some name"
+
+
     companion object {
+
+        const val EVENT: String = "/event"
 
         const val PAYLOAD: String = "/payload"
 

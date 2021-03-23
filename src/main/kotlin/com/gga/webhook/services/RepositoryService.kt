@@ -1,9 +1,12 @@
 package com.gga.webhook.services
 
-import com.gga.webhook.models.vO.RepositoryVo
+import com.gga.webhook.models.RepositoryModel
+import com.gga.webhook.models.dTO.RepositoryDto
 
 interface RepositoryService {
 
-    fun getRepository(): RepositoryVo?
+    fun saveRepository(repository: RepositoryModel)
+
+    fun findRepositoryByName(name: String): RepositoryDto
 
 }

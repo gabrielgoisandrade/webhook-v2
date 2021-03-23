@@ -1,9 +1,12 @@
 package com.gga.webhook.services
 
-import com.gga.webhook.models.vO.CreatorVo
+import com.gga.webhook.models.CreatorModel
+import com.gga.webhook.models.dTO.CreatorDto
 
 interface CreatorService {
 
-    fun getCreator(): CreatorVo?
+    fun saveCreator(creator: CreatorModel?): CreatorModel?
+
+    fun findCreatorByMilestoneNumber(milestoneNumber: Int): CreatorDto
 
 }

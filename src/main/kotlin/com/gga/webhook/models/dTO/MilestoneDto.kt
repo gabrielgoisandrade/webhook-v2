@@ -1,6 +1,10 @@
 package com.gga.webhook.models.dTO
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
+import io.swagger.v3.oas.annotations.media.Schema
+import org.springframework.hateoas.Links
+import org.springframework.hateoas.RepresentationModel
 import java.io.Serializable
 import java.time.Instant
 
@@ -14,14 +18,14 @@ data class MilestoneDto @JvmOverloads constructor(
     @JsonProperty("labels_url")
     var labelsUrl: String = "",
 
-    @JsonProperty("id")
+    @JsonIgnore
     var id: Long = 0,
 
     @JsonProperty("node_id")
     var nodeId: String = "",
 
     @JsonProperty("number")
-    var number: Long = 0,
+    var number: Int = 0,
 
     @JsonProperty("title")
     var title: String = "",
@@ -29,6 +33,7 @@ data class MilestoneDto @JvmOverloads constructor(
     @JsonProperty("description")
     var description: String? = null,
 
+    @get:JsonIgnore
     @JsonProperty("creator")
     var creator: CreatorDto? = null,
 
@@ -52,4 +57,10 @@ data class MilestoneDto @JvmOverloads constructor(
 
     @JsonProperty("closed_at")
     var closedAt: Instant? = null
-) : Serializable
+) : Serializable, RepresentationModel<MilestoneDto>(){
+
+    @Schema(hidden = true)
+    @Suppress("unused")
+    private val links: List<Links> = emptyList()
+
+}

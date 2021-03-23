@@ -1,58 +1,39 @@
 package com.gga.webhook.repositories
 
-import com.gga.webhook.builder.PayloadBuilder
+import com.gga.webhook.factories.BaseRepositoryTestFactory
 import com.gga.webhook.models.CreatorModel
-import com.gga.webhook.models.LicenseModel
-import com.gga.webhook.models.PayloadModel
-import com.gga.webhook.models.dTO.CreatorDto
-import com.gga.webhook.models.dTO.PayloadDto
-import com.gga.webhook.utils.MapperUtil.Companion.convertTo
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.junit.jupiter.SpringExtension
 
-@DataJpaTest
-@ActiveProfiles("test")
-@ExtendWith(SpringExtension::class)
-internal class CreatorRepositoryTest {
+internal class CreatorRepositoryTest : BaseRepositoryTestFactory() {
 
     @Autowired
-    private lateinit var entityManager: TestEntityManager
+    private lateinit var repository: CreatorRepository
 
-    @Autowired
-    private lateinit var creatorRepository: CreatorRepository
-
-    private val builder: PayloadBuilder = PayloadBuilder()
-
-    private val payload: PayloadDto = this.builder.payload()
-
-    private val creatorDto: CreatorDto = this.builder.creatorDto()
+    private val creatorModel: CreatorModel = this.model.creator
 
     @Test
-    @DisplayName("Deve persistir Creator no database")
+    @DisplayName("Must save Creator")
     fun saveCreator() {
-        this.entityManager.persist(this.creatorDto convertTo CreatorModel::class.java)
+        val expectedCreator: CreatorModel = this.entityManager.merge(this.creatorModel)
 
-        this.creatorRepository.findAll().also { assertTrue(it.isNotEmpty()) }
+        this.repository.findById(expectedCreator.id).also {
+            assertThat(it.isPresent).isTrue
+            assertThat(it.get()).isEqualTo(expectedCreator)
+        }
     }
 
     @Test
-    @DisplayName("Deve retornar o creator de determinado milestone")
-    fun getCreator() {
-        val persist: PayloadModel = this.entityManager.persist((this.payload convertTo PayloadModel::class.java).apply {
-            this.repository!!.license = entityManager.merge(builder.licenseDto() convertTo LicenseModel::class.java)
-        })
+    @DisplayName("Must return the Creator by login")
+    fun findByLogin() {
+        val expectedCreator: CreatorModel = this.entityManager.merge(this.creatorModel)
 
-        val creator: CreatorModel = this.creatorRepository.getCreator()!!
-
-        assertEquals(persist.issue!!.milestone!!.creator, creator)
+        this.repository.findByLogin(expectedCreator.login).also {
+            assertThat(it.isPresent).isTrue
+            assertThat(it.get()).isEqualTo(expectedCreator)
+        }
     }
 
 }

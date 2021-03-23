@@ -1,73 +1,86 @@
 package com.gga.webhook.repositories
 
-import com.gga.webhook.builder.PayloadBuilder
+import com.gga.webhook.factories.BaseRepositoryTestFactory
 import com.gga.webhook.models.*
-import com.gga.webhook.models.dTO.*
-import com.gga.webhook.utils.MapperUtil.Companion.convertTo
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.junit.jupiter.SpringExtension
 
-@DataJpaTest
-@ActiveProfiles("test")
-@ExtendWith(SpringExtension::class)
-internal class IssueRepositoryTest {
+internal class IssueRepositoryTest : BaseRepositoryTestFactory() {
 
     @Autowired
-    private lateinit var issueRepository: IssueRepository
+    private lateinit var repository: IssueRepository
 
-    @Autowired
-    private lateinit var entityManager: TestEntityManager
+    private val userModel: UserModel = this.model.user
 
-    private val builder: PayloadBuilder = PayloadBuilder()
+    private val assigneeModel: AssigneeModel = this.model.assignee
 
-    private val payload: PayloadDto = this.builder.payload()
+    private val creatorModel: CreatorModel = this.model.creator
 
-    private val issueDto: IssueDto = this.builder.issue()
+    private val milestoneModel: MilestoneModel = this.model.milestone.apply { this.creator = null }
 
-    private val userDto: UserDto = this.builder.userDto()
-
-    private val assigneeDto: AssigneeDto = this.builder.assigneeDto()
-
-    private val milestoneDto: MilestoneDto = this.builder.milestoneDto()
-
-    private val creatorDto: CreatorDto = this.builder.creatorDto()
-
-    @Test
-    @DisplayName("Deve persistir Issue no database")
-    fun saveIssue() {
-        val milestoneModel: MilestoneModel = (this.milestoneDto convertTo MilestoneModel::class.java).apply {
-            this.creator = entityManager.persist(creatorDto convertTo CreatorModel::class.java)
-        }
-
-        val toSave: IssueModel = (this.issueDto convertTo IssueModel::class.java).apply {
-            this.assignee = entityManager.persist(assigneeDto convertTo AssigneeModel::class.java)
-            this.milestone = entityManager.persist(milestoneModel)
-            this.user = entityManager.persist(userDto convertTo UserModel::class.java)
-        }
-
-        this.entityManager.persist(toSave)
-
-        this.issueRepository.findAll().also { assertTrue(it.isNotEmpty()) }
+    private val issueModel: IssueModel = this.model.issue.apply {
+        this.assignee = null
+        this.user = null
+        this.milestone = null
     }
 
     @Test
-    @DisplayName("Deve retornar a issue de determinado payload")
-    fun getIssue() {
-        val persist: PayloadModel = this.entityManager.persist((this.payload convertTo PayloadModel::class.java).apply {
-            this.repository!!.license = entityManager.merge(builder.licenseDto() convertTo LicenseModel::class.java)
+    @DisplayName("Must save Issue")
+    fun saveIssue() {
+        val expectedUser: UserModel = this.entityManager.merge(this.userModel)
+
+        val expectedAssignee: AssigneeModel = this.entityManager.merge(this.assigneeModel)
+
+        val expectedCreator: CreatorModel = this.entityManager.merge(this.creatorModel)
+
+        val expectedMilestone: MilestoneModel = this.entityManager.merge(this.milestoneModel.apply {
+            this.creator = expectedCreator
         })
 
-        val issue: IssueModel = this.issueRepository.getIssue()!!
+        val expectedIssue: IssueModel = this.entityManager.merge(this.issueModel.apply {
+            this.assignee = expectedAssignee
+            this.user = expectedUser
+            this.milestone = expectedMilestone
+        })
 
-        assertEquals(persist.issue, issue)
+        this.repository.findById(expectedIssue.id).also {
+            assertThat(it.isPresent).isTrue
+            assertThat(it.get()).isEqualTo(expectedIssue)
+            assertThat(it.get().assignee).isEqualTo(expectedAssignee)
+            assertThat(it.get().user).isEqualTo(expectedUser)
+            assertThat(it.get().milestone).isEqualTo(expectedMilestone)
+        }
+
+    }
+
+    @Test
+    @DisplayName("Must return the Issue by number")
+    fun findByNumber() {
+        val expectedUser: UserModel = this.entityManager.merge(this.userModel)
+
+        val expectedAssignee: AssigneeModel = this.entityManager.merge(this.assigneeModel)
+
+        val expectedCreator: CreatorModel = this.entityManager.merge(this.creatorModel)
+
+        val expectedMilestone: MilestoneModel = this.entityManager.merge(this.milestoneModel.apply {
+            this.creator = expectedCreator
+        })
+
+        val expectedIssue: IssueModel = this.entityManager.merge(this.issueModel.apply {
+            this.assignee = expectedAssignee
+            this.user = expectedUser
+            this.milestone = expectedMilestone
+        })
+
+        this.repository.findByNumber(expectedIssue.number).also {
+            assertThat(it.isPresent).isTrue
+            assertThat(it.get()).isEqualTo(expectedIssue)
+            assertThat(it.get().assignee).isEqualTo(expectedAssignee)
+            assertThat(it.get().user).isEqualTo(expectedUser)
+            assertThat(it.get().milestone).isEqualTo(expectedMilestone)
+        }
     }
 
 }
