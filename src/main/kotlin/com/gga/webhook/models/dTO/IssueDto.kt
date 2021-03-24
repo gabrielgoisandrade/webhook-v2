@@ -45,7 +45,7 @@ data class IssueDto @JvmOverloads constructor(
 
     @get:JsonIgnore
     @JsonProperty("labels")
-    var labels: List<LabelsDto> = emptyList(),
+    var labels: Set<LabelsDto> = emptySet(),
 
     @JsonProperty("state")
     var state: String = "",
@@ -59,7 +59,7 @@ data class IssueDto @JvmOverloads constructor(
 
     @get:JsonIgnore
     @JsonProperty("assignees")
-    var assignees: List<AssigneesDto> = emptyList(),
+    var assignees: Set<AssigneesDto> = emptySet(),
 
     @get:JsonIgnore
     @JsonProperty("milestone")

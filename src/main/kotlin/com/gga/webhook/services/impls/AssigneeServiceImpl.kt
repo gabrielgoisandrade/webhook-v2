@@ -29,13 +29,7 @@ class AssigneeServiceImpl @Autowired constructor(
 
     @Transactional
     @CacheEvict("assigneeByID", "assigneeByIssueNumber", "assigneeByLogin", "assigneeByIssueId", allEntries = true)
-    override fun saveAssignee(assignee: AssigneeModel?): AssigneeModel? {
-        if (assignee == null) {
-            this.log.info("Assignee: No Assignee to save.")
-
-            return null
-        }
-
+    override fun saveAssignee(assignee: AssigneeModel): AssigneeModel {
         val assigneeFound: Optional<AssigneeModel> = this.repository.findByLogin(assignee.login)
 
         return if (assigneeFound.isPresent) {

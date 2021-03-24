@@ -23,10 +23,11 @@ internal class AssigneesServiceImplTest : BaseServiceImplTestFactory() {
     fun saveAssignees() {
         `when`(this.assigneesRepository.findByLogin(anyString())).thenReturn(Optional.empty())
 
-        `when`(this.assigneesRepository.saveAll(anyList())).thenReturn(listOf(this.expectedModel))
+        `when`(this.assigneesRepository.saveAll(anySet())).thenReturn(listOf(this.expectedModel))
 
-        this.service.saveAssignees(listOf(this.expectedModel))
-            .also { assertThat(it).isEqualTo(listOf(this.expectedModel)) }
+        this.service.saveAssignees(hashSetOf(this.expectedModel)).also {
+            assertThat(it).isEqualTo(hashSetOf(this.expectedModel))
+        }
     }
 
     @Test
@@ -34,18 +35,9 @@ internal class AssigneesServiceImplTest : BaseServiceImplTestFactory() {
         `when`(this.assigneesRepository.findByLogin(anyString()))
             .thenReturn(Optional.of(this.expectedModel))
 
-        this.service.saveAssignees(listOf(this.expectedModel)).also {
-            assertThat(it).isEqualTo(listOf(this.expectedModel))
+        this.service.saveAssignees(hashSetOf(this.expectedModel)).also {
+            assertThat(it).isEqualTo(hashSetOf(this.expectedModel))
         }
-
-        verify(this.assigneesRepository, never()).saveAll(anyList())
-    }
-
-    @Test
-    fun getNullAssignees() {
-        this.service.saveAssignees(emptyList()).also { assertThat(it).isEmpty() }
-
-        verify(this.assigneesRepository, never()).findByLogin(anyString())
 
         verify(this.assigneesRepository, never()).saveAll(anyList())
     }
@@ -53,11 +45,11 @@ internal class AssigneesServiceImplTest : BaseServiceImplTestFactory() {
     @Test
     fun findAssigneesByIssueNumber() {
         `when`(this.assigneesRepository.findByIssueNumber(ISSUE_NUMBER))
-            .thenReturn(Optional.of(listOf(this.expectedModel)))
+            .thenReturn(Optional.of(hashSetOf(this.expectedModel)))
 
         this.service.findAssigneesByIssueNumber(ISSUE_NUMBER).also {
             assertThat(it.isEmpty()).isFalse
-            assertThat(it).isEqualTo(listOf(this.expectedDto))
+            assertThat(it).isEqualTo(hashSetOf(this.expectedDto))
         }
     }
 

@@ -27,7 +27,7 @@ internal class EventServiceImplTest : BaseServiceImplTestFactory() {
 
         `when`(this.eventRepository.save(any(EventModel::class.java))).thenReturn(this.expectedModel)
 
-        this.service.saveEvent(this.expectedDto).also { assertThat(it).isEqualTo(this.expectedModel) }
+        this.service.saveEvent(this.expectedModel).also { assertThat(it).isEqualTo(this.expectedModel) }
     }
 
     @Test
@@ -36,7 +36,7 @@ internal class EventServiceImplTest : BaseServiceImplTestFactory() {
 
         verify(this.eventRepository, never()).save(any(EventModel::class.java))
 
-        this.service.saveEvent(this.expectedDto).also { assertThat(it).isEqualTo(this.expectedModel) }
+        this.service.saveEvent(this.expectedModel).also { assertThat(it).isEqualTo(this.expectedModel) }
     }
 
     @Test

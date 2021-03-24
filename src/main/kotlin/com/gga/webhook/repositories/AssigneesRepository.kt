@@ -10,6 +10,6 @@ interface AssigneesRepository : JpaRepository<AssigneesModel, Long> {
     fun findByLogin(login: String): Optional<AssigneesModel>
 
     @Query("SELECT R.assignees FROM IssueResponsibleModel R WHERE R.issue.number = :number")
-    fun findByIssueNumber(number: Int): Optional<List<AssigneesModel>>
+    fun findByIssueNumber(number: Int): Optional<HashSet<AssigneesModel>>
 
 }

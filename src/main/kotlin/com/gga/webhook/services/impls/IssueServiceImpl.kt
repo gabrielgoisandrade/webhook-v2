@@ -101,10 +101,12 @@ class IssueServiceImpl @Autowired constructor(
         this.labels = getLabels(issue.number)
     }
 
-    private fun getAssignees(number: Int): List<AssigneesDto> =
-        this.assigneesRepository.findByIssueNumber(number).orElse(emptyList()) convertTo AssigneesDto::class.java
+    private fun getAssignees(number: Int): HashSet<AssigneesDto> =
+        (this.assigneesRepository.findByIssueNumber(number)
+                .orElse(hashSetOf()) convertTo AssigneesDto::class.java).toHashSet()
 
-    private fun getLabels(number: Int): List<LabelsDto> =
-        this.labelsRepository.findByIssueNumber(number).orElse(emptyList()) convertTo LabelsDto::class.java
+    private fun getLabels(number: Int): HashSet<LabelsDto> =
+        (this.labelsRepository.findByIssueNumber(number)
+            .orElse(hashSetOf()) convertTo LabelsDto::class.java).toHashSet()
 
 }

@@ -1,36 +1,38 @@
 package com.gga.webhook.services
 
-import com.gga.webhook.models.dTO.EventDto
-import com.gga.webhook.models.dTO.PayloadDto
+import com.gga.webhook.models.*
+import com.gga.webhook.models.dTO.*
 
 interface PayloadService {
 
-    fun savePayload(payload: PayloadDto): EventDto
+    fun savePayloadData(payload: PayloadDto): EventDto
 
-    //fun saveIssue(issue: IssueDto): IssueModel
+    fun saveEvent(action: String): EventModel
 
-    //fun saveUser(user: UserDto): UserModel
+    fun saveIssue(issue: IssueDto, fk: EventModel): IssueModel
 
-    // fun saveAssignee(assignee: AssigneeDto): AssigneeModel
+    fun saveRepository(repository: RepositoryDto, fk: EventModel)
 
-    // fun saveAssignees(assignees: Set<AssigneesDto>, issue: IssueModel): HashSet<AssigneesModel>
+    fun saveSender(sender: SenderDto, fk: EventModel)
 
-    //  fun saveLabels(labels: Set<LabelsDto>, issue: IssueModel): HashSet<LabelsModel>
+    fun saveUser(user: UserDto): UserModel
 
-    //  fun saveMilestone(milestone: MilestoneDto): MilestoneModel
+    fun saveAssignee(assignee: AssigneeDto?): AssigneeModel?
 
-//    fun saveCreator(creator: CreatorDto): CreatorModel
+    fun saveAssignees(assignees: HashSet<AssigneesDto>): HashSet<AssigneesModel>
 
-    //  fun saveRepository(repository: RepositoryDto): RepositoryModel
+    fun saveLabels(labels: HashSet<LabelsDto>): HashSet<LabelsModel>
 
-    //   fun saveLicense(license: LicenseDto): LicenseModel
+    fun saveMilestone(milestone: MilestoneDto?): MilestoneModel?
 
-    //   fun saveOwner(owner: OwnerDto): OwnerModel
+    fun saveCreator(creator: CreatorDto): CreatorModel
 
-    //   fun saveSender(sender: SenderDto): SenderModel
+    fun saveLicense(license: LicenseDto?): LicenseModel?
 
-    //   fun getPayloadById(id: Long): PayloadVo
+    fun saveOwner(owner: OwnerDto): OwnerModel
 
-    //   fun getAllPayloads(page: Int = 0, limit: Int = 10, sort: String): Page<PayloadVo>
+    fun saveClassifiers(issue: IssueModel, labels: HashSet<LabelsModel>)
+
+    fun saveResponsible(issue: IssueModel, assignees: HashSet<AssigneesModel>)
 
 }

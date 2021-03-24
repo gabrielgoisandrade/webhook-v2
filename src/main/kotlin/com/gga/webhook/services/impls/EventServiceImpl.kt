@@ -29,9 +29,7 @@ class EventServiceImpl @Autowired constructor(
 
     @Transactional
     @CacheEvict("eventByAction", "eventByID", allEntries = true)
-    override fun saveEvent(event: EventDto): EventModel {
-        val eventToSave: EventModel = event convertTo EventModel::class.java
-
+    override fun saveEvent(event: EventModel): EventModel {
         val eventFound: Optional<EventModel> = this.repository.findByAction(event.action)
 
         return if (eventFound.isPresent) {
@@ -41,7 +39,7 @@ class EventServiceImpl @Autowired constructor(
         } else {
             this.log.info("Event: Saving new Event.")
 
-            this.repository.save(eventToSave)
+            this.repository.save(event)
         }
     }
 

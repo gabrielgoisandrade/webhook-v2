@@ -28,17 +28,17 @@ internal class IssueServiceImplTest : BaseServiceImplTestFactory() {
 
     private val expectedModel: IssueModel = this.model.issue
 
-    private val expectedLabelsModel: List<LabelsModel> = listOf(this.model.labels)
+    private val expectedLabelsModel: HashSet<LabelsModel> = hashSetOf(this.model.labels)
 
-    private val expectedAssigneesModel: List<AssigneesModel> = listOf(this.model.assignees)
+    private val expectedAssigneesModel: HashSet<AssigneesModel> = hashSetOf(this.model.assignees)
 
-    private val expectedLabelsDto: List<LabelsDto> = this.dto.labels()
+    private val expectedLabelsDto: HashSet<LabelsDto> = this.dto.labels()
 
-    private val expectedAssigneesDto: List<AssigneesDto> = this.dto.assignees()
+    private val expectedAssigneesDto: HashSet<AssigneesDto> = this.dto.assignees()
 
     private val expectedDto: IssueDto = this.dto.issueDto().apply {
-        this.assignees = emptyList()
-        this.labels = emptyList()
+        this.assignees = hashSetOf()
+        this.labels = hashSetOf()
     }
 
     @Test
@@ -62,7 +62,9 @@ internal class IssueServiceImplTest : BaseServiceImplTestFactory() {
     @Test
     fun findIssueByNumber() {
         `when`(this.issueRepository.findByNumber(anyInt())).thenReturn(Optional.of(this.expectedModel))
+
         `when`(this.labelsRepository.findByIssueNumber(anyInt())).thenReturn(Optional.of(this.expectedLabelsModel))
+
         `when`(this.assigneesRepository.findByIssueNumber(anyInt())).thenReturn(Optional.of(this.expectedAssigneesModel))
 
         this.service.findIssueByNumber(ISSUE_NUMBER).also {

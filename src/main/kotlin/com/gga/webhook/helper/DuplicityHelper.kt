@@ -2,6 +2,6 @@ package com.gga.webhook.helper
 
 interface DuplicityHelper<T> {
 
-    fun findDuplicatedValues(newValues: List<T>): HashMap<String, List<T>>
+    fun findDuplicatedValues(newValues: HashSet<T>): HashMap<String, HashSet<T>>
 
 }

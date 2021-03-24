@@ -29,7 +29,7 @@ internal class IssueResponsibleServiceImplTest : BaseServiceImplTestFactory() {
         `when`(this.issueResponsibleRepository.save(any(IssueResponsibleModel::class.java)))
             .thenReturn((this.expectedIssueResponsible))
 
-        this.service.saveIssueResponsible(this.expectedIssue, listOf(this.expectedAssignees))
+        this.service.saveIssueResponsible(this.expectedIssue, hashSetOf(this.expectedAssignees))
 
         verify(this.issueResponsibleRepository).save(any(IssueResponsibleModel::class.java))
     }
@@ -44,7 +44,7 @@ internal class IssueResponsibleServiceImplTest : BaseServiceImplTestFactory() {
 
         this.service.saveIssueResponsible(
             this.expectedIssue,
-            listOf(this.model.assignees.apply { this.login = "newLogin" })
+            hashSetOf(this.model.assignees.apply { this.login = "newLogin" })
         )
 
         verify(this.issueResponsibleRepository).save(any(IssueResponsibleModel::class.java))
@@ -52,7 +52,7 @@ internal class IssueResponsibleServiceImplTest : BaseServiceImplTestFactory() {
 
     @Test
     fun doNotSave() {
-        this.service.saveIssueResponsible(this.expectedIssue, emptyList())
+        this.service.saveIssueResponsible(this.expectedIssue, hashSetOf())
 
         verify(this.issueResponsibleRepository, never())
             .findByIssueIdAndAssigneesId(anyLong(), anyLong())

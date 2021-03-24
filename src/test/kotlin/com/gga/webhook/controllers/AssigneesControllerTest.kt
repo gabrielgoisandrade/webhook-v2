@@ -30,12 +30,12 @@ internal class AssigneesControllerTest : BaseControllerTestFactory() {
 
     @Test
     fun findAssigneesByIssueNumber() {
-        `when`(this.service.findAssigneesByIssueNumber(anyInt())).thenReturn(listOf(this.expected))
+        `when`(this.service.findAssigneesByIssueNumber(anyInt())).thenReturn(hashSetOf(this.expected))
 
         this.controller.findAssigneesByIssueNumber(ISSUE_NUMBER).also {
             assertThat(it.statusCode).isEqualTo(HttpStatus.OK)
             assertThat(it.body!!.isNotEmpty()).isTrue
-            assertThat(it.body).isEqualTo(listOf(this.expected))
+            assertThat(it.body).isEqualTo(hashSetOf(this.expected))
 
             it.body!!.forEach { body: AssigneesDto ->
                 with(body.links) {

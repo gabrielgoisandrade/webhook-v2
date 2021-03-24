@@ -89,7 +89,7 @@ internal class IssueControllerTest : BaseControllerTestFactory() {
     @Test
     fun findIssueByNumberWithoutAssignees() {
         `when`(this.service.findIssueByNumber(anyInt())).thenReturn(this.expected.apply {
-            this.assignees = emptyList()
+            this.assignees = hashSetOf()
         })
 
         this.controller.findIssueByNumber(ISSUE_NUMBER).also {
@@ -110,7 +110,7 @@ internal class IssueControllerTest : BaseControllerTestFactory() {
 
     @Test
     fun findIssueByNumberWithoutLabels() {
-        `when`(this.service.findIssueByNumber(anyInt())).thenReturn(this.expected.apply { this.labels = emptyList() })
+        `when`(this.service.findIssueByNumber(anyInt())).thenReturn(this.expected.apply { this.labels = hashSetOf() })
 
         this.controller.findIssueByNumber(ISSUE_NUMBER).also {
             assertThat(it.statusCode).isEqualTo(HttpStatus.OK)
@@ -132,8 +132,8 @@ internal class IssueControllerTest : BaseControllerTestFactory() {
     fun findIssueByNumberWithOnlyUser() {
         `when`(this.service.findIssueByNumber(anyInt())).thenReturn(this.expected.apply {
             this.assignee = null
-            this.assignees = emptyList()
-            this.labels = emptyList()
+            this.assignees = hashSetOf()
+            this.labels = hashSetOf()
             this.milestone = null
         })
 

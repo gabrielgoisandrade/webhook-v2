@@ -30,7 +30,7 @@ class PayloadController {
 
     @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
     fun savePayload(@RequestBody payloadDto: PayloadDto): ResponseEntity<EventDto> =
-        this.service.savePayload(payloadDto).run {
+        this.service.savePayloadData(payloadDto).run {
             this.add(
                 linkTo(methodOn(EVENT_CONTROLLER).findEventByAction(this.action)).withSelfRel(),
                 linkTo(methodOn(ISSUE_CONTROLLER).findIssueByNumber(payloadDto.issue!!.number)).withRel("issue"),

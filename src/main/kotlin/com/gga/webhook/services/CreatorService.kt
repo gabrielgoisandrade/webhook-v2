@@ -5,7 +5,7 @@ import com.gga.webhook.models.dTO.CreatorDto
 
 interface CreatorService {
 
-    fun saveCreator(creator: CreatorModel?): CreatorModel?
+    fun saveCreator(creator: CreatorModel): CreatorModel
 
     fun findCreatorByMilestoneNumber(milestoneNumber: Int): CreatorDto
 

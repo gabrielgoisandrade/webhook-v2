@@ -23,9 +23,11 @@ internal class LabelsServiceImplTest : BaseServiceImplTestFactory() {
     fun saveLabels() {
         `when`(this.labelsRepository.findByName(anyString())).thenReturn(Optional.empty())
 
-        `when`(this.labelsRepository.saveAll(anyList())).thenReturn(listOf(this.expectedModel))
+        `when`(this.labelsRepository.saveAll(anySet())).thenReturn(listOf(this.expectedModel))
 
-        this.service.saveLabels(listOf(this.expectedModel)).also { assertThat(it).isEqualTo(listOf(this.expectedModel)) }
+        this.service.saveLabels(hashSetOf(this.expectedModel)).also {
+            assertThat(it).isEqualTo(hashSetOf(this.expectedModel))
+        }
     }
 
     @Test
@@ -33,16 +35,7 @@ internal class LabelsServiceImplTest : BaseServiceImplTestFactory() {
         `when`(this.labelsRepository.findByName(anyString()))
             .thenReturn(Optional.of(this.expectedModel))
 
-        this.service.saveLabels(listOf(this.expectedModel)).also { assertThat(it).isEqualTo(listOf(this.expectedModel)) }
-
-        verify(this.labelsRepository, never()).saveAll(anyList())
-    }
-
-    @Test
-    fun getNullLabels() {
-        this.service.saveLabels(emptyList()).also { assertThat(it).isEmpty() }
-
-        verify(this.labelsRepository, never()).findByName(anyString())
+        this.service.saveLabels(hashSetOf(this.expectedModel)).also { assertThat(it).isEqualTo(hashSetOf(this.expectedModel)) }
 
         verify(this.labelsRepository, never()).saveAll(anyList())
     }
@@ -50,11 +43,11 @@ internal class LabelsServiceImplTest : BaseServiceImplTestFactory() {
     @Test
     fun findLabelsByIssueNumber() {
         `when`(this.labelsRepository.findByIssueNumber(ISSUE_NUMBER))
-            .thenReturn(Optional.of(listOf(this.expectedModel)))
+            .thenReturn(Optional.of(hashSetOf(this.expectedModel)))
 
         this.service.findLabelsByIssueNumber(ISSUE_NUMBER).also {
             assertThat(it.isEmpty()).isFalse
-            assertThat(it).isEqualTo(listOf(this.expectedDto))
+            assertThat(it).isEqualTo(hashSetOf(this.expectedDto))
         }
     }
 

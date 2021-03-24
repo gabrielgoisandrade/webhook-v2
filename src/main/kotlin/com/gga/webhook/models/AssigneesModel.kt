@@ -8,7 +8,7 @@ data class AssigneesModel @JvmOverloads constructor(
     @Id
     @Column(name = "ASSIGNEES_ID")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    var id: Long = 0L,
+    val id: Long = 0L,
 
     @Column(name = "LOGIN")
     var login: String = "",

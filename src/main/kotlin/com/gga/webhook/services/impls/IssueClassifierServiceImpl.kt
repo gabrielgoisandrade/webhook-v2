@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
+import kotlin.collections.HashSet
 
 @Service
 class IssueClassifierServiceImpl @Autowired constructor(
@@ -20,12 +21,7 @@ class IssueClassifierServiceImpl @Autowired constructor(
     private val log: Logger = LoggerFactory.getLogger(this::class.java)
 
     @Transactional
-    override fun saveIssueClassifier(issue: IssueModel, labels: List<LabelsModel>) {
-        if (labels.isEmpty()) {
-            this.log.info("IssueClassifier: No Labels found. No actions needed.")
-            return
-        }
-
+    override fun saveIssueClassifier(issue: IssueModel, labels: HashSet<LabelsModel>) {
         labels.forEach {
             val classifier: Optional<IssueClassifierModel> = this.repository.findByIssueIdAndLabelsId(issue.id, it.id)
 

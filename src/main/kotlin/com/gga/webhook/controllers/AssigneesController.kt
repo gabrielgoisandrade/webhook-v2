@@ -24,7 +24,7 @@ class AssigneesController {
     private lateinit var service: AssigneesServiceImpl
 
     @GetMapping("/issue/{issue-number}")
-    fun findAssigneesByIssueNumber(@PathVariable("issue-number") issueNumber: Int): ResponseEntity<List<AssigneesDto>> =
+    fun findAssigneesByIssueNumber(@PathVariable("issue-number") issueNumber: Int): ResponseEntity<HashSet<AssigneesDto>> =
         this.service.findAssigneesByIssueNumber(issueNumber).run {
             this.forEach {
                 configureLinks(it.links) {

@@ -27,13 +27,8 @@ class LabelsServiceImpl @Autowired constructor(
 
     @Transactional
     @CacheEvict("labelsByIssueNumber", allEntries = true)
-    override fun saveLabels(labels: List<LabelsModel>): List<LabelsModel> {
-        if (labels.isEmpty()) {
-            this.log.info("Labels: No Labels to save.")
-            return emptyList()
-        }
-
-        val labelsFound: HashMap<String, List<LabelsModel>> = this.findDuplicatedValues(labels)
+    override fun saveLabels(labels: HashSet<LabelsModel>): HashSet<LabelsModel> {
+        val labelsFound: HashMap<String, HashSet<LabelsModel>> = this.findDuplicatedValues(labels)
 
         if (labelsFound["newValues"]!!.isEmpty()) {
             this.log.info("Labels: Returning existing Labels.")
@@ -42,20 +37,24 @@ class LabelsServiceImpl @Autowired constructor(
 
         return if (labelsFound["existingValues"]!!.isEmpty()) {
             this.log.info("Labels: Saving new Labels.")
-            return this.repository.saveAll(labels convertTo LabelsModel::class.java)
+            return this.repository.saveAll(labelsFound["newValues"]!!).toHashSet()
         } else {
             this.log.info("Labels: Saving new Labels.")
-            this.repository.saveAll(labelsFound["newValues"]!!)
+            this.repository.saveAll(labelsFound["newValues"]!!).toHashSet()
         }
     }
 
     @Cacheable("labelsByIssueNumber")
-    override fun findLabelsByIssueNumber(issueNumber: Int): List<LabelsDto> =
-        this.repository.findByIssueNumber(issueNumber).orElseThrow {
-            RelationNotFoundException("There isn't any Labels related with this Issue")
-        } convertTo LabelsDto::class.java
+    override fun findLabelsByIssueNumber(issueNumber: Int): HashSet<LabelsDto> {
+        val issueFound: Optional<HashSet<LabelsModel>> = this.repository.findByIssueNumber(issueNumber)
 
-    override fun findDuplicatedValues(newValues: List<LabelsModel>): HashMap<String, List<LabelsModel>> {
+        return if (issueFound.isPresent)
+            (issueFound.get() convertTo LabelsDto::class.java).toHashSet()
+        else
+            throw  RelationNotFoundException("There isn't any Labels related with this Issue")
+    }
+
+    override fun findDuplicatedValues(newValues: HashSet<LabelsModel>): HashMap<String, HashSet<LabelsModel>> {
         val existingValues: MutableList<LabelsModel> = mutableListOf()
 
         newValues.forEach {
@@ -64,9 +63,11 @@ class LabelsServiceImpl @Autowired constructor(
             }
         }
 
-        val labelsToSave: List<LabelsModel> = newValues.filter { !existingValues.contains(it) }
+        val labelsToSave: List<LabelsModel> = newValues.filter {
+            !(existingValues convertTo LabelsDto::class.java).contains(it convertTo LabelsDto::class.java)
+        }
 
-        return hashMapOf("newValues" to labelsToSave, "existingValues" to existingValues)
+        return hashMapOf("newValues" to labelsToSave.toHashSet(), "existingValues" to existingValues.toHashSet())
     }
 
 }

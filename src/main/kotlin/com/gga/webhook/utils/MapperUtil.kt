@@ -19,7 +19,7 @@ class MapperUtil private constructor() {
         }
 
         @JvmStatic
-        infix fun <O, D> Collection<O>.convertTo(destination: Class<D>): List<D> =
+        infix fun <O, D> Collection<O>.convertTo(destination: Class<D>): Collection<D> =
             this.stream().map { mapper.map(it, destination) }.collect(Collectors.toList())
 
         @JvmStatic

@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
+import kotlin.collections.HashSet
 
 @Service
 class IssueResponsibleServiceImpl @Autowired constructor(
@@ -20,12 +21,7 @@ class IssueResponsibleServiceImpl @Autowired constructor(
     private val log: Logger = LoggerFactory.getLogger(this::class.java)
 
     @Transactional
-    override fun saveIssueResponsible(issue: IssueModel, assignees: List<AssigneesModel>) {
-        if (assignees.isEmpty()) {
-            this.log.info("IssueResponsible: No Assignees found. No actions needed.")
-            return
-        }
-
+    override fun saveIssueResponsible(issue: IssueModel, assignees: HashSet<AssigneesModel>) {
         assignees.forEach {
             val classifier: Optional<IssueResponsibleModel> =
                 this.repository.findByIssueIdAndAssigneesId(issue.id, it.id)

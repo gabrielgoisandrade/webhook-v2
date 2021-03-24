@@ -24,7 +24,7 @@ class LabelsController {
     private lateinit var service: LabelsServiceImpl
 
     @GetMapping("/issue/{issue-number}")
-    fun findLabelsByIssueNumber(@PathVariable("issue-number") issueNumber: Int): ResponseEntity<List<LabelsDto>> =
+    fun findLabelsByIssueNumber(@PathVariable("issue-number") issueNumber: Int): ResponseEntity<HashSet<LabelsDto>> =
         this.service.findLabelsByIssueNumber(issueNumber).run {
             this.forEach {
                 configureLinks(it.links) {

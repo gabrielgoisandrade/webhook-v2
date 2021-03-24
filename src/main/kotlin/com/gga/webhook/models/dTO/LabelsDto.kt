@@ -9,7 +9,7 @@ import java.io.Serializable
 
 data class LabelsDto @JvmOverloads constructor(
     @JsonIgnore
-    var id: Long = 0L,
+    val id: Long = 1L,
 
     @JsonProperty("node_id")
     var nodeId: String = "",

@@ -27,13 +27,8 @@ class AssigneesServiceImpl @Autowired constructor(
 
     @Transactional
     @CacheEvict("assigneesByIssueNumber", allEntries = true)
-    override fun saveAssignees(assignees: List<AssigneesModel>): List<AssigneesModel> {
-        if (assignees.isEmpty()) {
-            this.log.info("Assignees: No Assignees to save.")
-            return emptyList()
-        }
-
-        val assigneesFound: HashMap<String, List<AssigneesModel>> = this.findDuplicatedValues(assignees)
+    override fun saveAssignees(assignees: HashSet<AssigneesModel>): HashSet<AssigneesModel> {
+        val assigneesFound: HashMap<String, HashSet<AssigneesModel>> = this.findDuplicatedValues(assignees)
 
         if (assigneesFound["newValues"]!!.isEmpty()) {
             this.log.info("Assignees: Returning existing Assignees.")
@@ -42,20 +37,25 @@ class AssigneesServiceImpl @Autowired constructor(
 
         return if (assigneesFound["existingValues"]!!.isEmpty()) {
             this.log.info("Assignees: Saving new Assignees.")
-            return this.repository.saveAll(assignees convertTo AssigneesModel::class.java)
+            return this.repository.saveAll(assigneesFound["newValues"]!!).toHashSet()
         } else {
             this.log.info("Assignees: Saving new Assignees.")
-            this.repository.saveAll(assigneesFound["newValues"]!!)
+            this.repository.saveAll(assigneesFound["newValues"]!!).toHashSet()
         }
     }
 
     @Cacheable("assigneesByIssueNumber")
-    override fun findAssigneesByIssueNumber(issueNumber: Int): List<AssigneesDto> =
-        this.repository.findByIssueNumber(issueNumber).orElseThrow {
-            RelationNotFoundException("There isn't any Assignees related with this Issue")
-        } convertTo AssigneesDto::class.java
+    override fun findAssigneesByIssueNumber(issueNumber: Int): HashSet<AssigneesDto> {
+        val issueFound: Optional<HashSet<AssigneesModel>> = this.repository.findByIssueNumber(issueNumber)
 
-    override fun findDuplicatedValues(newValues: List<AssigneesModel>): HashMap<String, List<AssigneesModel>> {
+        return if (issueFound.isPresent)
+            (issueFound.get() convertTo AssigneesDto::class.java).toHashSet()
+        else
+            throw RelationNotFoundException("Assignees: There isn't any Assignees related with this Issue")
+
+    }
+
+    override fun findDuplicatedValues(newValues: HashSet<AssigneesModel>): HashMap<String, HashSet<AssigneesModel>> {
         val existingValues: MutableList<AssigneesModel> = mutableListOf()
 
         newValues.forEach {
@@ -64,9 +64,11 @@ class AssigneesServiceImpl @Autowired constructor(
             }
         }
 
-        val assigneesToSave: List<AssigneesModel> = newValues.filter { !existingValues.contains(it) }
+        val assigneesToSave: List<AssigneesModel> = newValues.filter {
+            !(existingValues convertTo AssigneesDto::class.java).contains(it convertTo AssigneesDto::class.java)
+        }
 
-        return hashMapOf("newValues" to assigneesToSave, "existingValues" to existingValues)
+        return hashMapOf("newValues" to assigneesToSave.toHashSet(), "existingValues" to existingValues.toHashSet())
     }
 
 }

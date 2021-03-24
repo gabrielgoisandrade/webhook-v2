@@ -30,12 +30,12 @@ internal class LabelsControllerTest : BaseControllerTestFactory() {
 
     @Test
     fun findLabelsByIssueNumber() {
-        `when`(this.service.findLabelsByIssueNumber(anyInt())).thenReturn(listOf(this.expected))
+        `when`(this.service.findLabelsByIssueNumber(anyInt())).thenReturn(hashSetOf(this.expected))
 
         this.controller.findLabelsByIssueNumber(ISSUE_NUMBER).also {
             assertThat(it.statusCode).isEqualTo(HttpStatus.OK)
             assertThat(it.body!!.isNotEmpty()).isTrue
-            assertThat(it.body).isEqualTo(listOf(this.expected))
+            assertThat(it.body).isEqualTo(hashSetOf(this.expected))
 
             it.body!!.forEach { body: LabelsDto ->
                 with(body.links) {

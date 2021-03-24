@@ -39,7 +39,7 @@ class DtoBuilder {
         description = "mock"
     )
 
-    fun labels(): List<LabelsDto> = listOf(this.labelsDto())
+    fun labels(): HashSet<LabelsDto> = hashSetOf(this.labelsDto())
 
     fun creatorDto(): CreatorDto = CreatorDto(
         login = "mock@mock.com",
@@ -102,7 +102,6 @@ class DtoBuilder {
 
     fun assigneesDto(): AssigneesDto = AssigneesDto(
         login = "mock@mock.com",
-        id = 1L,
         nodeId = "mockmock4123mock",
         avatarUrl = "mock",
         gravatarId = "mock4321mock",
@@ -120,7 +119,7 @@ class DtoBuilder {
         type = "https://mock.com/events"
     )
 
-    fun assignees(): List<AssigneesDto> = listOf(this.assigneesDto())
+    fun assignees(): HashSet<AssigneesDto> = hashSetOf(this.assigneesDto())
 
     fun ownerDto(): OwnerDto = OwnerDto(
         login = "mock@mock.com",
@@ -272,27 +271,8 @@ class DtoBuilder {
         closedAt = null
     )
 
-    fun issueWithoutLabels(): PayloadDto = this.payloadDto().run {
-        this.issue.apply { this?.labels = emptyList() }
-        this
-    }
-
-    fun issueWithoutMilestone(): PayloadDto = this.payloadDto().run {
-        this.issue.apply { this?.milestone = null }
-        this
-    }
-
-    fun issueWithoutAssignee(): PayloadDto = this.payloadDto().run {
-        this.issue.apply {
-            this?.assignee = null
-            this?.assignees = emptyList()
-        }
-        this
-    }
-
-    fun repositoryWithoutLicense(): PayloadDto = this.payloadDto().run {
-        this.repository.apply { this?.license = null }
-        this
+    fun repositoryWithoutLicense(): RepositoryDto = this.payloadDto().run {
+        this.repository!!.apply { this.license = null }
     }
 
 }

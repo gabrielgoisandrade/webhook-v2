@@ -29,7 +29,7 @@ internal class PayloadControllerTest : BaseControllerTestFactory() {
     fun payload() {
         val expectedResponse: EventDto = this.dto.eventDto()
 
-        `when`(this.service.savePayload(this.payload)).thenReturn(expectedResponse)
+        `when`(this.service.savePayloadData(this.payload)).thenReturn(expectedResponse)
 
         this.controller.savePayload(this.payload).also {
             assertThat(it.statusCode).isEqualTo(HttpStatus.CREATED)

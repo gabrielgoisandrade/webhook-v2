@@ -40,15 +40,6 @@ internal class LicenseServiceImplTest : BaseServiceImplTestFactory() {
     }
 
     @Test
-    fun getNullLicense() {
-        this.service.saveLicense(null).also { assertThat(it).isNull() }
-
-        verify(this.licenseRepository, never()).findByKey(anyString())
-
-        verify(this.licenseRepository, never()).save(any(LicenseModel::class.java))
-    }
-
-    @Test
     fun findLicenseByRepositoryName() {
         `when`(this.licenseRepository.findByRepositoryName(anyString())).thenReturn(Optional.of(this.expectedModel))
 

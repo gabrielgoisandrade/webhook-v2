@@ -5,8 +5,8 @@ import com.gga.webhook.models.dTO.AssigneesDto
 
 interface AssigneesService {
 
-    fun saveAssignees(assignees: List<AssigneesModel>): List<AssigneesModel>
+    fun saveAssignees(assignees: HashSet<AssigneesModel>): HashSet<AssigneesModel>
 
-    fun findAssigneesByIssueNumber(issueNumber: Int): List<AssigneesDto>
+    fun findAssigneesByIssueNumber(issueNumber: Int): HashSet<AssigneesDto>
 
 }

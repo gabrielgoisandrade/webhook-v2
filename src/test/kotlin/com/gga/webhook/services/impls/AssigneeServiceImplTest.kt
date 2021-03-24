@@ -41,15 +41,6 @@ internal class AssigneeServiceImplTest : BaseServiceImplTestFactory() {
     }
 
     @Test
-    fun getNullAssignee() {
-        this.service.saveAssignee(null).also { assertThat(it).isNull() }
-
-        verify(this.assigneeRepository, never()).findByLogin(anyString())
-
-        verify(this.assigneeRepository, never()).save(any(AssigneeModel::class.java))
-    }
-
-    @Test
     fun findAssigneeByIssueNumber() {
         `when`(this.assigneeRepository.findByIssueNumber(anyInt())).thenReturn(Optional.of(this.expectedModel))
 

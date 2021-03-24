@@ -5,7 +5,7 @@ import com.gga.webhook.models.dTO.EventDto
 
 interface EventService {
 
-    fun saveEvent(event: EventDto): EventModel
+    fun saveEvent(event: EventModel): EventModel
 
     fun findEventByAction(action: String): EventDto
 

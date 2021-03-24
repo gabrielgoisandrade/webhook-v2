@@ -44,9 +44,9 @@ internal class MapperUtilTest {
 
     @Test
     fun fromListDtoToListModel() {
-        val labelsDto: List<LabelsDto> = this.builder.payloadDto().issue!!.labels
+        val labelsDto: HashSet<LabelsDto> = (this.builder.payloadDto().issue!!.labels).toHashSet()
 
-        val labelsModel: List<LabelsModel> = listOf(
+        val labelsModel: HashSet<LabelsModel> = hashSetOf(
             LabelsModel(
                 id = 1L,
                 nodeId = "mock431mock",
@@ -58,7 +58,7 @@ internal class MapperUtilTest {
             )
         )
 
-        val parseObjects: List<LabelsDto> = labelsModel convertTo LabelsDto::class.java
+        val parseObjects: HashSet<LabelsDto> = (labelsModel convertTo LabelsDto::class.java).toHashSet()
 
         assertEquals(labelsDto, parseObjects)
     }
@@ -94,11 +94,10 @@ internal class MapperUtilTest {
 
     @Test
     fun fromListModelToListDto() {
-        val labelsDto: List<LabelsDto> = this.builder.payloadDto().issue!!.labels
+        val labelsDto: HashSet<LabelsDto> = (this.builder.payloadDto().issue!!.labels).toHashSet()
 
-        val labelsModel: List<LabelsModel> = listOf(
+        val labelsModel: HashSet<LabelsModel> = hashSetOf(
             LabelsModel(
-                id = 1L,
                 nodeId = "mock431mock",
                 url = "https://mock.com",
                 name = "bug",
@@ -108,7 +107,7 @@ internal class MapperUtilTest {
             )
         )
 
-        val parseObjects: List<LabelsModel> = labelsDto convertTo LabelsModel::class.java
+        val parseObjects: HashSet<LabelsModel> = (labelsDto convertTo LabelsModel::class.java).toHashSet()
 
         assertEquals(labelsModel, parseObjects)
     }

@@ -12,7 +12,7 @@ data class AssigneesDto @JvmOverloads constructor(
     var login: String = "",
 
     @JsonIgnore
-    var id: Long = 0L,
+    val id: Long = 1L,
 
     @JsonProperty("node_id")
     var nodeId: String = "",

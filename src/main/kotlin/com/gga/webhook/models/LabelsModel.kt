@@ -9,7 +9,7 @@ data class LabelsModel @JvmOverloads constructor(
     @Id
     @Column(name = "LABELS_ID")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    var id: Long = 0L,
+    val id: Long = 0L,
 
     @Column(name = "NODE_ID")
     var nodeId: String = "",

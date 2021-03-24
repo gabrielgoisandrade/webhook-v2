@@ -5,8 +5,8 @@ import com.gga.webhook.models.dTO.LabelsDto
 
 interface LabelsService {
 
-    fun saveLabels(labels: List<LabelsModel>): List<LabelsModel>
+    fun saveLabels(labels: HashSet<LabelsModel>): HashSet<LabelsModel>
 
-    fun findLabelsByIssueNumber(issueNumber: Int): List<LabelsDto>
+    fun findLabelsByIssueNumber(issueNumber: Int): HashSet<LabelsDto>
 
 }

@@ -29,9 +29,7 @@ class CreatorServiceImpl @Autowired constructor(
 
     @Transactional
     @CacheEvict("creatorByID", "creatorByLogin", "creatorByMilestoneNumber", allEntries = true)
-    override fun saveCreator(creator: CreatorModel?): CreatorModel? {
-        if (creator == null) return null
-
+    override fun saveCreator(creator: CreatorModel): CreatorModel {
         val creatorFound: Optional<CreatorModel> = this.repository.findByLogin(creator.login)
 
         return if (creatorFound.isPresent) {

@@ -29,7 +29,7 @@ internal class IssueClassifierServiceImplTest : BaseServiceImplTestFactory() {
         `when`(this.issueClassifierRepository.save(any(IssueClassifierModel::class.java)))
             .thenReturn((this.expectedIssueClassifier))
 
-        this.service.saveIssueClassifier(this.expectedIssue, listOf(this.expectedLabels))
+        this.service.saveIssueClassifier(this.expectedIssue, hashSetOf(this.expectedLabels))
 
         verify(this.issueClassifierRepository).save(any(IssueClassifierModel::class.java))
     }
@@ -42,14 +42,17 @@ internal class IssueClassifierServiceImplTest : BaseServiceImplTestFactory() {
         `when`(this.issueClassifierRepository.save(any(IssueClassifierModel::class.java)))
             .thenReturn((this.expectedIssueClassifier))
 
-        this.service.saveIssueClassifier(this.expectedIssue, listOf(this.model.labels.apply { this.name = "newName" }))
+        this.service.saveIssueClassifier(
+            this.expectedIssue,
+            hashSetOf(this.model.labels.apply { this.name = "newName" })
+        )
 
         verify(this.issueClassifierRepository).save(any(IssueClassifierModel::class.java))
     }
 
     @Test
     fun doNotSave() {
-        this.service.saveIssueClassifier(this.expectedIssue, emptyList())
+        this.service.saveIssueClassifier(this.expectedIssue, hashSetOf())
 
         verify(this.issueClassifierRepository, never()).findByIssueIdAndLabelsId(anyLong(), anyLong())
 

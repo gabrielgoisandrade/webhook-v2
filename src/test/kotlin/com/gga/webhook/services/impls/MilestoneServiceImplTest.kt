@@ -40,15 +40,6 @@ internal class MilestoneServiceImplTest : BaseServiceImplTestFactory() {
     }
 
     @Test
-    fun getNullMilestone() {
-        this.service.saveMilestone(null).also { assertThat(it).isNull() }
-
-        verify(this.milestoneRepository, never()).findByNumber(anyInt())
-
-        verify(this.milestoneRepository, never()).save(any(MilestoneModel::class.java))
-    }
-
-    @Test
     fun findMilestoneByIssueNumber() {
         `when`(this.milestoneRepository.findByIssueNumber(anyInt())).thenReturn(Optional.of(this.expectedModel))
 
