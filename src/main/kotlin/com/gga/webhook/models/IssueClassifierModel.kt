@@ -16,6 +16,6 @@ data class IssueClassifierModel(
     var issue: IssueModel? = null,
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ASSIGNEES_ID", foreignKey = ForeignKey(name = "C_ISSUE_CLASSIFIER_LABELS"))
+    @JoinColumn(name = "LABELS_ID", foreignKey = ForeignKey(name = "C_ISSUE_CLASSIFIER_LABELS"))
     var labels: LabelsModel? = null
 ) : Serializable

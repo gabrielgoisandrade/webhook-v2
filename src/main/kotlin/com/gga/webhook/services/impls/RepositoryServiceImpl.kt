@@ -1,8 +1,7 @@
 package com.gga.webhook.services.impls
 
 import com.gga.webhook.errors.exceptions.RepositoryNotFoundException
-import com.gga.webhook.helper.FkHelper
-import com.gga.webhook.helper.PageableHelper
+import com.gga.webhook.helper.AlterationsHelper
 import com.gga.webhook.models.RepositoryModel
 import com.gga.webhook.models.dTO.RepositoryDto
 import com.gga.webhook.repositories.RepositoryRepository
@@ -22,14 +21,12 @@ import java.util.*
 @EnableCaching
 class RepositoryServiceImpl @Autowired constructor(
     private val repository: RepositoryRepository
-) : RepositoryService, FkHelper<RepositoryModel> {
-
-    private val helper: PageableHelper<RepositoryModel> = PageableHelper(this.repository)
+) : RepositoryService, AlterationsHelper<RepositoryModel> {
 
     private val log: Logger = LoggerFactory.getLogger(this::class.java)
 
     @Transactional
-    @CacheEvict("repositoryByID", "repositoryByName", "repositoryByEventAction", allEntries = true)
+    @CacheEvict("repositoryByEventAction", "repositoryByName", "repositoryByEventAction", allEntries = true)
     override fun saveRepository(repository: RepositoryModel) {
         val repositoryFound: Optional<RepositoryModel> = this.repository.findByName(repository.name)
 
@@ -46,29 +43,35 @@ class RepositoryServiceImpl @Autowired constructor(
     }
 
     override fun collectAlterations(newResult: RepositoryModel, actualResult: RepositoryModel): RepositoryModel? {
+        newResult.id = actualResult.id
+
         var updatedRepository: RepositoryModel? = null
 
-        if (actualResult.event!!.action != newResult.event!!.action) {
-            log.info("Repository: Alterations found.")
-            log.info("Repository: Updating foreign key 'EVENT_ID'.")
+        if (actualResult != newResult) {
 
-            updatedRepository = actualResult.apply { this.event = newResult.event }
+            updatedRepository = newResult
+
+            if (actualResult.event!! != newResult.event!!) {
+                log.info("Repository: Alterations found.")
+                log.info("Repository: Updating foreign key 'EVENT_ID'.")
+
+                updatedRepository = actualResult.apply { this.event = newResult.event }
+            }
+
+            if (actualResult.owner != newResult.owner) {
+                log.info("Repository: Alterations found.")
+                log.info("Repository: Updating foreign key 'OWNER_ID'.")
+
+                updatedRepository = actualResult.apply { this.owner = newResult.owner }
+            }
+
+            if (actualResult.license != newResult.license) {
+                log.info("Repository: Alterations found.")
+                log.info("Repository: Updating foreign key 'LICENSE_ID'.")
+
+                updatedRepository = actualResult.apply { this.license = newResult.license }
+            }
         }
-
-        if (actualResult.owner != newResult.owner) {
-            log.info("Repository: Alterations found.")
-            log.info("Repository: Updating foreign key 'OWNER_ID'.")
-
-            updatedRepository = actualResult.apply { this.owner = newResult.owner }
-        }
-
-        if (actualResult.license != newResult.license) {
-            log.info("Repository: Alterations found.")
-            log.info("Repository: Updating foreign key 'LICENSE_ID'.")
-
-            updatedRepository = actualResult.apply { this.license = newResult.license }
-        }
-
         return updatedRepository
     }
 
@@ -76,5 +79,11 @@ class RepositoryServiceImpl @Autowired constructor(
     override fun findRepositoryByName(name: String): RepositoryDto = this.repository.findByName(name).orElseThrow {
         RepositoryNotFoundException("Repository '$name' not found.")
     } convertTo RepositoryDto::class.java
+
+    @Cacheable("repositoryByEventAction")
+    override fun findRepositoryByEventAction(action: String): RepositoryDto =
+        this.repository.findByEventAction(action).orElseThrow {
+            RepositoryNotFoundException("There isn't any Repository related with this Event.")
+        } convertTo RepositoryDto::class.java
 
 }

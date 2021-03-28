@@ -39,6 +39,7 @@ internal class PayloadControllerTest : BaseControllerTestFactory() {
                 assertThat(this).isEqualTo(expectedResponse)
                 assertThat(this.links.isEmpty).isFalse
                 assertThat(this.links.getLink("self").isPresent).isTrue
+                assertThat(this.links.getLink("event").isPresent).isTrue
                 assertThat(this.links.getLink("issue").isPresent).isTrue
                 assertThat(this.links.getLink("repository").isPresent).isTrue
                 assertThat(this.links.getLink("sender").isPresent).isTrue

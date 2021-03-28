@@ -9,7 +9,6 @@ plugins {
     jacoco
 }
 
-description = "Integration to Webhook from GitHub"
 group = "com.gga"
 version = "0.0.1-SNAPSHOT"
 java.sourceCompatibility = JavaVersion.VERSION_15

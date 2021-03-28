@@ -59,8 +59,5 @@ data class CreatorModel @JvmOverloads constructor(
     var type: String = "",
 
     @Column(name = "SITE_ADMIN")
-    var siteAdmin: Boolean = false,
-
-    @OneToMany(mappedBy = "creator", fetch = FetchType.LAZY)
-    var milestones: Set<MilestoneModel>? = null
+    var siteAdmin: Boolean = false
 )

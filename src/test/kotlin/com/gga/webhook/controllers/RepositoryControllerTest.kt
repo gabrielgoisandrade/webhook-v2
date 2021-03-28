@@ -1,6 +1,8 @@
 package com.gga.webhook.controllers
 
+import com.gga.webhook.constants.MockValuesConstant.EVENT_ACTION
 import com.gga.webhook.constants.MockValuesConstant.REPOSITORY_NAME
+import com.gga.webhook.errors.exceptions.RelationNotFoundException
 import com.gga.webhook.errors.exceptions.RepositoryNotFoundException
 import com.gga.webhook.factories.BaseControllerTestFactory
 import com.gga.webhook.models.dTO.RepositoryDto
@@ -63,7 +65,34 @@ internal class RepositoryControllerTest : BaseControllerTestFactory() {
     }
 
     @Test
-    fun throwRepositoryNameNotFound() {
+    fun findRepositoryByEventAction() {
+        `when`(this.service.findRepositoryByEventAction(anyString())).thenReturn(this.expected)
+
+        this.controller.findRepositoryByEventAction(EVENT_ACTION).also {
+            assertThat(it.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(it.body).isEqualTo(this.expected)
+
+            with(it.body!!.links) {
+                assertThat(this.isEmpty).isFalse
+                assertThat(this.getLink("self").isPresent).isTrue
+                assertThat(this.getLink("owner").isPresent).isTrue
+                assertThat(this.getLink("license").isPresent).isTrue
+            }
+        }
+    }
+
+    @Test
+    fun throwErrorByEventActionNotFound() {
+        given(this.service.findRepositoryByEventAction(anyString()))
+            .willThrow(RelationNotFoundException("There isn't any Repository related with this Event."))
+
+        this.mockMvc.perform(getRequest("$REPOSITORY/event/$EVENT_ACTION"))
+            .andExpect(status().isNotFound)
+            .andExpect(jsonPath("message").value("There isn't any Repository related with this Event."))
+    }
+
+    @Test
+    fun throwErrorByRepositoryNameNotFound() {
         given(this.service.findRepositoryByName(anyString()))
             .willThrow(RepositoryNotFoundException("Repository '$REPOSITORY_NAME' not found"))
 

@@ -1,7 +1,7 @@
 package com.gga.webhook.services.impls
 
 import com.gga.webhook.errors.exceptions.RelationNotFoundException
-import com.gga.webhook.helper.PageableHelper
+import com.gga.webhook.helper.AlterationsHelper
 import com.gga.webhook.models.UserModel
 import com.gga.webhook.models.dTO.UserDto
 import com.gga.webhook.repositories.UserRepository
@@ -21,9 +21,7 @@ import java.util.*
 @EnableCaching
 class UserServiceImpl @Autowired constructor(
     private val repository: UserRepository
-) : UserService {
-
-    private val helper: PageableHelper<UserModel> = PageableHelper(this.repository)
+) : UserService, AlterationsHelper<UserModel> {
 
     private val log: Logger = LoggerFactory.getLogger(this::class.java)
 
@@ -33,6 +31,11 @@ class UserServiceImpl @Autowired constructor(
         val userFound: Optional<UserModel> = this.repository.findByLogin(user.login)
 
         return if (userFound.isPresent) {
+            this.collectAlterations(user, userFound.get())?.let {
+                log.info("User: Saving alterations.")
+                this.repository.save(it)
+            } ?: log.info("User: No alterations found.")
+
             this.log.info("User: Returning existing User.")
 
             userFound.get()
@@ -48,5 +51,16 @@ class UserServiceImpl @Autowired constructor(
         this.repository.findByIssueNumber(issueNumber).orElseThrow {
             RelationNotFoundException("There isn't any User related with this Issue")
         } convertTo UserDto::class.java
+
+    override fun collectAlterations(newResult: UserModel, actualResult: UserModel): UserModel? {
+        newResult.id = actualResult.id
+
+        return if (actualResult != newResult) {
+            log.info("User: Alterations found.")
+            newResult
+        } else {
+            null
+        }
+    }
 
 }

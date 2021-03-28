@@ -9,6 +9,8 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.mockito.Mockito.*
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageImpl
 import java.util.*
 
 internal class LabelsServiceImplTest : BaseServiceImplTestFactory() {
@@ -23,10 +25,10 @@ internal class LabelsServiceImplTest : BaseServiceImplTestFactory() {
     fun saveLabels() {
         `when`(this.labelsRepository.findByName(anyString())).thenReturn(Optional.empty())
 
-        `when`(this.labelsRepository.saveAll(anySet())).thenReturn(listOf(this.expectedModel))
+        `when`(this.labelsRepository.saveAll(anyList())).thenReturn(listOf(this.expectedModel))
 
-        this.service.saveLabels(hashSetOf(this.expectedModel)).also {
-            assertThat(it).isEqualTo(hashSetOf(this.expectedModel))
+        this.service.saveLabels(listOf(this.expectedModel)).also {
+            assertThat(it).isEqualTo(listOf(this.expectedModel))
         }
     }
 
@@ -35,7 +37,8 @@ internal class LabelsServiceImplTest : BaseServiceImplTestFactory() {
         `when`(this.labelsRepository.findByName(anyString()))
             .thenReturn(Optional.of(this.expectedModel))
 
-        this.service.saveLabels(hashSetOf(this.expectedModel)).also { assertThat(it).isEqualTo(hashSetOf(this.expectedModel)) }
+        this.service.saveLabels(listOf(this.expectedModel))
+            .also { assertThat(it).isEqualTo(listOf(this.expectedModel)) }
 
         verify(this.labelsRepository, never()).saveAll(anyList())
     }
@@ -43,11 +46,13 @@ internal class LabelsServiceImplTest : BaseServiceImplTestFactory() {
     @Test
     fun findLabelsByIssueNumber() {
         `when`(this.labelsRepository.findByIssueNumber(ISSUE_NUMBER))
-            .thenReturn(Optional.of(hashSetOf(this.expectedModel)))
+            .thenReturn(Optional.of(listOf(this.expectedModel)))
 
-        this.service.findLabelsByIssueNumber(ISSUE_NUMBER).also {
-            assertThat(it.isEmpty()).isFalse
-            assertThat(it).isEqualTo(hashSetOf(this.expectedDto))
+        val expectedPage: Page<LabelsDto> = PageImpl(listOf(this.expectedDto))
+
+        this.service.findLabelsByIssueNumber(ISSUE_NUMBER, 0, 5, "asc").also {
+            assertThat(it.content).isNotEmpty
+            assertThat(it.content).isEqualTo(expectedPage.content)
         }
     }
 
@@ -56,7 +61,9 @@ internal class LabelsServiceImplTest : BaseServiceImplTestFactory() {
         `when`(this.labelsRepository.findByIssueNumber(ISSUE_NUMBER))
             .thenThrow(RelationNotFoundException("There isn't any Labels related with this Issue"))
 
-        assertThrows<RelationNotFoundException> { this.service.findLabelsByIssueNumber(ISSUE_NUMBER) }.also {
+        assertThrows<RelationNotFoundException> {
+            this.service.findLabelsByIssueNumber(ISSUE_NUMBER, 0, 5, "asc")
+        }.also {
             assertThat(it).isInstanceOf(RelationNotFoundException::class.java)
                 .hasMessage("There isn't any Labels related with this Issue")
         }

@@ -1,6 +1,7 @@
 package com.gga.webhook.services.impls
 
 import com.gga.webhook.errors.exceptions.RelationNotFoundException
+import com.gga.webhook.helper.AlterationsHelper
 import com.gga.webhook.helper.PageableHelper
 import com.gga.webhook.models.CreatorModel
 import com.gga.webhook.models.dTO.CreatorDto
@@ -21,9 +22,7 @@ import java.util.*
 @EnableCaching
 class CreatorServiceImpl @Autowired constructor(
     private val repository: CreatorRepository
-) : CreatorService {
-
-    private val helper: PageableHelper<CreatorModel> = PageableHelper(this.repository)
+) : CreatorService, AlterationsHelper<CreatorModel> {
 
     private val log: Logger = LoggerFactory.getLogger(this::class.java)
 
@@ -33,6 +32,11 @@ class CreatorServiceImpl @Autowired constructor(
         val creatorFound: Optional<CreatorModel> = this.repository.findByLogin(creator.login)
 
         return if (creatorFound.isPresent) {
+            this.collectAlterations(creator, creatorFound.get())?.let {
+                log.info("Creator: Saving alterations.")
+                this.repository.save(it)
+            } ?: log.info("Creator: No alterations found.")
+
             this.log.info("Creator: Returning existing Creator.")
 
             creatorFound.get()
@@ -48,5 +52,16 @@ class CreatorServiceImpl @Autowired constructor(
         this.repository.findByMilestoneNumber(milestoneNumber).orElseThrow {
             RelationNotFoundException("There isn't any Creator related with this Milestone.")
         } convertTo CreatorDto::class.java
+
+    override fun collectAlterations(newResult: CreatorModel, actualResult: CreatorModel): CreatorModel? {
+        newResult.id = actualResult.id
+
+        return if (newResult != actualResult) {
+            log.info("Creator: Alterations found.")
+            newResult
+        } else {
+            null
+        }
+    }
 
 }

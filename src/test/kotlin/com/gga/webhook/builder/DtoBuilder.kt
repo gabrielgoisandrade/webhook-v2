@@ -39,7 +39,7 @@ class DtoBuilder {
         description = "mock"
     )
 
-    fun labels(): HashSet<LabelsDto> = hashSetOf(this.labelsDto())
+    fun labels(): List<LabelsDto> = listOf(this.labelsDto())
 
     fun creatorDto(): CreatorDto = CreatorDto(
         login = "mock@mock.com",
@@ -119,7 +119,7 @@ class DtoBuilder {
         type = "https://mock.com/events"
     )
 
-    fun assignees(): HashSet<AssigneesDto> = hashSetOf(this.assigneesDto())
+    fun assignees(): List<AssigneesDto> = listOf(this.assigneesDto())
 
     fun ownerDto(): OwnerDto = OwnerDto(
         login = "mock@mock.com",

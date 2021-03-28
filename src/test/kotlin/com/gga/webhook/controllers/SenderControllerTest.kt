@@ -1,6 +1,8 @@
 package com.gga.webhook.controllers
 
+import com.gga.webhook.constants.MockValuesConstant.EVENT_ACTION
 import com.gga.webhook.constants.MockValuesConstant.LOGIN
+import com.gga.webhook.errors.exceptions.RelationNotFoundException
 import com.gga.webhook.errors.exceptions.SenderNotFoundException
 import com.gga.webhook.factories.BaseControllerTestFactory
 import com.gga.webhook.models.dTO.SenderDto
@@ -46,6 +48,31 @@ internal class SenderControllerTest : BaseControllerTestFactory() {
     }
 
     @Test
+    fun findSenderByEventAction() {
+        `when`(this.service.findSenderByEventAction(anyString())).thenReturn(this.expected)
+
+        this.controller.findSenderByEventAction(EVENT_ACTION).also {
+            assertThat(it.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(it.body).isEqualTo(this.expected)
+
+            with(it.body!!.links) {
+                assertThat(this.isEmpty).isFalse
+                assertThat(this.getLink("self").isPresent).isTrue
+            }
+        }
+    }
+
+    @Test
+    fun throwErrorByEventActionNotFound() {
+        given(this.service.findSenderByEventAction(anyString()))
+            .willThrow(RelationNotFoundException("There isn't any Sender related with this Event"))
+
+        this.mockMvc.perform(getRequest("$SENDER/event/$EVENT_ACTION"))
+            .andExpect(status().isNotFound)
+            .andExpect(jsonPath("message").value("There isn't any Sender related with this Event"))
+    }
+
+    @Test
     fun throwErrorBySenderLoginNotFound() {
         given(this.service.findSenderByLogin(anyString()))
             .willThrow(SenderNotFoundException("Sender '$LOGIN' not found"))
@@ -54,4 +81,5 @@ internal class SenderControllerTest : BaseControllerTestFactory() {
             .andExpect(status().isNotFound)
             .andExpect(jsonPath("message").value("Sender '$LOGIN' not found"))
     }
+
 }

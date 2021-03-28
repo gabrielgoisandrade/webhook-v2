@@ -61,10 +61,4 @@ data class OwnerDto @JvmOverloads constructor(
 
     @JsonProperty("site_admin")
     var siteAdmin: Boolean = false
-) : Serializable, RepresentationModel<OwnerDto>(){
-
-    @Schema(hidden = true)
-    @Suppress("unused")
-    private val links: List<Links> = emptyList()
-
-}
+) : Serializable, RepresentationModel<OwnerDto>()

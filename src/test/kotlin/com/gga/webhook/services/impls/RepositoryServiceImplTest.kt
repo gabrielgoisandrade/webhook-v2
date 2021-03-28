@@ -1,6 +1,8 @@
 package com.gga.webhook.services.impls
 
+import com.gga.webhook.constants.MockValuesConstant.EVENT_ACTION
 import com.gga.webhook.constants.MockValuesConstant.REPOSITORY_NAME
+import com.gga.webhook.errors.exceptions.RelationNotFoundException
 import com.gga.webhook.errors.exceptions.RepositoryNotFoundException
 import com.gga.webhook.factories.BaseServiceImplTestFactory
 import com.gga.webhook.models.RepositoryModel
@@ -46,6 +48,26 @@ internal class RepositoryServiceImplTest : BaseServiceImplTestFactory() {
 
         this.service.findRepositoryByName(REPOSITORY_NAME).also {
             assertThat(it).isEqualTo(this.expectedDto)
+        }
+    }
+
+    @Test
+    fun findRepositoryByEventAction() {
+        `when`(this.repositoryRepository.findByEventAction(anyString())).thenReturn(Optional.of(this.expectedModel))
+
+        this.service.findRepositoryByEventAction(EVENT_ACTION).also {
+            assertThat(it).isEqualTo(this.expectedDto)
+        }
+    }
+
+    @Test
+    fun throwErrorByEventActionNotFound() {
+        `when`(this.repositoryRepository.findByEventAction(anyString()))
+            .thenThrow(RelationNotFoundException("There isn't any Repository related with this Event."))
+
+        assertThrows<RelationNotFoundException> { this.service.findRepositoryByEventAction(EVENT_ACTION) }.also {
+            assertThat(it).isInstanceOf(RelationNotFoundException::class.java)
+                .hasMessage("There isn't any Repository related with this Event.")
         }
     }
 

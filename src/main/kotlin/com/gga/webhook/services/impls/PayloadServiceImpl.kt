@@ -34,9 +34,9 @@ class PayloadServiceImpl @Autowired constructor(
     override fun savePayloadData(payload: PayloadDto): EventDto {
         val savedEvent: EventModel = this.saveEvent(payload.action)
 
-        val savedLabels: HashSet<LabelsModel> = this.saveLabels(payload.issue!!.labels.toHashSet())
+        val savedLabels: List<LabelsModel> = this.saveLabels(payload.issue!!.labels)
 
-        val savedAssignees: HashSet<AssigneesModel> = this.saveAssignees(payload.issue!!.assignees.toHashSet())
+        val savedAssignees: List<AssigneesModel> = this.saveAssignees(payload.issue!!.assignees)
 
         with(savedEvent) {
             saveIssue(payload.issue!!, this).also {
@@ -89,20 +89,20 @@ class PayloadServiceImpl @Autowired constructor(
             (assignee convertTo AssigneeModel::class.java).run { assigneeServiceImpl.saveAssignee(this) }
         }
 
-    override fun saveAssignees(assignees: HashSet<AssigneesDto>): HashSet<AssigneesModel> =
+    override fun saveAssignees(assignees: List<AssigneesDto>): List<AssigneesModel> =
         if (assignees.isEmpty()) {
             this.log.info("Payload: No Assignees to save.")
-            hashSetOf()
+            emptyList()
         } else {
-            (assignees convertTo AssigneesModel::class.java).run { assigneesServiceImpl.saveAssignees(this.toHashSet()) }
+            (assignees convertTo AssigneesModel::class.java).run { assigneesServiceImpl.saveAssignees(this) }
         }
 
-    override fun saveLabels(labels: HashSet<LabelsDto>): HashSet<LabelsModel> =
+    override fun saveLabels(labels: List<LabelsDto>): List<LabelsModel> =
         if (labels.isEmpty()) {
             this.log.info("Payload: No Labels to save.")
-            hashSetOf()
+            emptyList()
         } else {
-            (labels convertTo LabelsModel::class.java).run { labelsServiceImpl.saveLabels(this.toHashSet()) }
+            (labels convertTo LabelsModel::class.java).run { labelsServiceImpl.saveLabels(this) }
         }
 
     override fun saveMilestone(milestone: MilestoneDto?): MilestoneModel? =
@@ -130,13 +130,13 @@ class PayloadServiceImpl @Autowired constructor(
             (license convertTo LicenseModel::class.java).run { licenseServiceImpl.saveLicense(this) }
         }
 
-    override fun saveClassifiers(issue: IssueModel, labels: HashSet<LabelsModel>): Unit =
+    override fun saveClassifiers(issue: IssueModel, labels: List<LabelsModel>): Unit =
         if (labels.isEmpty())
             this.log.info("Payload: No Labels found. No classifiers to save.")
         else
             this.issueClassifierServiceImpl.saveIssueClassifier(issue, labels)
 
-    override fun saveResponsible(issue: IssueModel, assignees: HashSet<AssigneesModel>): Unit =
+    override fun saveResponsible(issue: IssueModel, assignees: List<AssigneesModel>): Unit =
         if (assignees.isEmpty())
             this.log.info("Payload: No Assignees found. No responsible to save.")
         else

@@ -11,45 +11,41 @@ import org.springframework.context.annotation.Configuration
 @Configuration
 class OpenApiConfig {
 
-    @Value("\${doc.info.name}")
+    @Value("\${info.app.name}")
     private lateinit var title: String
 
-    @Value("\${doc.info.version}")
+    @Value("\${info.app.version}")
     private lateinit var version: String
 
-    @Value("\${doc.info.description}")
+    @Value("\${info.app.description}")
     private lateinit var description: String
 
-    @Value("\${doc.contact.url}")
-    private lateinit var contactUrl: String
+    @Value("\${info.app.contact.github}")
+    private lateinit var github: String
 
-    @Value("\${doc.contact.name}")
+    @Value("\${info.app.contact.name}")
     private lateinit var contactName: String
 
-    @Value("\${doc.contact.email}")
+    @Value("\${info.app.contact.email}")
     private lateinit var contactEmail: String
 
-    @Value("\${doc.license.url}")
+    @Value("\${info.app.license.url}")
     private lateinit var licenseUrl: String
 
-    @Value("\${doc.license.name}")
+    @Value("\${info.app.license.name}")
     private lateinit var licenseName: String
-
-    @Value("\${doc.terms-of-service}")
-    private lateinit var termsOfService: String
 
     private fun info(): Info = Info()
         .title(this.title)
-        .description("# ${this.description}")
+        .description(this.description)
         .version(this.version)
         .contact(this.contact())
         .license(this.license())
-        .termsOfService(this.termsOfService)
 
     private fun contact(): Contact = Contact()
         .name(this.contactName)
         .email(this.contactEmail)
-        .url(this.contactUrl)
+        .url(this.github)
 
     private fun license(): License = License().name(this.licenseName).url(this.licenseUrl)
 

@@ -1,7 +1,9 @@
 package com.gga.webhook.services.impls
 
+import com.gga.webhook.constants.MockValuesConstant.EVENT_ACTION
 import com.gga.webhook.constants.MockValuesConstant.ISSUE_NUMBER
 import com.gga.webhook.errors.exceptions.IssueNotFoundException
+import com.gga.webhook.errors.exceptions.RelationNotFoundException
 import com.gga.webhook.factories.BaseServiceImplTestFactory
 import com.gga.webhook.models.AssigneesModel
 import com.gga.webhook.models.IssueModel
@@ -28,17 +30,17 @@ internal class IssueServiceImplTest : BaseServiceImplTestFactory() {
 
     private val expectedModel: IssueModel = this.model.issue
 
-    private val expectedLabelsModel: HashSet<LabelsModel> = hashSetOf(this.model.labels)
+    private val expectedLabelsModel: List<LabelsModel> = listOf(this.model.labels)
 
-    private val expectedAssigneesModel: HashSet<AssigneesModel> = hashSetOf(this.model.assignees)
+    private val expectedAssigneesModel: List<AssigneesModel> = listOf(this.model.assignees)
 
-    private val expectedLabelsDto: HashSet<LabelsDto> = this.dto.labels()
+    private val expectedLabelsDto: List<LabelsDto> = this.dto.labels()
 
-    private val expectedAssigneesDto: HashSet<AssigneesDto> = this.dto.assignees()
+    private val expectedAssigneesDto: List<AssigneesDto> = this.dto.assignees()
 
     private val expectedDto: IssueDto = this.dto.issueDto().apply {
-        this.assignees = hashSetOf()
-        this.labels = hashSetOf()
+        this.assignees = emptyList()
+        this.labels = emptyList()
     }
 
     @Test
@@ -72,6 +74,33 @@ internal class IssueServiceImplTest : BaseServiceImplTestFactory() {
                 this.assignees = expectedAssigneesDto
                 this.labels = expectedLabelsDto
             })
+        }
+    }
+
+    @Test
+    fun findIssueByEventAction() {
+        `when`(this.issueRepository.findByEventAction(anyString())).thenReturn(Optional.of(this.expectedModel))
+
+        `when`(this.labelsRepository.findByIssueNumber(anyInt())).thenReturn(Optional.of(this.expectedLabelsModel))
+
+        `when`(this.assigneesRepository.findByIssueNumber(anyInt())).thenReturn(Optional.of(this.expectedAssigneesModel))
+
+        this.service.findIssueByEventAction(EVENT_ACTION).also {
+            assertThat(it).isEqualTo(this.expectedDto.apply {
+                this.assignees = expectedAssigneesDto
+                this.labels = expectedLabelsDto
+            })
+        }
+    }
+
+    @Test
+    fun throwErrorByEventActionNotFound() {
+        `when`(this.issueRepository.findByEventAction(anyString()))
+            .thenThrow(RelationNotFoundException("There isn't any Issue related with this Event."))
+
+        assertThrows<RelationNotFoundException> { this.service.findIssueByEventAction(EVENT_ACTION) }.also {
+            assertThat(it).isInstanceOf(RelationNotFoundException::class.java)
+                .hasMessage("There isn't any Issue related with this Event.")
         }
     }
 

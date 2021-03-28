@@ -1,7 +1,7 @@
 package com.gga.webhook.services.impls
 
 import com.gga.webhook.errors.exceptions.RelationNotFoundException
-import com.gga.webhook.helper.FkHelper
+import com.gga.webhook.helper.AlterationsHelper
 import com.gga.webhook.helper.PageableHelper
 import com.gga.webhook.models.MilestoneModel
 import com.gga.webhook.models.dTO.MilestoneDto
@@ -22,9 +22,7 @@ import java.util.*
 @EnableCaching
 class MilestoneServiceImpl @Autowired constructor(
     private val repository: MilestoneRepository
-) : MilestoneService, FkHelper<MilestoneModel> {
-
-    private val helper: PageableHelper<MilestoneModel> = PageableHelper(this.repository)
+) : MilestoneService, AlterationsHelper<MilestoneModel> {
 
     private val log: Logger = LoggerFactory.getLogger(this::class.java)
 
@@ -52,13 +50,21 @@ class MilestoneServiceImpl @Autowired constructor(
     }
 
     override fun collectAlterations(newResult: MilestoneModel, actualResult: MilestoneModel): MilestoneModel? {
+        newResult.id = actualResult.id
+
         var updatedMilestone: MilestoneModel? = null
 
-        if (actualResult.creator != newResult.creator) {
+        if (newResult != actualResult) {
             log.info("Milestone: Alterations found.")
-            log.info("Milestone: Updating foreign key 'CREATOR_ID'.")
 
-            updatedMilestone = actualResult.apply { this.creator = newResult.creator }
+            updatedMilestone = newResult
+
+            if (actualResult.creator != newResult.creator) {
+                log.info("Milestone: Alterations found.")
+                log.info("Milestone: Updating foreign key 'CREATOR_ID'.")
+
+                updatedMilestone = actualResult.apply { this.creator = newResult.creator }
+            }
         }
 
         return updatedMilestone

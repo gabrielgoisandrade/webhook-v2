@@ -39,6 +39,9 @@ internal class EventControllerTest : BaseControllerTestFactory() {
             with(it.body!!.links) {
                 assertThat(this.isEmpty).isFalse
                 assertThat(this.getLink("self").isPresent).isTrue
+                assertThat(this.getLink("issue").isPresent).isTrue
+                assertThat(this.getLink("repository").isPresent).isTrue
+                assertThat(this.getLink("sender").isPresent).isTrue
             }
         }
     }

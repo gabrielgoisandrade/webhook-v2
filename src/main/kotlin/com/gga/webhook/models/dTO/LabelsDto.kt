@@ -9,7 +9,7 @@ import java.io.Serializable
 
 data class LabelsDto @JvmOverloads constructor(
     @JsonIgnore
-    val id: Long = 1L,
+    var id: Long = 0L,
 
     @JsonProperty("node_id")
     var nodeId: String = "",
@@ -28,10 +28,4 @@ data class LabelsDto @JvmOverloads constructor(
 
     @JsonProperty("description")
     var description: String? = null
-) : Serializable, RepresentationModel<LabelsDto>(){
-
-    @Schema(hidden = true)
-    @Suppress("unused")
-    private val links: List<Links> = emptyList()
-
-}
+) : Serializable, RepresentationModel<LabelsDto>()

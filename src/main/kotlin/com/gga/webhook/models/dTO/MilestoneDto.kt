@@ -57,10 +57,4 @@ data class MilestoneDto @JvmOverloads constructor(
 
     @JsonProperty("closed_at")
     var closedAt: Instant? = null
-) : Serializable, RepresentationModel<MilestoneDto>(){
-
-    @Schema(hidden = true)
-    @Suppress("unused")
-    private val links: List<Links> = emptyList()
-
-}
+) : Serializable, RepresentationModel<MilestoneDto>()

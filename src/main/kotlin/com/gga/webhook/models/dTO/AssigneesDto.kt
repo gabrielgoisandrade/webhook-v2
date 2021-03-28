@@ -2,8 +2,6 @@ package com.gga.webhook.models.dTO
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
-import io.swagger.v3.oas.annotations.media.Schema
-import org.springframework.hateoas.Links
 import org.springframework.hateoas.RepresentationModel
 import java.io.Serializable
 
@@ -12,7 +10,7 @@ data class AssigneesDto @JvmOverloads constructor(
     var login: String = "",
 
     @JsonIgnore
-    val id: Long = 1L,
+    var id: Long = 0L,
 
     @JsonProperty("node_id")
     var nodeId: String = "",
@@ -61,10 +59,4 @@ data class AssigneesDto @JvmOverloads constructor(
 
     @JsonProperty("site_admin")
     var siteAdmin: Boolean = false
-) : Serializable, RepresentationModel<AssigneesDto>(){
-
-    @Schema(hidden = true)
-    @Suppress("unused")
-    private val links: List<Links> = emptyList()
-
-}
+) : Serializable, RepresentationModel<AssigneesDto>()

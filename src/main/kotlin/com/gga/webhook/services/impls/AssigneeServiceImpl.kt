@@ -1,6 +1,7 @@
 package com.gga.webhook.services.impls
 
 import com.gga.webhook.errors.exceptions.RelationNotFoundException
+import com.gga.webhook.helper.AlterationsHelper
 import com.gga.webhook.helper.PageableHelper
 import com.gga.webhook.models.AssigneeModel
 import com.gga.webhook.models.dTO.AssigneeDto
@@ -21,9 +22,7 @@ import java.util.*
 @EnableCaching
 class AssigneeServiceImpl @Autowired constructor(
     private val repository: AssigneeRepository
-) : AssigneeService {
-
-    private val helper: PageableHelper<AssigneeModel> = PageableHelper(this.repository)
+) : AssigneeService, AlterationsHelper<AssigneeModel> {
 
     private val log: Logger = LoggerFactory.getLogger(this::class.java)
 
@@ -33,6 +32,11 @@ class AssigneeServiceImpl @Autowired constructor(
         val assigneeFound: Optional<AssigneeModel> = this.repository.findByLogin(assignee.login)
 
         return if (assigneeFound.isPresent) {
+            this.collectAlterations(assignee, assigneeFound.get())?.let {
+                log.info("Assignee: Saving alterations.")
+                this.repository.save(it)
+            } ?: log.info("Assignee: No alterations found.")
+
             this.log.info("Assignee: Returning existing Assignee.")
 
             assigneeFound.get()
@@ -48,5 +52,16 @@ class AssigneeServiceImpl @Autowired constructor(
         this.repository.findByIssueNumber(issueNumber).orElseThrow {
             RelationNotFoundException("There isn't any Assignee related with this Issue.")
         } convertTo AssigneeDto::class.java
+
+    override fun collectAlterations(newResult: AssigneeModel, actualResult: AssigneeModel): AssigneeModel? {
+        newResult.id = actualResult.id
+
+        return if (newResult != actualResult) {
+            log.info("Assignee: Alterations found.")
+            newResult
+        } else {
+            null
+        }
+    }
 
 }

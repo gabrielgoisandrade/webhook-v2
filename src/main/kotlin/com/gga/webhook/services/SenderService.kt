@@ -9,4 +9,6 @@ interface SenderService {
 
     fun findSenderByLogin(login: String): SenderDto
 
+    fun findSenderByEventAction(action: String): SenderDto
+
 }

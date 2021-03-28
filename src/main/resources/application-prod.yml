@@ -1,0 +1,27 @@
+spring:
+  # Datasource config
+  datasource:
+    username: szdioskzykcudu
+    password: ab52bac745c8c7faa5b8334de79240ed8570e68da2ea3e1d6cdc701495752f6e
+    url: jdbc:postgresql://ec2-34-195-233-155.compute-1.amazonaws.com:5432/d5ip19fca0pj4j
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+  # Flyway config
+  flyway:
+    password: ab52bac745c8c7faa5b8334de79240ed8570e68da2ea3e1d6cdc701495752f6e
+    user: szdioskzykcudu
+    url: jdbc:postgresql://ec2-34-195-233-155.compute-1.amazonaws.com:5432/d5ip19fca0pj4j
+    schemas: public
+    check-location: true
+
+# SpringDoc config
+springdoc:
+  api-docs:
+    path: /doc
+  swagger-ui:
+    enabled: false

@@ -5,6 +5,6 @@ import com.gga.webhook.models.IssueModel
 
 interface IssueResponsibleService {
 
-    fun saveIssueResponsible(issue: IssueModel, assignees: HashSet<AssigneesModel>)
+    fun saveIssueResponsible(issue: IssueModel, assignees: List<AssigneesModel>)
 
 }

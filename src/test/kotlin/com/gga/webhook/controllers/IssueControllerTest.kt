@@ -1,7 +1,9 @@
 package com.gga.webhook.controllers
 
+import com.gga.webhook.constants.MockValuesConstant.EVENT_ACTION
 import com.gga.webhook.constants.MockValuesConstant.ISSUE_NUMBER
 import com.gga.webhook.errors.exceptions.IssueNotFoundException
+import com.gga.webhook.errors.exceptions.RelationNotFoundException
 import com.gga.webhook.factories.BaseControllerTestFactory
 import com.gga.webhook.models.dTO.IssueDto
 import com.gga.webhook.services.impls.IssueServiceImpl
@@ -89,7 +91,7 @@ internal class IssueControllerTest : BaseControllerTestFactory() {
     @Test
     fun findIssueByNumberWithoutAssignees() {
         `when`(this.service.findIssueByNumber(anyInt())).thenReturn(this.expected.apply {
-            this.assignees = hashSetOf()
+            this.assignees = emptyList()
         })
 
         this.controller.findIssueByNumber(ISSUE_NUMBER).also {
@@ -110,7 +112,7 @@ internal class IssueControllerTest : BaseControllerTestFactory() {
 
     @Test
     fun findIssueByNumberWithoutLabels() {
-        `when`(this.service.findIssueByNumber(anyInt())).thenReturn(this.expected.apply { this.labels = hashSetOf() })
+        `when`(this.service.findIssueByNumber(anyInt())).thenReturn(this.expected.apply { this.labels = emptyList() })
 
         this.controller.findIssueByNumber(ISSUE_NUMBER).also {
             assertThat(it.statusCode).isEqualTo(HttpStatus.OK)
@@ -132,8 +134,8 @@ internal class IssueControllerTest : BaseControllerTestFactory() {
     fun findIssueByNumberWithOnlyUser() {
         `when`(this.service.findIssueByNumber(anyInt())).thenReturn(this.expected.apply {
             this.assignee = null
-            this.assignees = hashSetOf()
-            this.labels = hashSetOf()
+            this.assignees = emptyList()
+            this.labels = emptyList()
             this.milestone = null
         })
 
@@ -151,6 +153,34 @@ internal class IssueControllerTest : BaseControllerTestFactory() {
                 assertThat(this.getLink("milestone").isPresent).isFalse
             }
         }
+    }
+
+    @Test
+    fun findIssueByEventAction() {
+        `when`(this.service.findIssueByEventAction(anyString())).thenReturn(this.expected)
+
+        this.controller.findIssueByEventAction(EVENT_ACTION).also {
+            assertThat(it.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(it.body).isEqualTo(this.expected)
+
+            with(it.body!!.links) {
+                assertThat(this.isEmpty).isFalse
+                assertThat(this.getLink("self").isPresent).isTrue
+                assertThat(this.getLink("user").isPresent).isTrue
+                assertThat(this.getLink("assignee").isPresent).isTrue
+                assertThat(this.getLink("milestone").isPresent).isTrue
+            }
+        }
+    }
+
+    @Test
+    fun throwErrorByEventActionNotFound() {
+        given(this.service.findIssueByEventAction(anyString()))
+            .willThrow(RelationNotFoundException("There isn't any Issue related with this Event."))
+
+        this.mockMvc.perform(getRequest("$ISSUE/event/$EVENT_ACTION"))
+            .andExpect(status().isNotFound)
+            .andExpect(jsonPath("message").value("There isn't any Issue related with this Event."))
     }
 
     @Test

@@ -9,4 +9,6 @@ interface RepositoryService {
 
     fun findRepositoryByName(name: String): RepositoryDto
 
+    fun findRepositoryByEventAction(action: String): RepositoryDto
+
 }

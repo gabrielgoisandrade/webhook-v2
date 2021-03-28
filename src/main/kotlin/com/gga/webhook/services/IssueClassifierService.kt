@@ -5,6 +5,6 @@ import com.gga.webhook.models.LabelsModel
 
 interface IssueClassifierService {
 
-    fun saveIssueClassifier(issue: IssueModel, labels: HashSet<LabelsModel>)
+    fun saveIssueClassifier(issue: IssueModel, labels: List<LabelsModel>)
 
 }

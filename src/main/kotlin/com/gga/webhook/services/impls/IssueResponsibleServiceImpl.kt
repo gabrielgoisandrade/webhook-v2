@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
-import kotlin.collections.HashSet
 
 @Service
 class IssueResponsibleServiceImpl @Autowired constructor(
@@ -21,7 +20,7 @@ class IssueResponsibleServiceImpl @Autowired constructor(
     private val log: Logger = LoggerFactory.getLogger(this::class.java)
 
     @Transactional
-    override fun saveIssueResponsible(issue: IssueModel, assignees: HashSet<AssigneesModel>) {
+    override fun saveIssueResponsible(issue: IssueModel, assignees: List<AssigneesModel>) {
         assignees.forEach {
             val classifier: Optional<IssueResponsibleModel> =
                 this.repository.findByIssueIdAndAssigneesId(issue.id, it.id)
@@ -29,11 +28,11 @@ class IssueResponsibleServiceImpl @Autowired constructor(
             if (classifier.isPresent) {
                 this.log.info("IssueResponsible: Same set found. Searching for alterations.")
 
-                classifier.verifyAmbiguousResponsible(issue, it).also { toSave: IssueResponsibleModel ->
+                classifier.verifyAmbiguousResponsible(issue, it)?.let { toSave: IssueResponsibleModel ->
                     this.log.info("IssueResponsible: Saving new IssueResponsible's sets.")
 
                     this.repository.save(toSave)
-                }
+                } ?: this.log.info("IssueResponsible: No alterations found.")
             } else {
                 IssueResponsibleModel(issue = issue, assignees = it).also { toSave: IssueResponsibleModel ->
                     this.log.info("IssueResponsible: Saving new IssueResponsible.")
@@ -45,12 +44,12 @@ class IssueResponsibleServiceImpl @Autowired constructor(
     }
 
     private fun Optional<IssueResponsibleModel>.verifyAmbiguousResponsible(
-        issue: IssueModel,
-        assignees: AssigneesModel
-    ): IssueResponsibleModel =
-        IssueResponsibleModel(
-            issue = if (this.get().issue == issue) this.get().issue else issue,
-            assignees = if (this.get().assignees == assignees) this.get().assignees else assignees
-        )
+        newIssue: IssueModel,
+        newAssignees: AssigneesModel
+    ): IssueResponsibleModel? =
+        if (this.get().issue != newIssue || this.get().assignees != newAssignees)
+            IssueResponsibleModel(issue = newIssue, assignees = newAssignees)
+        else
+            null
 
 }

@@ -98,15 +98,15 @@ internal class PayloadServiceImplTest : BaseServiceImplTestFactory() {
     private val issueResponsibleModel: IssueResponsibleModel =
         IssueResponsibleModel(issue = this.issueModel, assignees = this.model.assignees)
 
-    private val assigneesModel: HashSet<AssigneesModel> = hashSetOf(this.model.assignees)
+    private val assigneesModel: List<AssigneesModel> = listOf(this.model.assignees)
 
     private val senderModel: SenderModel = this.model.sender
 
-    private val labelsModel: HashSet<LabelsModel> = hashSetOf(this.model.labels)
+    private val labelsModel: List<LabelsModel> = listOf(this.model.labels)
 
-    private val assigneesDto: HashSet<AssigneesDto> = this.dto.assignees()
+    private val assigneesDto: List<AssigneesDto> = this.dto.assignees()
 
-    private val labelsDto: HashSet<LabelsDto> = this.dto.labels()
+    private val labelsDto: List<LabelsDto> = this.dto.labels()
 
     private val issueDto: IssueDto = this.dto.issueDto()
 
@@ -118,9 +118,9 @@ internal class PayloadServiceImplTest : BaseServiceImplTestFactory() {
     fun savePayloadData() {
         `when`(this.eventRepository.save(any(EventModel::class.java))).thenReturn(this.eventModel)
 
-        `when`(this.labelsRepository.saveAll(anySet())).thenReturn(this.labelsModel.toMutableList())
+        `when`(this.labelsRepository.saveAll(anyList())).thenReturn(this.labelsModel.toMutableList())
 
-        `when`(this.assigneesRepository.saveAll(anySet())).thenReturn(this.assigneesModel.toMutableList())
+        `when`(this.assigneesRepository.saveAll(anyList())).thenReturn(this.assigneesModel.toMutableList())
 
         `when`(this.issueRepository.save(any(IssueModel::class.java))).thenReturn(this.issueModel)
 
@@ -354,7 +354,7 @@ internal class PayloadServiceImplTest : BaseServiceImplTestFactory() {
 
     @Test
     fun saveAssignees() {
-        `when`(this.assigneesRepository.saveAll(anySet())).thenReturn(this.assigneesModel.toMutableList())
+        `when`(this.assigneesRepository.saveAll(anyList())).thenReturn(this.assigneesModel.toMutableList())
 
         this.payloadServiceImpl.saveAssignees(this.assigneesDto).also {
             assertThat(it).isEqualTo(this.assigneesModel)
@@ -363,14 +363,14 @@ internal class PayloadServiceImplTest : BaseServiceImplTestFactory() {
 
     @Test
     fun emptyAssignees() {
-        this.payloadServiceImpl.saveAssignees(hashSetOf())
+        this.payloadServiceImpl.saveAssignees(emptyList())
 
         verify(this.assigneesRepository, never()).saveAll((anyList()))
     }
 
     @Test
     fun saveLabels() {
-        `when`(this.labelsRepository.saveAll(anySet())).thenReturn(this.labelsModel.toMutableList())
+        `when`(this.labelsRepository.saveAll(anyList())).thenReturn(this.labelsModel.toMutableList())
 
         this.payloadServiceImpl.saveLabels(this.labelsDto).also {
             assertThat(it).isEqualTo(this.labelsModel)
@@ -379,7 +379,7 @@ internal class PayloadServiceImplTest : BaseServiceImplTestFactory() {
 
     @Test
     fun emptyLabels() {
-        this.payloadServiceImpl.saveLabels(hashSetOf())
+        this.payloadServiceImpl.saveLabels(emptyList())
 
         verify(this.labelsRepository, never()).saveAll((anyList()))
     }
@@ -396,7 +396,7 @@ internal class PayloadServiceImplTest : BaseServiceImplTestFactory() {
 
     @Test
     fun emptyClassifiers() {
-        this.payloadServiceImpl.saveClassifiers(this.issueModel, hashSetOf())
+        this.payloadServiceImpl.saveClassifiers(this.issueModel, emptyList())
 
         verify(this.issueClassifierRepository, never()).save(any(IssueClassifierModel::class.java))
     }
@@ -413,7 +413,7 @@ internal class PayloadServiceImplTest : BaseServiceImplTestFactory() {
 
     @Test
     fun emptyResponsible() {
-        this.payloadServiceImpl.saveResponsible(this.issueModel, hashSetOf())
+        this.payloadServiceImpl.saveResponsible(this.issueModel, emptyList())
 
         verify(this.issueResponsibleRepository, never()).save(any(IssueResponsibleModel::class.java))
     }

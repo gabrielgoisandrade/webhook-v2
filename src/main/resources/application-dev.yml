@@ -1,5 +1,5 @@
 spring:
-    # Datasource config
+  # Datasource config
   datasource:
     username: postgres
     password: 58326248
@@ -18,3 +18,11 @@ spring:
     url: jdbc:postgresql://localhost:5432/webhook
     schemas: public
     check-location: true
+
+# SpringDoc config
+springdoc:
+  api-docs:
+    path: /doc
+  swagger-ui:
+    path: /
+    tags-sorter: alpha

@@ -1,6 +1,8 @@
 package com.gga.webhook.services.impls
 
+import com.gga.webhook.constants.MockValuesConstant.EVENT_ACTION
 import com.gga.webhook.constants.MockValuesConstant.LOGIN
+import com.gga.webhook.errors.exceptions.RelationNotFoundException
 import com.gga.webhook.errors.exceptions.SenderNotFoundException
 import com.gga.webhook.factories.BaseServiceImplTestFactory
 import com.gga.webhook.models.SenderModel
@@ -46,6 +48,26 @@ internal class SenderServiceImplTest : BaseServiceImplTestFactory() {
 
         this.service.findSenderByLogin(LOGIN).also {
             assertThat(it).isEqualTo(this.expectedDto)
+        }
+    }
+
+    @Test
+    fun findSenderByEventAction() {
+        `when`(this.senderRepository.findByEventAction(anyString())).thenReturn(Optional.of(this.expectedModel))
+
+        this.service.findSenderByEventAction(EVENT_ACTION).also {
+            assertThat(it).isEqualTo(this.expectedDto)
+        }
+    }
+
+    @Test
+    fun throwErrorByEventActionNotFound() {
+        `when`(this.senderRepository.findByEventAction(anyString()))
+            .thenThrow(RelationNotFoundException("There isn't any Sender related with this Event."))
+
+        assertThrows<RelationNotFoundException> { this.service.findSenderByEventAction(EVENT_ACTION) }.also {
+            assertThat(it).isInstanceOf(RelationNotFoundException::class.java)
+                .hasMessage("There isn't any Sender related with this Event.")
         }
     }
 

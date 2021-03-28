@@ -8,10 +8,11 @@ spring:
   jackson:
     date-format: yyyy-MM-dd'T'HH:mm:ss.SSSZ
     time-zone: America/Sao_Paulo
+    default-property-inclusion: non_null
 
   # Profiles config
   profiles:
-    active: test
+    active: prod
 
   # SQL config
   jpa:
@@ -27,32 +28,6 @@ logging:
     rollingpolicy:
       clean-history-on-start: true
 
-# OpenAPI config
-doc:
-  info:
-    name: ${project.name}
-    description: ${project.description}
-    version: ${project.version}
-
-  contact:
-    url: https://github.com/gabrielgoisandrade/
-    name: Gabriel Gois Andrade
-    email: gabriel.gois.andrade14@gmail.com
-
-  license:
-    url: https://www.apache.org/licenses/LICENSE-2.0.txt
-    name: Apache License 2.0
-
-  terms-of-service: http://springdoc.org/
-
-# SpringDoc config
-springdoc:
-  api-docs:
-    path: /doc
-  swagger-ui:
-    path: /
-    tags-sorter: alpha
-
 # Actuator config
 management:
   endpoint:
@@ -63,8 +38,19 @@ management:
       exposure:
         include: '*'
 
+# API descriptions
 info:
   app:
     name: ${project.name}
-    description: ${project.description}
+    description: <p>API RESTful feita para integração com o serviço de Webhook do GitHub — voltado apenas para issues.</p>
+      <p>A API tem como objetivo receber, processar e armazenar as informações geradas ao abrir, modificar ou excluir uma issue.</p>
     version: ${project.version}
+
+    contact:
+      github: https://github.com/gabrielgoisandrade/
+      name: Gabriel Gois Andrade
+      email: gabriel.gois.andrade14@gmail.com
+
+    license:
+      url: https://www.apache.org/licenses/LICENSE-2.0.txt
+      name: Apache License 2.0

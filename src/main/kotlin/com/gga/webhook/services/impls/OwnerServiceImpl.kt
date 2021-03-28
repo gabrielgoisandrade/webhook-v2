@@ -1,6 +1,7 @@
 package com.gga.webhook.services.impls
 
 import com.gga.webhook.errors.exceptions.RelationNotFoundException
+import com.gga.webhook.helper.AlterationsHelper
 import com.gga.webhook.helper.PageableHelper
 import com.gga.webhook.models.OwnerModel
 import com.gga.webhook.models.dTO.OwnerDto
@@ -21,9 +22,7 @@ import java.util.*
 @EnableCaching
 class OwnerServiceImpl @Autowired constructor(
     private val repository: OwnerRepository
-) : OwnerService {
-
-    private val helper: PageableHelper<OwnerModel> = PageableHelper(this.repository)
+) : OwnerService, AlterationsHelper<OwnerModel> {
 
     private val log: Logger = LoggerFactory.getLogger(this::class.java)
 
@@ -33,6 +32,11 @@ class OwnerServiceImpl @Autowired constructor(
         val ownerFound: Optional<OwnerModel> = this.repository.findByLogin(owner.login)
 
         return if (ownerFound.isPresent) {
+            this.collectAlterations(owner, ownerFound.get())?.let {
+                log.info("Owner: Saving alterations.")
+                this.repository.save(it)
+            } ?: log.info("Owner: No alterations found.")
+
             this.log.info("Owner: Returning existing Owner.")
 
             ownerFound.get()
@@ -48,5 +52,16 @@ class OwnerServiceImpl @Autowired constructor(
         this.repository.findByRepositoryName(repositoryName).orElseThrow {
             RelationNotFoundException("There isn't any Owner related with this Repository.")
         } convertTo OwnerDto::class.java
+
+    override fun collectAlterations(newResult: OwnerModel, actualResult: OwnerModel): OwnerModel? {
+        newResult.id = actualResult.id
+
+        return if (newResult != actualResult) {
+            log.info("Owner: Alterations found.")
+            newResult
+        } else {
+            null
+        }
+    }
 
 }

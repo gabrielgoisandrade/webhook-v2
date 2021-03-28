@@ -29,30 +29,14 @@ internal class IssueResponsibleServiceImplTest : BaseServiceImplTestFactory() {
         `when`(this.issueResponsibleRepository.save(any(IssueResponsibleModel::class.java)))
             .thenReturn((this.expectedIssueResponsible))
 
-        this.service.saveIssueResponsible(this.expectedIssue, hashSetOf(this.expectedAssignees))
-
-        verify(this.issueResponsibleRepository).save(any(IssueResponsibleModel::class.java))
-    }
-
-    @Test
-    fun adjustIssueResponsibleSets() {
-        `when`(this.issueResponsibleRepository.findByIssueIdAndAssigneesId(anyLong(), anyLong()))
-            .thenReturn(Optional.of(this.expectedIssueResponsible))
-
-        `when`(this.issueResponsibleRepository.save(any(IssueResponsibleModel::class.java)))
-            .thenReturn((this.expectedIssueResponsible))
-
-        this.service.saveIssueResponsible(
-            this.expectedIssue,
-            hashSetOf(this.model.assignees.apply { this.login = "newLogin" })
-        )
+        this.service.saveIssueResponsible(this.expectedIssue, listOf(this.expectedAssignees))
 
         verify(this.issueResponsibleRepository).save(any(IssueResponsibleModel::class.java))
     }
 
     @Test
     fun doNotSave() {
-        this.service.saveIssueResponsible(this.expectedIssue, hashSetOf())
+        this.service.saveIssueResponsible(this.expectedIssue, emptyList())
 
         verify(this.issueResponsibleRepository, never())
             .findByIssueIdAndAssigneesId(anyLong(), anyLong())

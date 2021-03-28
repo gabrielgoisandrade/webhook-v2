@@ -45,7 +45,7 @@ data class IssueDto @JvmOverloads constructor(
 
     @get:JsonIgnore
     @JsonProperty("labels")
-    var labels: Set<LabelsDto> = emptySet(),
+    var labels: List<LabelsDto> = emptyList(),
 
     @JsonProperty("state")
     var state: String = "",
@@ -59,7 +59,7 @@ data class IssueDto @JvmOverloads constructor(
 
     @get:JsonIgnore
     @JsonProperty("assignees")
-    var assignees: Set<AssigneesDto> = emptySet(),
+    var assignees: List<AssigneesDto> = emptyList(),
 
     @get:JsonIgnore
     @JsonProperty("milestone")
@@ -88,10 +88,4 @@ data class IssueDto @JvmOverloads constructor(
 
     @JsonProperty("performed_via_github_app")
     var performedViaGithubApp: String? = null
-) : Serializable, RepresentationModel<IssueDto>(){
-
-    @Schema(hidden = true)
-    @Suppress("unused")
-    private val links: List<Links> = emptyList()
-
-}
+) : Serializable, RepresentationModel<IssueDto>()

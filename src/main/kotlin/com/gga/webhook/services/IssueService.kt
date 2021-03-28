@@ -9,4 +9,6 @@ interface IssueService {
 
     fun findIssueByNumber(number: Int): IssueDto
 
+    fun findIssueByEventAction(action: String): IssueDto
+
 }

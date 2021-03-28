@@ -25,10 +25,4 @@ data class LicenseDto @JvmOverloads constructor(
 
     @JsonProperty("node_id")
     var nodeId: String = ""
-) : Serializable, RepresentationModel<LicenseDto>(){
-
-    @Schema(hidden = true)
-    @Suppress("unused")
-    private val links: List<Links> = emptyList()
-
-}
+) : Serializable, RepresentationModel<LicenseDto>()

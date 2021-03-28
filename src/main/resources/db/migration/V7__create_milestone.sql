@@ -11,9 +11,9 @@ CREATE TABLE IF NOT EXISTS MILESTONE
     OPEN_ISSUES   INT                NOT NULL,
     CLOSED_ISSUES INT                NOT NULL,
     STATE         VARCHAR(20)        NOT NULL,
-    CREATED_AT    DATE               NOT NULL,
-    UPDATED_AT    DATE,
-    DUE_ON        DATE,
-    CLOSED_AT     DATE,
+    CREATED_AT    TIMESTAMP        NOT NULL,
+    UPDATED_AT    TIMESTAMP,
+    DUE_ON        TIMESTAMP,
+    CLOSED_AT     TIMESTAMP,
     CREATOR_ID    INT                NOT NULL
 );

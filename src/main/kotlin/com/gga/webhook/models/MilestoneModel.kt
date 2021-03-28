@@ -57,8 +57,5 @@ data class MilestoneModel @JvmOverloads constructor(
     var dueOn: Instant? = null,
 
     @Column(name = "CLOSED_AT")
-    var closedAt: Instant? = null,
-
-    @OneToMany(mappedBy = "milestone", fetch = FetchType.LAZY)
-    var issues: Set<IssueModel>? = null
+    var closedAt: Instant? = null
 ) : Serializable

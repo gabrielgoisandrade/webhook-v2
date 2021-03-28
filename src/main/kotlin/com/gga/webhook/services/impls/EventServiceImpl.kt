@@ -23,8 +23,6 @@ class EventServiceImpl @Autowired constructor(
     private val repository: EventRepository
 ) : EventService {
 
-    private val helper: PageableHelper<EventModel> = PageableHelper(this.repository)
-
     private val log: Logger = LoggerFactory.getLogger(this::class.java)
 
     @Transactional

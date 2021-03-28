@@ -2,8 +2,6 @@ package com.gga.webhook.constants
 
 object MockValuesConstant {
 
-    const val ID: Long = 1L
-
     const val ISSUE_NUMBER: Int = 1
 
     const val MILESTONE_NUMBER: Int = 1

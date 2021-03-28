@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
-import kotlin.collections.HashSet
 
 @Service
 class IssueClassifierServiceImpl @Autowired constructor(
@@ -21,18 +20,18 @@ class IssueClassifierServiceImpl @Autowired constructor(
     private val log: Logger = LoggerFactory.getLogger(this::class.java)
 
     @Transactional
-    override fun saveIssueClassifier(issue: IssueModel, labels: HashSet<LabelsModel>) {
+    override fun saveIssueClassifier(issue: IssueModel, labels: List<LabelsModel>) {
         labels.forEach {
             val classifier: Optional<IssueClassifierModel> = this.repository.findByIssueIdAndLabelsId(issue.id, it.id)
 
             if (classifier.isPresent) {
                 this.log.info("Issue classifier: Same set found. Searching for alterations.")
 
-                classifier.verifyAmbiguousClassifiers(issue, it).also { toSave: IssueClassifierModel ->
+                classifier.verifyAmbiguousClassifiers(issue, it)?.let { toSave: IssueClassifierModel ->
                     this.log.info("IssueClassifier: Saving new IssueClassifiers' sets.")
 
                     this.repository.save(toSave)
-                }
+                } ?: this.log.info("Issue classifier: No alterations found.")
             } else {
                 IssueClassifierModel(issue = issue, labels = it).also { toSave: IssueClassifierModel ->
                     this.log.info("IssueClassifier: Saving new IssueClassifier.")
@@ -44,12 +43,12 @@ class IssueClassifierServiceImpl @Autowired constructor(
     }
 
     private fun Optional<IssueClassifierModel>.verifyAmbiguousClassifiers(
-        issue: IssueModel,
-        labels: LabelsModel
-    ): IssueClassifierModel =
-        IssueClassifierModel(
-            issue = if (this.get().issue == issue) this.get().issue else issue,
-            labels = if (this.get().labels == labels) this.get().labels else labels
-        )
+        newIssue: IssueModel,
+        newLabel: LabelsModel
+    ): IssueClassifierModel? =
+        if (this.get().issue != newIssue || this.get().labels != newLabel)
+            IssueClassifierModel(issue = newIssue, labels = newLabel)
+        else
+            null
 
 }

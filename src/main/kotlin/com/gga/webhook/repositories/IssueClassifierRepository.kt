@@ -8,7 +8,10 @@ import java.util.*
 
 interface IssueClassifierRepository : JpaRepository<IssueClassifierModel, Long> {
 
-    @Query("SELECT I FROM IssueClassifierModel I WHERE I.issue.id = :id AND I.labels.id = :id")
-    fun findByIssueIdAndLabelsId(@Param("id") issueId: Long, @Param("id") labelId: Long): Optional<IssueClassifierModel>
+    @Query("SELECT I FROM IssueClassifierModel I WHERE I.issue.id = :issueId AND I.labels.id = :labelsId")
+    fun findByIssueIdAndLabelsId(
+        @Param("issueId") issueId: Long,
+        @Param("labelsId") labelId: Long
+    ): Optional<IssueClassifierModel>
 
 }

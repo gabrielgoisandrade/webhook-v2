@@ -22,7 +22,7 @@ internal class PageableHelperTest {
     private lateinit var eventRepository: EventRepository
 
     @InjectMocks
-    private lateinit var helper: PageableHelper<EventModel>
+    private lateinit var helper: PageableHelper<EventRepository>
 
     @BeforeAll
     private fun init() {
@@ -34,7 +34,7 @@ internal class PageableHelperTest {
     fun direction() {
         val direction = "asc"
 
-        val expectedSort: Sort = Sort.by("id").ascending()
+        val expectedSort: Sort = Sort.by("nodeId").ascending()
 
         assertDoesNotThrow { this.helper.sort(direction) }.also { assertThat(it).isEqualTo(expectedSort) }
     }

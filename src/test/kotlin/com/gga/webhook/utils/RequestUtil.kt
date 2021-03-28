@@ -11,16 +11,10 @@ class RequestUtil {
 
     val randomId: Long = Random.nextLong()
 
-    val eventAction: String = "some action"
-
-    val repositoryName: String = "some name"
-
 
     companion object {
 
         const val EVENT: String = "/event"
-
-        const val PAYLOAD: String = "/payload"
 
         const val ISSUE: String = "/issue"
 
@@ -45,17 +39,8 @@ class RequestUtil {
         const val CREATOR: String = "/creator"
 
         @JvmStatic
-        fun postRequest(uri: String, body: String): MockHttpServletRequestBuilder = post(uri)
-            .contentType(APPLICATION_JSON_VALUE)
-            .accept(APPLICATION_JSON_VALUE)
-            .content(body)
-
-        @JvmStatic
         fun getRequest(uri: String): MockHttpServletRequestBuilder = get(uri)
             .accept(APPLICATION_JSON_VALUE)
-
-        @JvmStatic
-        fun <T> T.toJson(): String = ObjectMapper().writeValueAsString(this)
 
     }
 }

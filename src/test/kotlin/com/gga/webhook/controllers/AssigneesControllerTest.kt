@@ -1,5 +1,6 @@
 package com.gga.webhook.controllers
 
+import com.gga.webhook.constants.ControllersConstants.ASSIGNEES_CONTROLLER
 import com.gga.webhook.constants.MockValuesConstant.ISSUE_NUMBER
 import com.gga.webhook.errors.exceptions.RelationNotFoundException
 import com.gga.webhook.factories.BaseControllerTestFactory
@@ -13,6 +14,12 @@ import org.mockito.BDDMockito.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageImpl
+import org.springframework.hateoas.CollectionModel
+import org.springframework.hateoas.Link
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn
 import org.springframework.http.HttpStatus
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
@@ -30,25 +37,29 @@ internal class AssigneesControllerTest : BaseControllerTestFactory() {
 
     @Test
     fun findAssigneesByIssueNumber() {
-        `when`(this.service.findAssigneesByIssueNumber(anyInt())).thenReturn(hashSetOf(this.expected))
+        val expected: Page<AssigneesDto> = PageImpl(listOf(this.expected))
+
+        val link: Link = linkTo(methodOn(ASSIGNEES_CONTROLLER).findAssigneesByIssueNumber(ISSUE_NUMBER)).withSelfRel()
+            .withType("GET")
+
+        val expectedPage: CollectionModel<AssigneesDto> = CollectionModel.of(expected, link)
+
+        `when`(this.service.findAssigneesByIssueNumber(anyInt(), anyInt(), anyInt(), anyString())).thenReturn(expected)
 
         this.controller.findAssigneesByIssueNumber(ISSUE_NUMBER).also {
             assertThat(it.statusCode).isEqualTo(HttpStatus.OK)
-            assertThat(it.body!!.isNotEmpty()).isTrue
-            assertThat(it.body).isEqualTo(hashSetOf(this.expected))
+            assertThat(it.body!!).isNotEmpty.isEqualTo(expectedPage)
+            assertThat(it.body!!.links.getLink("self").isPresent).isTrue
 
-            it.body!!.forEach { body: AssigneesDto ->
-                with(body.links) {
-                    assertThat(this.isEmpty).isFalse
-                    assertThat(this.getLink("self").isPresent).isTrue
-                }
+            it.body!!.content.forEach { content: AssigneesDto ->
+                assertThat(content.links.getLink("self").isPresent).isTrue
             }
         }
     }
 
     @Test
     fun throwErrorByIssueNumberNotFound() {
-        given(this.service.findAssigneesByIssueNumber(anyInt()))
+        given(this.service.findAssigneesByIssueNumber(anyInt(), anyInt(), anyInt(), anyString()))
             .willThrow(RelationNotFoundException("There isn't any Assignees related with this Issue"))
 
         this.mockMvc.perform(getRequest("$ASSIGNEES/issue/$ISSUE_NUMBER"))

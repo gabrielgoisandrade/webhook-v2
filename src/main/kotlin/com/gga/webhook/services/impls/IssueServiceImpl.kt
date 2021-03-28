@@ -1,8 +1,8 @@
 package com.gga.webhook.services.impls
 
 import com.gga.webhook.errors.exceptions.IssueNotFoundException
-import com.gga.webhook.helper.FkHelper
-import com.gga.webhook.helper.PageableHelper
+import com.gga.webhook.errors.exceptions.RelationNotFoundException
+import com.gga.webhook.helper.AlterationsHelper
 import com.gga.webhook.models.IssueModel
 import com.gga.webhook.models.dTO.AssigneesDto
 import com.gga.webhook.models.dTO.IssueDto
@@ -28,14 +28,12 @@ class IssueServiceImpl @Autowired constructor(
     private val issueRepository: IssueRepository,
     private val labelsRepository: LabelsRepository,
     private val assigneesRepository: AssigneesRepository
-) : IssueService, FkHelper<IssueModel> {
-
-    private val helper: PageableHelper<IssueModel> = PageableHelper(this.issueRepository)
+) : IssueService, AlterationsHelper<IssueModel> {
 
     private val log: Logger = LoggerFactory.getLogger(this::class.java)
 
     @Transactional
-    @CacheEvict("issueByNumber", "issueByID", "issueByEventAction", allEntries = true)
+    @CacheEvict("issueByNumber", "issueByEventAction", "issueByEventAction", allEntries = true)
     override fun saveIssue(issue: IssueModel): IssueModel {
         val issueFound: Optional<IssueModel> = this.issueRepository.findByNumber(issue.number)
 
@@ -53,34 +51,42 @@ class IssueServiceImpl @Autowired constructor(
     }
 
     override fun collectAlterations(newResult: IssueModel, actualResult: IssueModel): IssueModel? {
+        newResult.id = actualResult.id
+
         var updatedIssue: IssueModel? = null
 
-        if (actualResult.event != newResult.event) {
+        if (actualResult != newResult) {
             log.info("Issue: Alterations found.")
-            log.info("Issue: Updating foreign key 'EVENT_ID'.")
 
-            updatedIssue = actualResult.apply { this.event = newResult.event }
-        }
+            updatedIssue = newResult
 
-        if (actualResult.milestone != newResult.milestone) {
-            log.info("Issue: Alterations found.")
-            log.info("Issue: Updating foreign key 'MILESTONE_ID'.")
+            if (actualResult.event != newResult.event) {
+                log.info("Issue: Alterations found.")
+                log.info("Issue: Updating foreign key 'EVENT_ID'.")
 
-            updatedIssue = actualResult.apply { this.milestone = newResult.milestone }
-        }
+                updatedIssue = actualResult.apply { this.event = newResult.event }
+            }
 
-        if (actualResult.user != newResult.user) {
-            log.info("Issue: Alterations found.")
-            log.info("Issue: Updating foreign key 'USER_ID'.")
+            if (actualResult.milestone != newResult.milestone) {
+                log.info("Issue: Alterations found.")
+                log.info("Issue: Updating foreign key 'MILESTONE_ID'.")
 
-            updatedIssue = actualResult.apply { this.user = newResult.user }
-        }
+                updatedIssue = actualResult.apply { this.milestone = newResult.milestone }
+            }
 
-        if (actualResult.assignee != newResult.assignee) {
-            log.info("Issue: Alterations found.")
-            log.info("Issue: Updating foreign key 'ASSIGNEE_ID'.")
+            if (actualResult.user != newResult.user) {
+                log.info("Issue: Alterations found.")
+                log.info("Issue: Updating foreign key 'USER_ID'.")
 
-            updatedIssue = actualResult.apply { this.assignee = newResult.assignee }
+                updatedIssue = actualResult.apply { this.user = newResult.user }
+            }
+
+            if (actualResult.assignee != newResult.assignee) {
+                log.info("Issue: Alterations found.")
+                log.info("Issue: Updating foreign key 'ASSIGNEE_ID'.")
+
+                updatedIssue = actualResult.apply { this.assignee = newResult.assignee }
+            }
         }
 
         return updatedIssue
@@ -96,17 +102,27 @@ class IssueServiceImpl @Autowired constructor(
             throw IssueNotFoundException("Issue #$number not found.")
     }
 
+    @Cacheable("issueByEventAction")
+    override fun findIssueByEventAction(action: String): IssueDto {
+        val issueFound: Optional<IssueModel> = this.issueRepository.findByEventAction(action)
+
+        return if (issueFound.isPresent)
+            configureObjects(issueFound.get())
+        else
+            throw RelationNotFoundException("There isn't any Issue related with this Event.")
+    }
+
     private fun configureObjects(issue: IssueModel): IssueDto = (issue convertTo IssueDto::class.java).apply {
         this.assignees = getAssignees(issue.number)
         this.labels = getLabels(issue.number)
     }
 
-    private fun getAssignees(number: Int): HashSet<AssigneesDto> =
+    private fun getAssignees(number: Int): List<AssigneesDto> =
         (this.assigneesRepository.findByIssueNumber(number)
-                .orElse(hashSetOf()) convertTo AssigneesDto::class.java).toHashSet()
+            .orElse(emptyList()) convertTo AssigneesDto::class.java)
 
-    private fun getLabels(number: Int): HashSet<LabelsDto> =
+    private fun getLabels(number: Int): List<LabelsDto> =
         (this.labelsRepository.findByIssueNumber(number)
-            .orElse(hashSetOf()) convertTo LabelsDto::class.java).toHashSet()
+            .orElse(emptyList()) convertTo LabelsDto::class.java)
 
 }

@@ -19,9 +19,9 @@ interface PayloadService {
 
     fun saveAssignee(assignee: AssigneeDto?): AssigneeModel?
 
-    fun saveAssignees(assignees: HashSet<AssigneesDto>): HashSet<AssigneesModel>
+    fun saveAssignees(assignees: List<AssigneesDto>): List<AssigneesModel>
 
-    fun saveLabels(labels: HashSet<LabelsDto>): HashSet<LabelsModel>
+    fun saveLabels(labels: List<LabelsDto>): List<LabelsModel>
 
     fun saveMilestone(milestone: MilestoneDto?): MilestoneModel?
 
@@ -31,8 +31,8 @@ interface PayloadService {
 
     fun saveOwner(owner: OwnerDto): OwnerModel
 
-    fun saveClassifiers(issue: IssueModel, labels: HashSet<LabelsModel>)
+    fun saveClassifiers(issue: IssueModel, labels: List<LabelsModel>)
 
-    fun saveResponsible(issue: IssueModel, assignees: HashSet<AssigneesModel>)
+    fun saveResponsible(issue: IssueModel, assignees: List<AssigneesModel>)
 
 }
