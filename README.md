@@ -18,7 +18,7 @@ Logo, possíveis errros são esperados. Mas isso não tira o potencial desse pro
 <a href="https://documenter.getpostman.com/view/7776218/TzCJgprx"> Veja aqui a documentação completa e teste diretamente no Postman!</a>
 
 ---
-<h3 style="text-align: center">
+<h3 align="center">
 
 ![Kotlin]
 ![Spring]
