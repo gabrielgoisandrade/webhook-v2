@@ -12,7 +12,7 @@ SOLID e boas práticas para desenvolvimento de APIs REST.</p>
 <p>As tecnologias usadas foram Kotlin como linguagem principal, Spring Boot, Postgres como banco de dados relacional,
 Jacoco para cobertura de código, TravisCI para build e Heroku para o deploy.</p>
 
-<p>Essa API é voltada para fins de **ESTUDO**, com o propósito de fixar conhecimento sobre RESTful.<br>   
+<p>Essa API é voltada para fins de <b>ESTUDO</b>, com o propósito de fixar conhecimento sobre RESTful.<br>   
 Logo, possíveis errros são esperados. Mas isso não tira o potencial desse projeto evoluir.</p>
 
 <a href="https://documenter.getpostman.com/view/7776218/TzCJgprx"> Veja aqui a documentação completa e teste diretamente no Postman!</a>
