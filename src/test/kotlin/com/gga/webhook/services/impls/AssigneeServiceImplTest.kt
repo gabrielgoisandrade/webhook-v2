@@ -50,7 +50,7 @@ internal class AssigneeServiceImplTest : BaseServiceImplTestFactory() {
     }
 
     @Test
-    fun throeErrorByIssueNumberNotFound() {
+    fun throwErrorByIssueNumberNotFound() {
         `when`(this.assigneeRepository.findByIssueNumber(anyInt()))
             .thenThrow(RelationNotFoundException("There isn't any Assignee related with this Issue"))
 
